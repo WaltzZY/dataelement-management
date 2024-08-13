@@ -1,0 +1,96 @@
+server:
+  port: 10003
+  servlet:
+    context-path: /dataelement
+  session-timeout: 7200
+  session:
+    tracking-modes: cookie
+spring:
+  application:
+    id: DSP-DATAELEMENT
+    name: DSP-DATAELEMENT
+    admin: true
+    # rc文件服务内网地址
+    inner_rcservice: http://10.110.26.81:80/rcservice
+    # rc文件服务外网地址
+    outer_rcservice: http://10.110.26.81:80/rcservice
+    # 一些登录配置
+    login: /login
+    login.exclude.path: /,/index,/login,/logout,/error,/restapi/**,/direct/manage/**,/captcha,/getMenuData,/captcha,/loginStatus
+    # 登录类型
+    login.type: 0
+    # 登录地址
+    rootContext: http://localhost:4200/dsp-vatalog/#
+    outRootContext: http://localhost:4200/dsp-vatalog/#
+    # 单点登录地址
+    ucenter: http://10.110.26.81/ucenter/
+    sso:
+      code: ''
+    version: 1.0
+  # 环境配置
+  profiles:
+    active: dev
+  # 指定配置文件位置
+  config:
+    location: classpath:config/
+  # 判断rc文件服务地址参数
+  innerIp:
+    start: 127.
+  bsp:
+    root-organ-code: 200427114503
+    url: http://10.110.26.81/bsp
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://10.110.26.90:3326/enterprisereportfilling?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    username: Enterprise
+    password: ENC(dfqB38BWBQ1a0zWZpKPyTKx90fMsOLoP)
+  flyway:
+    baseline-on-migrate: true
+    enabled: false
+  main:
+    # 允许循环引用。Spring将尝试通过解决部分Bean的实例化来打破循环依赖。
+    allow-circular-references: true
+    banner-mode: off
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+  redis:
+    host: 10.110.26.90
+    password: ENC(Du9ECPUmoOcfjiMiKxvHi9jDMmIpzzoj)
+    port: 16379
+  web:
+    locale: zh_CN
+dubbo:
+  application:
+    name: DSP-ENTERPRISE
+  config-center:
+    timeout: 10000
+  protocol:
+    name: dubbo
+    payload: 104857600
+    port: 20891
+  registry:
+    address: 10.110.26.90:2186
+    protocol: zookeeper
+    timeout: 200000
+  scan:
+    base-packages: com.inspur
+filter:
+  xss: (((%3D)|(=))[^\n]*((%27)|(')|(--)|(%3B)|(:)|(%23)|(#)))|(\w*((%27)|('))((%6F)|o|(%4F))((%72)|r|(%52)))|(exec((\s)|(%20))+(s|x)p\w+)|((<|%3c)/?(script|iframe|frame|body|img|STYLE))|(set-cookie)|(src=('|")javascript:)|(Content-\w+:)|(\r)|(\n)|(alert)|(\+)|(\=)|(select)|(sleep)|(delete)|(onmouseover)|(%0d%0a)
+flyway:
+  placeholderReplacement: false
+http:
+  mappers:
+    json-pretty-print: false
+    json-sort-keys: false
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.inspur.dsp.*.dbentity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 检测时候注掉
+jasypt:
+  encryptor:
+    password: DataServicePlatform

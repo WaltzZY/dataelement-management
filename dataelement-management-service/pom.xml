@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.inspur.dsp.enterprise</groupId>
+    <artifactId>dataelement-management</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <artifactId>dataelement-management-service</artifactId>
+  <name>dsp-enterprise-service</name>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring.version>4.3.29.RELEASE</spring.version>
+  </properties>
+  <dependencies>
+    <!-- dubbo -->
+
+	<!-- MP 核心库 -->
+      <dependency>
+          <groupId>com.inspur.dsp.enterprise</groupId>
+          <artifactId>dataelement-management-common</artifactId>
+          <version>1.0.0</version>
+      </dependency>
+  </dependencies>
+
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Releases</name>
+            <url>http://repo.inspur.com:80/artifactory/dsp-maven-local/</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>entity</classifier>
+                            <includes>
+                                <include>**/entity/*.class</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
