@@ -45,6 +45,13 @@ public class DataElementDataItem implements Serializable {
     private String dataResourceId;
 
     /**
+     * 数据资源唯名称
+     */
+    @TableField(value = "data_resource_name")
+    @Size(max = 300,message = "数据资源唯名称最大长度要小于 50")
+    private String dataResourceName;
+
+    /**
      * 数据资源中数据项名称
      */
     @TableField(value = "data_resource_item_name")

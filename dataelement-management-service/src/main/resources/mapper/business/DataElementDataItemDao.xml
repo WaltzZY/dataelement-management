@@ -7,6 +7,7 @@
     <id column="id" jdbcType="VARCHAR" property="id" />
     <result column="data_element_name" jdbcType="VARCHAR" property="dataElementName" />
     <result column="data_resource_id" jdbcType="VARCHAR" property="dataResourceId" />
+    <result column="data_resource_name" jdbcType="VARCHAR" property="dataResourceName" />
     <result column="data_resource_item_name" jdbcType="VARCHAR" property="dataResourceItemName" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
     <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
@@ -15,7 +16,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, data_element_name, data_resource_id, data_resource_item_name, create_date, create_user_id, 
+    id, data_element_name, data_resource_id, data_resource_name, data_resource_item_name, create_date, create_user_id,
     modify_date, modify_user_id
   </sql>
   <update id="updateBatch" parameterType="java.util.List">
@@ -30,6 +31,11 @@
       <trim prefix="data_resource_id = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
           when id = #{item.id,jdbcType=VARCHAR} then #{item.dataResourceId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_resource_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.dataResourceName,jdbcType=VARCHAR}
         </foreach>
       </trim>
       <trim prefix="data_resource_item_name = case" suffix="end,">
@@ -81,6 +87,13 @@
           </if>
         </foreach>
       </trim>
+      <trim prefix="data_resource_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataResourceName != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.dataResourceName,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
       <trim prefix="data_resource_item_name = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
           <if test="item.dataResourceItemName != null">
@@ -125,12 +138,12 @@
   <insert id="batchInsert" parameterType="map">
     <!--@mbg.generated-->
     insert into data_element_data_item
-    (id, data_element_name, data_resource_id, data_resource_item_name, create_date, create_user_id, 
+    (id, data_element_name, data_resource_id,data_resource_name, data_resource_item_name, create_date, create_user_id,
       modify_date, modify_user_id)
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.id,jdbcType=VARCHAR}, #{item.dataElementName,jdbcType=VARCHAR}, #{item.dataResourceId,jdbcType=VARCHAR}, 
-        #{item.dataResourceItemName,jdbcType=VARCHAR}, #{item.createDate,jdbcType=TIMESTAMP}, 
+      (#{item.id,jdbcType=VARCHAR}, #{item.dataElementName,jdbcType=VARCHAR}, #{item.dataResourceId,jdbcType=VARCHAR},
+      #{item.dataResourceName,jdbcType=VARCHAR}, #{item.dataResourceItemName,jdbcType=VARCHAR}, #{item.createDate,jdbcType=TIMESTAMP},
         #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, #{item.modifyUserId,jdbcType=VARCHAR}
         )
     </foreach>
