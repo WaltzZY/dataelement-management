@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.business.DataElementCollectorgDao">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.business.DataElementCollectorg">
+    <!--@mbg.generated-->
+    <!--@Table data_element_collectorg-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId" />
+    <result column="data_element_collect_org_code" jdbcType="VARCHAR" property="dataElementCollectOrgCode" />
+    <result column="data_element_collect_org_name" jdbcType="VARCHAR" property="dataElementCollectOrgName" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
+    <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+    <result column="modify_user_id" jdbcType="VARCHAR" property="modifyUserId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, data_element_id, data_element_collect_org_code, data_element_collect_org_name, 
+    create_date, create_user_id, modify_date, modify_user_id
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update data_element_collectorg
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="data_element_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.dataElementId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_collect_org_code = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.dataElementCollectOrgCode,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_collect_org_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.dataElementCollectOrgName,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="create_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update data_element_collectorg
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="data_element_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.dataElementId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_collect_org_code = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementCollectOrgCode != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.dataElementCollectOrgCode,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_collect_org_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementCollectOrgName != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.dataElementCollectOrgName,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createDate != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createUserId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyDate != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyUserId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <insert id="batchInsert" parameterType="map">
+    <!--@mbg.generated-->
+    insert into data_element_collectorg
+    (id, data_element_id, data_element_collect_org_code, data_element_collect_org_name, 
+      create_date, create_user_id, modify_date, modify_user_id)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.id,jdbcType=VARCHAR}, #{item.dataElementId,jdbcType=VARCHAR}, #{item.dataElementCollectOrgCode,jdbcType=VARCHAR}, 
+        #{item.dataElementCollectOrgName,jdbcType=VARCHAR}, #{item.createDate,jdbcType=TIMESTAMP}, 
+        #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, #{item.modifyUserId,jdbcType=VARCHAR}
+        )
+    </foreach>
+  </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from data_element_collectorg where id in 
+    <foreach close=")" collection="list" item="id" open="(" separator=", ">
+      #{id,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
+</mapper>

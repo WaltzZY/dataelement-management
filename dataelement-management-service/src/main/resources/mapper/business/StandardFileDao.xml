@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.business.StandardFileDao">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.business.StandardFile">
+    <!--@mbg.generated-->
+    <!--@Table standard_file-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="standard_no" jdbcType="VARCHAR" property="standardNo" />
+    <result column="standard_name" jdbcType="VARCHAR" property="standardName" />
+    <result column="standard_file_id" jdbcType="VARCHAR" property="standardFileId" />
+    <result column="standard_desc" jdbcType="VARCHAR" property="standardDesc" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
+    <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+    <result column="modify_user_id" jdbcType="VARCHAR" property="modifyUserId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, standard_no, standard_name, standard_file_id, standard_desc, create_date, create_user_id, 
+    modify_date, modify_user_id
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update standard_file
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="standard_no = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.standardNo,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="standard_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.standardName,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="standard_file_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.standardFileId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="standard_desc = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.standardDesc,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="create_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update standard_file
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="standard_no = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.standardNo != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.standardNo,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="standard_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.standardName != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.standardName,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="standard_file_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.standardFileId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.standardFileId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="standard_desc = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.standardDesc != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.standardDesc,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createDate != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createUserId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyDate != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyUserId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <insert id="batchInsert" parameterType="map">
+    <!--@mbg.generated-->
+    insert into standard_file
+    (id, standard_no, standard_name, standard_file_id, standard_desc, create_date, create_user_id, 
+      modify_date, modify_user_id)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.id,jdbcType=VARCHAR}, #{item.standardNo,jdbcType=VARCHAR}, #{item.standardName,jdbcType=VARCHAR}, 
+        #{item.standardFileId,jdbcType=VARCHAR}, #{item.standardDesc,jdbcType=VARCHAR}, 
+        #{item.createDate,jdbcType=TIMESTAMP}, #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, 
+        #{item.modifyUserId,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from standard_file where id in 
+    <foreach close=")" collection="list" item="id" open="(" separator=", ">
+      #{id,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
+</mapper>

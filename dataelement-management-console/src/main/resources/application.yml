@@ -42,9 +42,9 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.110.26.90:3326/enterprisereportfilling?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
-    username: Enterprise
-    password: ENC(dfqB38BWBQ1a0zWZpKPyTKx90fMsOLoP)
+    url: jdbc:mysql://10.110.26.121:3326/dataelement_management?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
+    username: dataelement
+    password: a4OFWj{2yV0_^z
   flyway:
     baseline-on-migrate: true
     enabled: false

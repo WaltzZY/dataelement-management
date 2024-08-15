@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.business.DataElementBaseDao">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.business.DataElementBase">
+    <!--@mbg.generated-->
+    <!--@Table data_element_base-->
+    <id column="data_element_id" jdbcType="VARCHAR" property="dataElementId" />
+    <result column="data_element_code" jdbcType="VARCHAR" property="dataElementCode" />
+    <result column="data_elementn_ame" jdbcType="VARCHAR" property="dataElementnAme" />
+    <result column="data_element_en_name" jdbcType="VARCHAR" property="dataElementEnName" />
+    <result column="data_element_definition" jdbcType="VARCHAR" property="dataElementDefinition" />
+    <result column="data_element_data_type" jdbcType="VARCHAR" property="dataElementDataType" />
+    <result column="data_element_data_format" jdbcType="VARCHAR" property="dataElementDataFormat" />
+    <result column="data_element_valuerange_code" jdbcType="VARCHAR" property="dataElementValuerangeCode" />
+    <result column="data_element_valuerange_desc" jdbcType="VARCHAR" property="dataElementValuerangeDesc" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="de_datasource_orgcode" jdbcType="VARCHAR" property="deDatasourceOrgcode" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
+    <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+    <result column="modify_user_id" jdbcType="VARCHAR" property="modifyUserId" />
+    <result column="data_element_status" jdbcType="VARCHAR" property="dataElementStatus" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    data_element_id, data_element_code, data_elementn_ame, data_element_en_name, data_element_definition, 
+    data_element_data_type, data_element_data_format, data_element_valuerange_code, data_element_valuerange_desc, 
+    remark, de_datasource_orgcode, create_date, create_user_id, modify_date, modify_user_id, 
+    data_element_status
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update data_element_base
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="data_element_code = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementCode,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_elementn_ame = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementnAme,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_en_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementEnName,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_definition = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementDefinition,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_data_type = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementDataType,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_data_format = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementDataFormat,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_valuerange_code = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementValuerangeCode,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_valuerange_desc = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementValuerangeDesc,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="remark = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.remark,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="de_datasource_orgcode = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.deDatasourceOrgcode,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="create_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="data_element_status = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementStatus,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where data_element_id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.dataElementId,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update data_element_base
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="data_element_code = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementCode != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementCode,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_elementn_ame = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementnAme != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementnAme,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_en_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementEnName != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementEnName,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_definition = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementDefinition != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementDefinition,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_data_type = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementDataType != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementDataType,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_data_format = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementDataFormat != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementDataFormat,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_valuerange_code = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementValuerangeCode != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementValuerangeCode,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_valuerange_desc = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementValuerangeDesc != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementValuerangeDesc,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="remark = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.remark != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.remark,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="de_datasource_orgcode = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.deDatasourceOrgcode != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.deDatasourceOrgcode,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createDate != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createUserId != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyDate != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyUserId != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="data_element_status = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.dataElementStatus != null">
+            when data_element_id = #{item.dataElementId,jdbcType=VARCHAR} then #{item.dataElementStatus,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where data_element_id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.dataElementId,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <insert id="batchInsert" parameterType="map">
+    <!--@mbg.generated-->
+    insert into data_element_base
+    (data_element_id, data_element_code, data_elementn_ame, data_element_en_name, data_element_definition, 
+      data_element_data_type, data_element_data_format, data_element_valuerange_code, 
+      data_element_valuerange_desc, remark, de_datasource_orgcode, create_date, create_user_id, 
+      modify_date, modify_user_id, data_element_status)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.dataElementId,jdbcType=VARCHAR}, #{item.dataElementCode,jdbcType=VARCHAR}, 
+        #{item.dataElementnAme,jdbcType=VARCHAR}, #{item.dataElementEnName,jdbcType=VARCHAR}, 
+        #{item.dataElementDefinition,jdbcType=VARCHAR}, #{item.dataElementDataType,jdbcType=VARCHAR}, 
+        #{item.dataElementDataFormat,jdbcType=VARCHAR}, #{item.dataElementValuerangeCode,jdbcType=VARCHAR}, 
+        #{item.dataElementValuerangeDesc,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR}, 
+        #{item.deDatasourceOrgcode,jdbcType=VARCHAR}, #{item.createDate,jdbcType=TIMESTAMP}, 
+        #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, #{item.modifyUserId,jdbcType=VARCHAR}, 
+        #{item.dataElementStatus,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from data_element_base where data_element_id in 
+    <foreach close=")" collection="list" item="dataElementId" open="(" separator=", ">
+      #{dataElementId,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
+</mapper>

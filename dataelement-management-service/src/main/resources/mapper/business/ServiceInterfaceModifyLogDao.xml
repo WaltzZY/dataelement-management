@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.business.ServiceInterfaceModifyLogDao">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.business.ServiceInterfaceModifyLog">
+    <!--@mbg.generated-->
+    <!--@Table service_interface_modify_log-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="interface_id" jdbcType="VARCHAR" property="interfaceId" />
+    <result column="interface_explanation" jdbcType="LONGVARCHAR" property="interfaceExplanation" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
+    <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+    <result column="modify_user_id" jdbcType="VARCHAR" property="modifyUserId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, interface_id, interface_explanation, create_date, create_user_id, modify_date, 
+    modify_user_id
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update service_interface_modify_log
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="interface_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.interfaceId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="interface_explanation = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.interfaceExplanation,jdbcType=LONGVARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="create_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update service_interface_modify_log
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="interface_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.interfaceId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.interfaceId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="interface_explanation = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.interfaceExplanation != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.interfaceExplanation,jdbcType=LONGVARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createDate != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createUserId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyDate != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyUserId != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <insert id="batchInsert" parameterType="map">
+    <!--@mbg.generated-->
+    insert into service_interface_modify_log
+    (id, interface_id, interface_explanation, create_date, create_user_id, modify_date, 
+      modify_user_id)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.id,jdbcType=VARCHAR}, #{item.interfaceId,jdbcType=VARCHAR}, #{item.interfaceExplanation,jdbcType=LONGVARCHAR}, 
+        #{item.createDate,jdbcType=TIMESTAMP}, #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, 
+        #{item.modifyUserId,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from service_interface_modify_log where id in 
+    <foreach close=")" collection="list" item="id" open="(" separator=", ">
+      #{id,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
+</mapper>
