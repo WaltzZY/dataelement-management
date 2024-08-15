@@ -96,9 +96,9 @@ public class DataElementBase implements Serializable {
     /**
      * 数源单位
      */
-    @TableField(value = "de_datasource_orgcode")
+    @TableField(value = "data_source_org_code")
     @Size(max = 18,message = "数源单位最大长度要小于 18")
-    private String deDatasourceOrgcode;
+    private String dataSourceOrgCode;
 
     /**
      * 创建时间
