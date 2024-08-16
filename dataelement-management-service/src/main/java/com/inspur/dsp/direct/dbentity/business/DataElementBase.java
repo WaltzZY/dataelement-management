@@ -40,9 +40,9 @@ public class DataElementBase implements Serializable {
     /**
      * 中文名称
      */
-    @TableField(value = "data_elementn_ame")
+    @TableField(value = "data_element_name")
     @Size(max = 200,message = "中文名称最大长度要小于 200")
-    private String dataElementnAme;
+    private String dataElementName;
 
     /**
      * 英文名称
