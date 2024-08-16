@@ -17,26 +17,252 @@
     <result column="result_status" jdbcType="VARCHAR" property="resultStatus" />
     <result column="exception_info" jdbcType="LONGVARCHAR" property="exceptionInfo" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="createuse_rid" jdbcType="VARCHAR" property="createuseRid" />
+    <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+    <result column="modify_user_id" jdbcType="VARCHAR" property="modifyUserId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    log_id, user_id, user_name, operation_type, client_ip, client_browser, client_system,
-    page_url, page_title, obj_data, result_status, exception_info, create_time
+    log_id, user_id, user_name, operation_type, client_ip, client_browser, client_system, 
+    page_url, page_title, obj_data, result_status, exception_info, create_time, create_date, 
+    createuse_rid, modify_date, modify_user_id
   </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update user_operation_log
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.userId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="user_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.userName,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="operation_type = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.operationType,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="client_ip = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.clientIp,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="client_browser = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.clientBrowser,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="client_system = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.clientSystem,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="page_url = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.pageUrl,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="page_title = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.pageTitle,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="obj_data = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.objData,jdbcType=LONGVARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="result_status = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.resultStatus,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="exception_info = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.exceptionInfo,jdbcType=LONGVARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="create_time = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.createTime,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="createuse_rid = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.createuseRid,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where log_id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.logId,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update user_operation_log
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.userId != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.userId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="user_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.userName != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.userName,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="operation_type = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.operationType != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.operationType,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="client_ip = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.clientIp != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.clientIp,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="client_browser = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.clientBrowser != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.clientBrowser,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="client_system = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.clientSystem != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.clientSystem,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="page_url = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.pageUrl != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.pageUrl,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="page_title = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.pageTitle != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.pageTitle,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="obj_data = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.objData != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.objData,jdbcType=LONGVARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="result_status = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.resultStatus != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.resultStatus,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="exception_info = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.exceptionInfo != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.exceptionInfo,jdbcType=LONGVARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_time = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createTime != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.createTime,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createDate != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="createuse_rid = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createuseRid != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.createuseRid,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyDate != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyUserId != null">
+            when log_id = #{item.logId,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where log_id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.logId,jdbcType=VARCHAR}
+    </foreach>
+  </update>
   <insert id="batchInsert" parameterType="map">
     <!--@mbg.generated-->
     insert into user_operation_log
-    (log_id, user_id, user_name, operation_type, client_ip, client_browser, client_system,
-      page_url, page_title, obj_data, result_status, exception_info, create_time)
+    (log_id, user_id, user_name, operation_type, client_ip, client_browser, client_system, 
+      page_url, page_title, obj_data, result_status, exception_info, create_time, create_date, 
+      createuse_rid, modify_date, modify_user_id)
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.logId,jdbcType=VARCHAR}, #{item.userId,jdbcType=VARCHAR}, #{item.userName,jdbcType=VARCHAR},
-        #{item.operationType,jdbcType=VARCHAR}, #{item.clientIp,jdbcType=VARCHAR}, #{item.clientBrowser,jdbcType=VARCHAR},
-        #{item.clientSystem,jdbcType=VARCHAR}, #{item.pageUrl,jdbcType=VARCHAR}, #{item.pageTitle,jdbcType=VARCHAR},
-        #{item.objData,jdbcType=LONGVARCHAR}, #{item.resultStatus,jdbcType=VARCHAR}, #{item.exceptionInfo,jdbcType=LONGVARCHAR},
-        #{item.createTime,jdbcType=TIMESTAMP})
+      (#{item.logId,jdbcType=VARCHAR}, #{item.userId,jdbcType=VARCHAR}, #{item.userName,jdbcType=VARCHAR}, 
+        #{item.operationType,jdbcType=VARCHAR}, #{item.clientIp,jdbcType=VARCHAR}, #{item.clientBrowser,jdbcType=VARCHAR}, 
+        #{item.clientSystem,jdbcType=VARCHAR}, #{item.pageUrl,jdbcType=VARCHAR}, #{item.pageTitle,jdbcType=VARCHAR}, 
+        #{item.objData,jdbcType=LONGVARCHAR}, #{item.resultStatus,jdbcType=VARCHAR}, #{item.exceptionInfo,jdbcType=LONGVARCHAR}, 
+        #{item.createTime,jdbcType=TIMESTAMP}, #{item.createDate,jdbcType=TIMESTAMP}, #{item.createuseRid,jdbcType=VARCHAR}, 
+        #{item.modifyDate,jdbcType=TIMESTAMP}, #{item.modifyUserId,jdbcType=VARCHAR})
     </foreach>
   </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from user_operation_log where log_id in 
+    <foreach close=")" collection="list" item="logId" open="(" separator=", ">
+      #{logId,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
 
   <select id="getList" resultMap="BaseResultMap">
     select * from user_operation_log

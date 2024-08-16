@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import java.util.Date;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ public class DataElementCategory implements Serializable {
      * 类目唯一标识
      */
     @TableId(value = "data_element_category_id", type = IdType.INPUT)
-    @Size(max = 36,message = "类目唯一标识最大长度要小于 36")
+    @Size(max = 36, message = "类目唯一标识最大长度要小于 36")
     @NotBlank(message = "类目唯一标识不能为空")
     private String dataElementCategoryId;
 
@@ -33,28 +34,28 @@ public class DataElementCategory implements Serializable {
      * 分类代码
      */
     @TableField(value = "data_element_category_code")
-    @Size(max = 10,message = "分类代码最大长度要小于 10")
+    @Size(max = 10, message = "分类代码最大长度要小于 10")
     private String dataElementCategoryCode;
 
     /**
      * 父级分类代码
      */
     @TableField(value = "parent_category_code")
-    @Size(max = 10,message = "父级分类代码最大长度要小于 10")
+    @Size(max = 10, message = "父级分类代码最大长度要小于 10")
     private String parentCategoryCode;
 
     /**
      * 分类方式代码(分类方式)
      */
     @TableField(value = "data_element_class_ification_method_code")
-    @Size(max = 10,message = "分类方式代码(分类方式)最大长度要小于 10")
+    @Size(max = 10, message = "分类方式代码(分类方式)最大长度要小于 10")
     private String dataElementClassIficationMethodCode;
 
     /**
      * 类目（分类名称）
      */
     @TableField(value = "data_element_category_name")
-    @Size(max = 100,message = "类目（分类名称）最大长度要小于 100")
+    @Size(max = 100, message = "类目（分类名称）最大长度要小于 100")
     private String dataElementCategoryName;
 
     /**
@@ -62,6 +63,32 @@ public class DataElementCategory implements Serializable {
      */
     @TableField(value = "sortid")
     private Integer sortid;
+
+    /**
+     * 创建时间
+     */
+    @TableField(value = "create_date")
+    private Date createDate;
+
+    /**
+     * 创建人账号
+     */
+    @TableField(value = "createuse_rid")
+    @Size(max = 30, message = "创建人账号最大长度要小于 30")
+    private String createuseRid;
+
+    /**
+     * 修改时间
+     */
+    @TableField(value = "modify_date")
+    private Date modifyDate;
+
+    /**
+     * 修改人账号
+     */
+    @TableField(value = "modify_user_id")
+    @Size(max = 30, message = "修改人账号最大长度要小于 30")
+    private String modifyUserId;
 
     private static final long serialVersionUID = 1L;
 }

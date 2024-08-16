@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import java.util.Date;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ public class DataElementClassIficationMethod implements Serializable {
      * 分类方式代码
      */
     @TableId(value = "class_ification_method_code", type = IdType.INPUT)
-    @Size(max = 10,message = "分类方式代码最大长度要小于 10")
+    @Size(max = 10, message = "分类方式代码最大长度要小于 10")
     @NotBlank(message = "分类方式代码不能为空")
     private String classIficationMethodCode;
 
@@ -33,14 +34,14 @@ public class DataElementClassIficationMethod implements Serializable {
      * 分类方式名称
      */
     @TableField(value = "class_ification_method_name")
-    @Size(max = 10,message = "分类方式名称最大长度要小于 10")
+    @Size(max = 10, message = "分类方式名称最大长度要小于 10")
     private String classIficationMethodName;
 
     /**
      * 分类方式描述
      */
     @TableField(value = "class_ification_method_desc")
-    @Size(max = 200,message = "分类方式描述最大长度要小于 200")
+    @Size(max = 200, message = "分类方式描述最大长度要小于 200")
     private String classIficationMethodDesc;
 
     /**
@@ -48,6 +49,32 @@ public class DataElementClassIficationMethod implements Serializable {
      */
     @TableField(value = "sortid")
     private Integer sortid;
+
+    /**
+     * 创建时间
+     */
+    @TableField(value = "create_date")
+    private Date createDate;
+
+    /**
+     * 创建人账号
+     */
+    @TableField(value = "createuse_rid")
+    @Size(max = 30, message = "创建人账号最大长度要小于 30")
+    private String createuseRid;
+
+    /**
+     * 修改时间
+     */
+    @TableField(value = "modify_date")
+    private Date modifyDate;
+
+    /**
+     * 修改人账号
+     */
+    @TableField(value = "modify_user_id")
+    @Size(max = 30, message = "修改人账号最大长度要小于 30")
+    private String modifyUserId;
 
     private static final long serialVersionUID = 1L;
 }

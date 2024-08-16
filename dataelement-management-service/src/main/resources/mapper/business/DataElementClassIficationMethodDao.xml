@@ -8,11 +8,15 @@
     <result column="class_ification_method_name" jdbcType="VARCHAR" property="classIficationMethodName" />
     <result column="class_ification_method_desc" jdbcType="VARCHAR" property="classIficationMethodDesc" />
     <result column="sortid" jdbcType="INTEGER" property="sortid" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="createuse_rid" jdbcType="VARCHAR" property="createuseRid" />
+    <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+    <result column="modify_user_id" jdbcType="VARCHAR" property="modifyUserId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     class_ification_method_code, class_ification_method_name, class_ification_method_desc, 
-    sortid
+    sortid, create_date, createuse_rid, modify_date, modify_user_id
   </sql>
   <update id="updateBatch" parameterType="java.util.List">
     <!--@mbg.generated-->
@@ -31,6 +35,26 @@
       <trim prefix="sortid = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
           when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.sortid,jdbcType=INTEGER}
+        </foreach>
+      </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="createuse_rid = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.createuseRid,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
         </foreach>
       </trim>
     </trim>
@@ -64,6 +88,34 @@
           </if>
         </foreach>
       </trim>
+      <trim prefix="create_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createDate != null">
+            when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="createuse_rid = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.createuseRid != null">
+            when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.createuseRid,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_date = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyDate != null">
+            when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.modifyDate,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="modify_user_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.modifyUserId != null">
+            when class_ification_method_code = #{item.classIficationMethodCode,jdbcType=VARCHAR} then #{item.modifyUserId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
     </trim>
     where class_ification_method_code in
     <foreach close=")" collection="list" item="item" open="(" separator=", ">
@@ -74,12 +126,13 @@
     <!--@mbg.generated-->
     insert into data_element_class_ification_method
     (class_ification_method_code, class_ification_method_name, class_ification_method_desc, 
-      sortid)
+      sortid, create_date, createuse_rid, modify_date, modify_user_id)
     values
     <foreach collection="list" item="item" separator=",">
       (#{item.classIficationMethodCode,jdbcType=VARCHAR}, #{item.classIficationMethodName,jdbcType=VARCHAR}, 
-        #{item.classIficationMethodDesc,jdbcType=VARCHAR}, #{item.sortid,jdbcType=INTEGER}
-        )
+        #{item.classIficationMethodDesc,jdbcType=VARCHAR}, #{item.sortid,jdbcType=INTEGER}, 
+        #{item.createDate,jdbcType=TIMESTAMP}, #{item.createuseRid,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, 
+        #{item.modifyUserId,jdbcType=VARCHAR})
     </foreach>
   </insert>
   <delete id="deleteByPrimaryKeyIn">
