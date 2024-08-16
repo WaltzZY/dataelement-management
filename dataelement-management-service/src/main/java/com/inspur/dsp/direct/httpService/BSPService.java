@@ -4,15 +4,23 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.inspur.dsp.common.utils.CollectionUtils;
 import com.inspur.dsp.direct.common.HttpClient;
+import com.inspur.dsp.direct.constant.Constants;
 import com.inspur.dsp.direct.entity.bo.BspOraanInfoBO;
+import com.inspur.dsp.direct.entity.bo.DictInfoBO;
+import com.inspur.dsp.direct.entity.bo.DictInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -72,22 +80,24 @@ public class BSPService {
         }
     }
 
-    public JSONArray getDictDataInfo(String kind) {
+    public List<DictInfoVO> getDictDataInfo(String kind) {
         try {
             String url = bspUrl + "/restapi/dict/getDictInfo?kind=" + kind + "&appCode=";
             JSONObject jsonObject = HttpClient.httpGetMethod(url);
             if (CollectionUtils.isNotEmpty(jsonObject) && 1 == jsonObject.getInteger("code")) {
                 jsonObject.put("code", "200");
                 jsonObject.put("rows", jsonObject.getJSONArray("data"));
-                return jsonObject.getJSONArray("data");
+                JSONArray dataArray = jsonObject.getJSONArray("data");
+                return Optional.of(dataArray.toJavaList(DictInfoBO.class))
+                        .map(dictInfoBOS -> dictInfoBOS.stream().map(DictInfoVO::toDictInfoVO).collect(Collectors.toList()))
+                        .orElse(new ArrayList<>());
             }
-            return new JSONArray();
+            return new ArrayList<>();
         } catch (NullPointerException e) {
             log.error("BSPService method getDictDataInfo error: ", e);
-            return new JSONArray();
+            return new ArrayList<>();
         }
     }
-
 
     public JSONObject getMenuData(String userId) {
         JSONObject object;
@@ -236,4 +246,16 @@ public class BSPService {
 
     }
 
+    /**
+     * 获取数据类型字典数据
+     *
+     * @return
+     */
+    public Map<String, String> getDataTypeDictMap() {
+        List<DictInfoVO> dictDataInfo = this.getDictDataInfo(Constants.DIC_DATATYPE);
+        return Optional.ofNullable(dictDataInfo).map(
+                l -> l.stream().filter(Objects::nonNull)
+                        .collect(Collectors.toMap(DictInfoVO::getCode, DictInfoVO::getName))
+        ).orElse(new HashMap<>());
+    }
 }

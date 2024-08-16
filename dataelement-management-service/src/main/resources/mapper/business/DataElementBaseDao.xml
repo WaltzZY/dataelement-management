@@ -23,9 +23,9 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    data_element_id, data_element_code, data_element_name, data_element_en_name, data_element_definition, 
-    data_element_data_type, data_element_data_format, data_element_valuerange_code, data_element_valuerange_desc, 
-    remark, data_source_org_code, create_date, create_user_id, modify_date, modify_user_id, 
+    data_element_id, data_element_code, data_element_name, data_element_en_name, data_element_definition,
+    data_element_data_type, data_element_data_format, data_element_valuerange_code, data_element_valuerange_desc,
+    remark, data_source_org_code, create_date, create_user_id, modify_date, modify_user_id,
     data_element_status
   </sql>
   <update id="updateBatch" parameterType="java.util.List">
@@ -231,27 +231,82 @@
   <insert id="batchInsert" parameterType="map">
     <!--@mbg.generated-->
     insert into data_element_base
-    (data_element_id, data_element_code, data_element_name, data_element_en_name, data_element_definition, 
-      data_element_data_type, data_element_data_format, data_element_valuerange_code, 
-      data_element_valuerange_desc, remark, data_source_org_code, create_date, create_user_id, 
+    (data_element_id, data_element_code, data_element_name, data_element_en_name, data_element_definition,
+      data_element_data_type, data_element_data_format, data_element_valuerange_code,
+      data_element_valuerange_desc, remark, data_source_org_code, create_date, create_user_id,
       modify_date, modify_user_id, data_element_status)
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.dataElementId,jdbcType=VARCHAR}, #{item.dataElementCode,jdbcType=VARCHAR}, 
-        #{item.dataElementName,jdbcType=VARCHAR}, #{item.dataElementEnName,jdbcType=VARCHAR}, 
-        #{item.dataElementDefinition,jdbcType=VARCHAR}, #{item.dataElementDataType,jdbcType=VARCHAR}, 
-        #{item.dataElementDataFormat,jdbcType=VARCHAR}, #{item.dataElementValuerangeCode,jdbcType=VARCHAR}, 
-        #{item.dataElementValuerangeDesc,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR}, 
-        #{item.dataSourceOrgCode,jdbcType=VARCHAR}, #{item.createDate,jdbcType=TIMESTAMP}, 
-        #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, #{item.modifyUserId,jdbcType=VARCHAR}, 
+      (#{item.dataElementId,jdbcType=VARCHAR}, #{item.dataElementCode,jdbcType=VARCHAR},
+        #{item.dataElementName,jdbcType=VARCHAR}, #{item.dataElementEnName,jdbcType=VARCHAR},
+        #{item.dataElementDefinition,jdbcType=VARCHAR}, #{item.dataElementDataType,jdbcType=VARCHAR},
+        #{item.dataElementDataFormat,jdbcType=VARCHAR}, #{item.dataElementValuerangeCode,jdbcType=VARCHAR},
+        #{item.dataElementValuerangeDesc,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR},
+        #{item.dataSourceOrgCode,jdbcType=VARCHAR}, #{item.createDate,jdbcType=TIMESTAMP},
+        #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, #{item.modifyUserId,jdbcType=VARCHAR},
         #{item.dataElementStatus,jdbcType=VARCHAR})
     </foreach>
   </insert>
   <delete id="deleteByPrimaryKeyIn">
     <!--@mbg.generated-->
-    delete from data_element_base where data_element_id in 
+    delete from data_element_base where data_element_id in
     <foreach close=")" collection="list" item="dataElementId" open="(" separator=", ">
       #{dataElementId,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <resultMap id="GetDetailedListVOResultMap" type="com.inspur.dsp.direct.entity.vo.GetDetailedListVO">
+    <result column="data_element_id" property="dataElementId"/>
+    <result column="data_element_data_format" property="dataElementDataFormat"/>
+    <result column="data_element_data_type" property="dataElementDataType"/>
+    <result column="data_element_definition" property="dataElementDefinition"/>
+    <result column="data_element_name" property="dataElementName"/>
+    <result column="data_element_status" property="dataElementStatus"/>
+  </resultMap>
+  <select id="getDetailedList" resultMap="GetDetailedListVOResultMap">
+      select deb.data_element_id,
+             data_element_name,
+             data_element_definition,
+             data_element_data_type,
+             data_element_data_format,
+             data_element_status
+      from data_element_base deb
+      <where>
+          <if test="dto.searchValue != null and dto.searchValue != ''">
+              and (deb.data_element_name like concat('%', #{dto.searchValue}, '%')
+              or deb.data_element_definition like concat('%', #{dto.searchValue}, '%'))
+          </if>
+          <if test="dto.categoryIds != null and dto.categoryIds.size() > 0">
+              and deb.data_element_id in (
+              select data_element_id
+              from data_element_belong_category where data_element_category_code in
+              <foreach collection="dto.categoryIds" item="categoryId" open="(" separator="," close=")">
+                  #{categoryId}
+              </foreach>
+              )
+          </if>
+          <if test="dto.orgCodes != null and dto.orgCodes.size() > 0">
+              and deb.data_element_id in (
+              select data_element_id
+              from data_element_collectorg where data_element_collect_org_code in
+              <foreach collection="dto.orgCodes" item="orgCode" open="(" separator="," close=")">
+                  #{orgCode}
+              </foreach>
+              )
+          </if>
+          <if test="dto.regionCodes != null and dto.regionCodes.size() > 0">
+              and deb.data_element_id in (
+              select data_element_id
+              from data_element_collectorg where dept_code_or_area_code in
+              <foreach collection="dto.regionCodes" item="regionCode" open="(" close=")" separator=",">
+                  #{regionCode}
+              </foreach>
+              )
+          </if>
+          <if test="dto.status != null and dto.status != ''">
+              and deb.data_element_status = #{dto.status}
+          </if>
+      </where>
+      order by deb.create_date desc
+  </select>
 </mapper>

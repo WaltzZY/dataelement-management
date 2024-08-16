@@ -1,8 +1,12 @@
 package com.inspur.dsp.direct.dao.business;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
 import java.util.List;
+
+import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
+import com.inspur.dsp.direct.entity.vo.GetDetailedListVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -15,4 +19,6 @@ public interface DataElementBaseDao extends BaseMapper<DataElementBase> {
     int batchInsert(@Param("list") List<DataElementBase> list);
 
     int deleteByPrimaryKeyIn(List<String> list);
+
+    Page<GetDetailedListVO> getDetailedList(Page<?> page, @Param("dto") GetDetailedListDTO dto);
 }

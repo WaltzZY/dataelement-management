@@ -1,11 +1,14 @@
 package com.inspur.dsp.direct.dao.business;
 
+import java.util.Collection;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.inspur.dsp.direct.dbentity.business.DataElementBelongCategory;
 
 import java.util.List;
 
 import com.inspur.dsp.direct.entity.vo.ClassIfiCationMethodVO;
+import com.inspur.dsp.direct.entity.bo.DataElementCategoryInfoBO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -31,4 +34,7 @@ public interface DataElementBelongCategoryDao extends BaseMapper<DataElementBelo
      * @return
      */
     List<ClassIfiCationMethodVO> getCategorylist();
+
+    List<DataElementCategoryInfoBO> selectDataElementIdAndCategoryNameByDataElementIdIn(@Param("dataElementIdCollection") Collection<String> dataElementIdCollection);
+
 }

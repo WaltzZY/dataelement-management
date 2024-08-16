@@ -1,4 +1,5 @@
 package com.inspur.dsp.direct.dao.business;
+import java.util.Collection;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.inspur.dsp.direct.dbentity.business.DataElementCollectorg;
@@ -19,4 +20,7 @@ public interface DataElementCollectorgDao extends BaseMapper<DataElementCollecto
     int deleteByPrimaryKeyIn(List<String> list);
 
     List<DataElementCollectOrgVO> getList(@Param("dataElementId") String dataElementId);
+
+    List<DataElementCollectorg> selectDataElementIdAndOrgCodeByDataElementIdIn(@Param("dataElementIdCollection")Collection<String> dataElementIdCollection);
+
 }
