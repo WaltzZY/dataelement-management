@@ -141,4 +141,30 @@
       #{id,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="getSubjectVocabularyByDataElementId" resultType="com.inspur.dsp.direct.entity.vo.SubjectVocabularyVO">
+    SELECT
+      dev.vocabulary ,-- 词汇名称
+      v.definition 	-- 定义
+    FROM
+      `data_element_vocabulary` dev
+        LEFT JOIN vocabulary v on dev.vocabulary = v.vocabulary
+    where data_element_id = #{dataElementId}
+  </select>
+
+  <select id="getObjectVocabularyBySubject" resultType="com.inspur.dsp.direct.entity.vo.ObjectVocabularyVO">
+    SELECT
+      vr.subject_vocabulary as subjectVocabulary,-- 主位词
+      vr.object_vocabulary as objectVocabulary,-- 宾位词
+      vr.relationship,-- 关系
+      v.definition -- 定义
+    FROM
+      `vocabulary_rel` vr
+        LEFT JOIN vocabulary v ON vr.object_vocabulary = v.vocabulary
+    WHERE
+      vr.subject_vocabulary in
+      <foreach collection="vocabularys" separator="," index="index" item="item" close=")" open="(">
+        #{item}
+      </foreach>
+  </select>
 </mapper>
