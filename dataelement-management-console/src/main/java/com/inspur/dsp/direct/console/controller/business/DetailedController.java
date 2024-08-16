@@ -6,7 +6,6 @@ import com.inspur.dsp.direct.entity.vo.DataElementCollectOrgVO;
 import com.inspur.dsp.direct.entity.vo.DataElementDataItemVO;
 import com.inspur.dsp.direct.service.DataElementCollectOrgService;
 import com.inspur.dsp.direct.service.DataElementDataItemService;
-import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
 import com.inspur.dsp.direct.entity.vo.ClassIfiCationMethodVO;
 import com.inspur.dsp.direct.entity.vo.DataElementAttributeVO;
@@ -40,6 +39,10 @@ public class DetailedController {
     private final DataElementAttributeService dataElementAttributeService;
     private final DataElementVocabularyService dataElementVocabularyService;
     private final DataElementBelongCategoryService dataElementBelongCategoryService;
+    @Resource
+    private DataElementCollectOrgService dataElementCollectOrgService;
+    @Resource
+    private DataElementDataItemService dataElementDataItemService;
 
     /**
      * 数据元基本信息查询
@@ -88,13 +91,6 @@ public class DetailedController {
         List<ClassIfiCationMethodVO> cationMethodVOS = dataElementBelongCategoryService.getCategoryByDataElementId(dataElementId);
         return cationMethodVOS;
     }
-
-
-
-    @Resource
-    private DataElementCollectOrgService dataElementCollectOrgService;
-    @Resource
-    private DataElementDataItemService dataElementDataItemService;
 
     @GetMapping("/getCollectOrgList")
     @RespAdvice
