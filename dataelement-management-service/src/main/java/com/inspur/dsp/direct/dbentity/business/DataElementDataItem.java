@@ -75,13 +75,13 @@ public class DataElementDataItem implements Serializable {
     /**
      * 修改时间
      */
-    @TableField(value = "modify_date", fill = FieldFill.INSERT)
+    @TableField(value = "modify_date", fill = FieldFill.UPDATE)
     private Date modifyDate;
 
     /**
      * 修改人账号
      */
-    @TableField(value = "modify_user_id", fill = FieldFill.INSERT)
+    @TableField(value = "modify_user_id", fill = FieldFill.UPDATE)
     @Size(max = 30,message = "修改人账号最大长度要小于 30")
     private String modifyUserId;
 

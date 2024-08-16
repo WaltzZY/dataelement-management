@@ -14,9 +14,7 @@ public class DefaultDBFieldHandler implements MetaObjectHandler {
         UserInfo userInfo = ServletUtils.getUserInfo();
         String account = userInfo != null ? userInfo.getACCOUNT() : Constants.DEFAULT_USER_ACCOUNT;
         this.strictInsertFill(metaObject, "createUserId",() ->  account, String.class);
-        this.strictInsertFill(metaObject, "modifyUserId", () -> account, String.class);
         this.strictInsertFill(metaObject, "createDate", Date::new, Date.class);
-        this.strictInsertFill(metaObject, "modifyDate", Date::new, Date.class);
     }
 
     @Override
