@@ -142,4 +142,13 @@
       #{id,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="getList" resultType="com.inspur.dsp.direct.entity.vo.DataElementCollectOrgVO">
+    SELECT
+    data_element_collect_org_code AS orgCode,
+    data_element_collect_org_name AS orgName,
+    dept_code_or_area_code AS regionCode
+    FROM
+    data_element_collectorg
+  </select>
 </mapper>

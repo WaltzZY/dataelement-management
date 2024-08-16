@@ -3,6 +3,8 @@ package com.inspur.dsp.direct.dao.business;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.inspur.dsp.direct.dbentity.business.DataElementDataItem;
 import java.util.List;
+
+import com.inspur.dsp.direct.entity.vo.DataElementDataItemVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -15,4 +17,6 @@ public interface DataElementDataItemDao extends BaseMapper<DataElementDataItem> 
     int batchInsert(@Param("list") List<DataElementDataItem> list);
 
     int deleteByPrimaryKeyIn(List<String> list);
+
+    List<DataElementDataItemVO> getList(@Param("dataElementId") String dataElementId);
 }

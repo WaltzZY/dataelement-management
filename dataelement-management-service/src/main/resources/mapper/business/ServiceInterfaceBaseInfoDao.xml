@@ -182,4 +182,36 @@
       #{id,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="getList" resultType="com.inspur.dsp.direct.entity.vo.ServiceInterfaceDocumentListVO">
+    SELECT
+    id,
+    interface_name AS interfaceName,
+    interface_title AS interfaceTitle,
+    interface_title AS interfaceAddress,
+    interface_status AS interfaceStatus
+    FROM
+    service_interface_base_info
+    <where>
+      <if test="keyWords != null and keyWords != ''">
+        POSITION(#{keyWords} IN interface_name) > 0
+      </if>
+    </where>
+  </select>
+
+  <select id="getDetail" resultType="com.inspur.dsp.direct.entity.vo.ServiceInterfaceDocumentDetailVO">
+    SELECT
+    id,
+    interface_name AS interfaceName,
+    interface_title AS interfaceTitle,
+    interface_title AS interfaceAddress,
+    interface_status AS interfaceStatus,
+    interface_explanation AS interfaceExplanation,
+    create_date AS createDate,
+    modify_date AS modifyDate
+    FROM
+    service_interface_base_info
+    WHERE
+    id = #{id}
+  </select>
 </mapper>
