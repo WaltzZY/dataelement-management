@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSession;
 import cn.hutool.extra.servlet.ServletUtil;
 import com.inspur.dsp.common.utils.constant.ServiceConstant;
 import com.inspur.dsp.common.web.controller.BaseController;
-import com.inspur.dsp.direct.service.httpService.BSPService;
+import com.inspur.dsp.direct.httpService.BSPService;
 import com.inspur.dsp.direct.util.AESEncrypter;
 import com.inspur.dsp.direct.util.CTools;
 import lombok.extern.slf4j.Slf4j;
