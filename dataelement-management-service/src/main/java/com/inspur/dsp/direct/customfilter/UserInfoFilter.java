@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.customfilter;
 
 import com.alibaba.fastjson.JSONObject;
+import com.inspur.dsp.direct.constant.Constants;
 import com.inspur.dsp.direct.constant.HttpStatus;
 import com.inspur.dsp.direct.domain.Resp;
 import com.inspur.dsp.direct.enums.RespCode;
@@ -43,7 +44,7 @@ public class UserInfoFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             HttpSession session = request.getSession();
-            Object dspSessionToken = session.getAttribute("_Dsp_Session_Token_");
+            Object dspSessionToken = session.getAttribute(Constants.DSP_SESSION_TOKEN);
             if (Objects.isNull(dspSessionToken)) {
                 HttpServletResponse response = (HttpServletResponse) servletResponse;
                 response.setStatus(HttpStatus.SUCCESS);

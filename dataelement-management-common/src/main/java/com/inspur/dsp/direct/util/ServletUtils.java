@@ -1,5 +1,8 @@
 package com.inspur.dsp.direct.util;
 
+import com.alibaba.fastjson.JSONObject;
+import com.inspur.dsp.direct.constant.Constants;
+import com.inspur.dsp.direct.domain.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -9,87 +12,77 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * 客户端工具类
  */
 @Slf4j
-public class ServletUtils
-{
+public class ServletUtils {
     /**
      * 获取String参数
      */
-    public static String getParameter(String name)
-    {
+    public static String getParameter(String name) {
         return getRequest().getParameter(name);
     }
 
     /**
      * 获取String参数
      */
-    public static String getParameter(String name, String defaultValue)
-    {
+    public static String getParameter(String name, String defaultValue) {
         return Convert.toStr(getRequest().getParameter(name), defaultValue);
     }
 
     /**
      * 获取Integer参数
      */
-    public static Integer getParameterToInt(String name)
-    {
+    public static Integer getParameterToInt(String name) {
         return Convert.toInt(getRequest().getParameter(name));
     }
 
     /**
      * 获取Integer参数
      */
-    public static Integer getParameterToInt(String name, Integer defaultValue)
-    {
+    public static Integer getParameterToInt(String name, Integer defaultValue) {
         return Convert.toInt(getRequest().getParameter(name), defaultValue);
     }
 
     /**
      * 获取Boolean参数
      */
-    public static Boolean getParameterToBool(String name)
-    {
+    public static Boolean getParameterToBool(String name) {
         return Convert.toBool(getRequest().getParameter(name));
     }
 
     /**
      * 获取Boolean参数
      */
-    public static Boolean getParameterToBool(String name, Boolean defaultValue)
-    {
+    public static Boolean getParameterToBool(String name, Boolean defaultValue) {
         return Convert.toBool(getRequest().getParameter(name), defaultValue);
     }
 
     /**
      * 获取request
      */
-    public static HttpServletRequest getRequest()
-    {
+    public static HttpServletRequest getRequest() {
         return getRequestAttributes().getRequest();
     }
 
     /**
      * 获取response
      */
-    public static HttpServletResponse getResponse()
-    {
+    public static HttpServletResponse getResponse() {
         return getRequestAttributes().getResponse();
     }
 
     /**
      * 获取session
      */
-    public static HttpSession getSession()
-    {
+    public static HttpSession getSession() {
         return getRequest().getSession();
     }
 
-    public static ServletRequestAttributes getRequestAttributes()
-    {
+    public static ServletRequestAttributes getRequestAttributes() {
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         return (ServletRequestAttributes) attributes;
     }
@@ -98,22 +91,29 @@ public class ServletUtils
      * 将字符串渲染到客户端
      *
      * @param response 渲染对象
-     * @param string 待渲染的字符串
+     * @param string   待渲染的字符串
      */
-    public static void renderString(HttpServletResponse response, String string)
-    {
-        try
-        {
+    public static void renderString(HttpServletResponse response, String string) {
+        try {
             response.setStatus(200);
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
             response.getWriter().print(string);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             log.error("renderString error: ", e);
         }
     }
 
-
+    /**
+     * 获取用户信息
+     *
+     * @return
+     */
+    public static UserInfo getUserInfo() {
+        return Optional.ofNullable(getSession().getAttribute(Constants.DSP_SESSION_TOKEN))
+                .map(userObj -> {
+                    String json = JSONObject.toJSONString(userObj);
+                    return JSONObject.parseObject(json, UserInfo.class);
+                }).orElse(null);
+    }
 }

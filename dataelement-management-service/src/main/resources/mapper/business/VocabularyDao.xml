@@ -8,7 +8,7 @@
     <result column="vocabulary" jdbcType="VARCHAR" property="vocabulary" />
     <result column="definition" jdbcType="VARCHAR" property="definition" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
-    <result column="create_user_id" jdbcType="INTEGER" property="createUserId" />
+    <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
     <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
     <result column="modify_user_id" jdbcType="VARCHAR" property="modifyUserId" />
   </resultMap>
@@ -38,7 +38,7 @@
       </trim>
       <trim prefix="create_user_id = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
-          when vocabulary_id = #{item.vocabularyId,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=INTEGER}
+          when vocabulary_id = #{item.vocabularyId,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
         </foreach>
       </trim>
       <trim prefix="modify_date = case" suffix="end,">
@@ -85,7 +85,7 @@
       <trim prefix="create_user_id = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
           <if test="item.createUserId != null">
-            when vocabulary_id = #{item.vocabularyId,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=INTEGER}
+            when vocabulary_id = #{item.vocabularyId,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
           </if>
         </foreach>
       </trim>
@@ -117,7 +117,7 @@
     values
     <foreach collection="list" item="item" separator=",">
       (#{item.vocabularyId,jdbcType=VARCHAR}, #{item.vocabulary,jdbcType=VARCHAR}, #{item.definition,jdbcType=VARCHAR}, 
-        #{item.createDate,jdbcType=TIMESTAMP}, #{item.createUserId,jdbcType=INTEGER}, #{item.modifyDate,jdbcType=TIMESTAMP}, 
+        #{item.createDate,jdbcType=TIMESTAMP}, #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, 
         #{item.modifyUserId,jdbcType=VARCHAR})
     </foreach>
   </insert>

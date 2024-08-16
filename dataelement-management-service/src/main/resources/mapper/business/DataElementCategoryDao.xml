@@ -11,14 +11,14 @@
     <result column="data_element_category_name" jdbcType="VARCHAR" property="dataElementCategoryName" />
     <result column="sortid" jdbcType="INTEGER" property="sortid" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
-    <result column="createuse_rid" jdbcType="VARCHAR" property="createuseRid" />
+    <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
     <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
     <result column="modify_user_id" jdbcType="VARCHAR" property="modifyUserId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     data_element_category_id, data_element_category_code, parent_category_code, data_element_class_ification_method_code, 
-    data_element_category_name, sortid, create_date, createuse_rid, modify_date, modify_user_id
+    data_element_category_name, sortid, create_date, create_user_id, modify_date, modify_user_id
   </sql>
   <update id="updateBatch" parameterType="java.util.List">
     <!--@mbg.generated-->
@@ -54,9 +54,9 @@
           when data_element_category_id = #{item.dataElementCategoryId,jdbcType=VARCHAR} then #{item.createDate,jdbcType=TIMESTAMP}
         </foreach>
       </trim>
-      <trim prefix="createuse_rid = case" suffix="end,">
+      <trim prefix="create_user_id = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
-          when data_element_category_id = #{item.dataElementCategoryId,jdbcType=VARCHAR} then #{item.createuseRid,jdbcType=VARCHAR}
+          when data_element_category_id = #{item.dataElementCategoryId,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
         </foreach>
       </trim>
       <trim prefix="modify_date = case" suffix="end,">
@@ -121,10 +121,10 @@
           </if>
         </foreach>
       </trim>
-      <trim prefix="createuse_rid = case" suffix="end,">
+      <trim prefix="create_user_id = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
-          <if test="item.createuseRid != null">
-            when data_element_category_id = #{item.dataElementCategoryId,jdbcType=VARCHAR} then #{item.createuseRid,jdbcType=VARCHAR}
+          <if test="item.createUserId != null">
+            when data_element_category_id = #{item.dataElementCategoryId,jdbcType=VARCHAR} then #{item.createUserId,jdbcType=VARCHAR}
           </if>
         </foreach>
       </trim>
@@ -152,14 +152,14 @@
     <!--@mbg.generated-->
     insert into data_element_category
     (data_element_category_id, data_element_category_code, parent_category_code, data_element_class_ification_method_code, 
-      data_element_category_name, sortid, create_date, createuse_rid, modify_date, modify_user_id
+      data_element_category_name, sortid, create_date, create_user_id, modify_date, modify_user_id
       )
     values
     <foreach collection="list" item="item" separator=",">
       (#{item.dataElementCategoryId,jdbcType=VARCHAR}, #{item.dataElementCategoryCode,jdbcType=VARCHAR}, 
         #{item.parentCategoryCode,jdbcType=VARCHAR}, #{item.dataElementClassIficationMethodCode,jdbcType=VARCHAR}, 
         #{item.dataElementCategoryName,jdbcType=VARCHAR}, #{item.sortid,jdbcType=INTEGER}, 
-        #{item.createDate,jdbcType=TIMESTAMP}, #{item.createuseRid,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, 
+        #{item.createDate,jdbcType=TIMESTAMP}, #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, 
         #{item.modifyUserId,jdbcType=VARCHAR})
     </foreach>
   </insert>

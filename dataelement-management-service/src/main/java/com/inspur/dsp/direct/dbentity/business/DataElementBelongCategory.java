@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.dbentity.business;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -48,26 +49,26 @@ public class DataElementBelongCategory implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(value = "create_date")
+    @TableField(value = "create_date", fill = FieldFill.INSERT)
     private Date createDate;
 
     /**
      * 创建人账号
      */
-    @TableField(value = "create_user_id")
+    @TableField(value = "create_user_id", fill = FieldFill.INSERT)
     @Size(max = 30, message = "创建人账号最大长度要小于 30")
     private String createUserId;
 
     /**
      * 修改时间
      */
-    @TableField(value = "modify_date")
+    @TableField(value = "modify_date", fill = FieldFill.INSERT)
     private Date modifyDate;
 
     /**
      * 修改人账号
      */
-    @TableField(value = "modify_user_id")
+    @TableField(value = "modify_user_id", fill = FieldFill.INSERT)
     @Size(max = 30, message = "修改人账号最大长度要小于 30")
     private String modifyUserId;
 
