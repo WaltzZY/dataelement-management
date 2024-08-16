@@ -1,7 +1,7 @@
 package com.inspur.dsp.direct.entity.vo;
 
 /**
- * 请求参数
+ * 响应参数
  */
 public class DataElementDataItemVO {
 
@@ -10,11 +10,11 @@ public class DataElementDataItemVO {
      */
     private String dataResourceId;
     /**
-     * 数据资源对应的目录中的数据项名称
-     */
-    private String dataResourceItemName;
-    /**
      * 资源名称
      */
     private String dataResourceName;
+    /**
+     * 数据资源对应的目录中的数据项名称
+     */
+    private String dataResourceItemName;
 }

@@ -168,4 +168,17 @@
       #{sceneId,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="getList" resultType="com.inspur.dsp.direct.entity.vo.DataElementSceneVO">
+    SELECT
+    scene_id AS sceneId,
+    scene_name AS sceneName,
+    scene_desc AS sceneDesc,
+    attach_file_id AS attachFileId,
+    attach_file_name AS attachFileName
+    FROM
+    data_element_scene
+    WHERE
+    data_element_id = #{dataElementId}
+  </select>
 </mapper>

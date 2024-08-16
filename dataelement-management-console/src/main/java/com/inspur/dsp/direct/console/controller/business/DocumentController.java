@@ -28,16 +28,24 @@ public class DocumentController {
     @Resource
     private ServiceInterfaceBaseInfoService serviceInterfaceBaseInfoService;
 
+    /**
+     * 获取服务接口文档列表
+     * @param serviceInterfaceDocumentDTO
+     * @return
+     */
     @PostMapping("/getList")
     @RespAdvice
-    @SysLog(title = "服务接口文档列表接口", modelName = "获取服务接口文档列表")
     public List<ServiceInterfaceDocumentListVO> getList(ServiceInterfaceDocumentDTO serviceInterfaceDocumentDTO) {
         return serviceInterfaceBaseInfoService.getList(serviceInterfaceDocumentDTO);
     }
 
+    /**
+     * 获取服务接口文档详情
+     * @param id
+     * @return
+     */
     @GetMapping("/getDetail")
     @RespAdvice
-    @SysLog(title = "服务接口文档详情接口", modelName = "获取服务接口文档详情")
     public ServiceInterfaceDocumentDetailVO getDetail(String id) {
         return serviceInterfaceBaseInfoService.getDetail(id);
     }

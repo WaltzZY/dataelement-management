@@ -6,6 +6,7 @@
     <!--@Table data_element_sample-->
     <id column="id" jdbcType="VARCHAR" property="id" />
     <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId" />
+    <result column="sample_title" jdbcType="LONGVARCHAR" property="sampleTitle" />
     <result column="sample_text" jdbcType="LONGVARCHAR" property="sampleText" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
     <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
@@ -14,7 +15,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, data_element_id, sample_text, create_date, create_user_id, modify_date, modify_user_id
+    id, data_element_id, sample_title, sample_text, create_date, create_user_id, modify_date, modify_user_id
   </sql>
   <update id="updateBatch" parameterType="java.util.List">
     <!--@mbg.generated-->
@@ -23,6 +24,11 @@
       <trim prefix="data_element_id = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
           when id = #{item.id,jdbcType=VARCHAR} then #{item.dataElementId,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="sample_title = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.sampleTitle,jdbcType=LONGVARCHAR}
         </foreach>
       </trim>
       <trim prefix="sample_text = case" suffix="end,">
@@ -64,6 +70,13 @@
         <foreach collection="list" index="index" item="item">
           <if test="item.dataElementId != null">
             when id = #{item.id,jdbcType=VARCHAR} then #{item.dataElementId,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="sample_title = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.sampleTitle != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.sampleTitle,jdbcType=LONGVARCHAR}
           </if>
         </foreach>
       </trim>
@@ -111,11 +124,11 @@
   <insert id="batchInsert" parameterType="map">
     <!--@mbg.generated-->
     insert into data_element_sample
-    (id, data_element_id, sample_text, create_date, create_user_id, modify_date, modify_user_id
+    (id, data_element_id, sample_title, sample_text, create_date, create_user_id, modify_date, modify_user_id
       )
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.id,jdbcType=VARCHAR}, #{item.dataElementId,jdbcType=VARCHAR}, #{item.sampleText,jdbcType=LONGVARCHAR}, 
+      (#{item.id,jdbcType=VARCHAR}, #{item.dataElementId,jdbcType=VARCHAR}, #{item.sampleTitle,jdbcType=LONGVARCHAR}, #{item.sampleText,jdbcType=LONGVARCHAR},
         #{item.createDate,jdbcType=TIMESTAMP}, #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, 
         #{item.modifyUserId,jdbcType=VARCHAR})
     </foreach>
@@ -127,4 +140,15 @@
       #{id,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="getList" resultType="com.inspur.dsp.direct.entity.vo.DataElementSampleVO">
+    SELECT
+    id,
+    sample_title AS sampleTitle,
+    sample_text AS sampleText
+    FROM
+    data_element_sample
+    WHERE
+    data_element_id = #{dataElementId}
+  </select>
 </mapper>

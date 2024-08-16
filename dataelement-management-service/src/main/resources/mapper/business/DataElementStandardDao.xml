@@ -127,4 +127,17 @@
       #{id,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="getList" resultType="com.inspur.dsp.direct.entity.vo.DataElementStandardVO">
+    SELECT
+    des.standard_id AS standardId,
+    sf.standard_no AS standardNo,
+    sf.standard_name AS standardName,
+    sf.standard_desc AS standardDesc
+    FROM
+    data_element_standard des
+    LEFT JOIN standard_file sf ON des.standard_id = sf.standard_file_id
+    WHERE
+    des.data_element_id = #{dataElementId}
+  </select>
 </mapper>

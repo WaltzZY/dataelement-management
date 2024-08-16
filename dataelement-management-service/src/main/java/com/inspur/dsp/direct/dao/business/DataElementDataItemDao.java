@@ -18,5 +18,5 @@ public interface DataElementDataItemDao extends BaseMapper<DataElementDataItem> 
 
     int deleteByPrimaryKeyIn(List<String> list);
 
-    List<DataElementDataItemVO> getList(@Param("dataElementId") String dataElementId);
+    List<DataElementDataItemVO> getList(@Param("dataElementName") String dataElementName);
 }

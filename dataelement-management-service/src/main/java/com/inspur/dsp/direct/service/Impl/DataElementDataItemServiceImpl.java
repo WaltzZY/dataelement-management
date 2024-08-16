@@ -20,8 +20,8 @@ public class DataElementDataItemServiceImpl  extends ServiceImpl<DataElementData
     private DataElementDataItemDao dataElementDataItemDao;
 
     @Override
-    public List<DataElementDataItemVO> getList(String dataElementId) {
-        List<DataElementDataItemVO> dataList = dataElementDataItemDao.getList(dataElementId);
+    public List<DataElementDataItemVO> getList(String dataElementName) {
+        List<DataElementDataItemVO> dataList = dataElementDataItemDao.getList(dataElementName);
         return dataList;
     }
 }

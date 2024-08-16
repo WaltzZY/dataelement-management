@@ -1,7 +1,7 @@
 package com.inspur.dsp.direct.entity.vo;
 
 /**
- * 请求参数
+ * 响应参数
  */
 public class DataElementCollectOrgVO {
 

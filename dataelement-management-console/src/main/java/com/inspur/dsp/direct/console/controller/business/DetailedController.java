@@ -2,18 +2,9 @@ package com.inspur.dsp.direct.console.controller.business;
 
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.annotation.SysLog;
-import com.inspur.dsp.direct.entity.vo.DataElementCollectOrgVO;
-import com.inspur.dsp.direct.entity.vo.DataElementDataItemVO;
-import com.inspur.dsp.direct.service.DataElementCollectOrgService;
-import com.inspur.dsp.direct.service.DataElementDataItemService;
+import com.inspur.dsp.direct.entity.vo.*;
+import com.inspur.dsp.direct.service.*;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
-import com.inspur.dsp.direct.entity.vo.ClassIfiCationMethodVO;
-import com.inspur.dsp.direct.entity.vo.DataElementAttributeVO;
-import com.inspur.dsp.direct.entity.vo.VocabularyVO;
-import com.inspur.dsp.direct.service.DataElementAttributeService;
-import com.inspur.dsp.direct.service.DataElementBaseService;
-import com.inspur.dsp.direct.service.DataElementBelongCategoryService;
-import com.inspur.dsp.direct.service.DataElementVocabularyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +34,12 @@ public class DetailedController {
     private DataElementCollectOrgService dataElementCollectOrgService;
     @Resource
     private DataElementDataItemService dataElementDataItemService;
+    @Resource
+    private DataElementSceneService dataElementSceneService;
+    @Resource
+    private DataElementSampleService dataElementSampleService;
+    @Resource
+    private DataElementStandardService dataElementStandardService;
 
     /**
      * 数据元基本信息查询
@@ -92,17 +89,58 @@ public class DetailedController {
         return cationMethodVOS;
     }
 
+    /**
+     * 获取关联单位
+     * @param dataElementId
+     * @return
+     */
     @GetMapping("/getCollectOrgList")
     @RespAdvice
-    @SysLog(title = "关联单位接口", modelName = "获取关联单位")
     public List<DataElementCollectOrgVO> getCollectOrgList(String dataElementId) {
         return dataElementCollectOrgService.getList(dataElementId);
     }
 
-    @GetMapping("/getCollectOrgList")
+    /**
+     * 获取关联资源
+     * @param dataElementName
+     * @return
+     */
+    @GetMapping("/getDataItemList")
     @RespAdvice
-    @SysLog(title = "关联资源接口", modelName = "获取关联资源")
-    public List<DataElementDataItemVO> getDataItemList(String dataElementId) {
-        return dataElementDataItemService.getList(dataElementId);
+    public List<DataElementDataItemVO> getDataItemList(String dataElementName) {
+        return dataElementDataItemService.getList(dataElementName);
+    }
+
+    /**
+     * 获取场景
+     * @param dataElementId
+     * @return
+     */
+    @GetMapping("/getSceneList")
+    @RespAdvice
+    public List<DataElementSceneVO> getSceneList(String dataElementId) {
+        return dataElementSceneService.getList(dataElementId);
+    }
+
+    /**
+     * 获取样例
+     * @param dataElementId
+     * @return
+     */
+    @GetMapping("/getSampleList")
+    @RespAdvice
+    public List<DataElementSampleVO> getSampleList(String dataElementId) {
+        return dataElementSampleService.getList(dataElementId);
+    }
+
+    /**
+     * 获取标准文件
+     * @param dataElementId
+     * @return
+     */
+    @GetMapping("/getStandardList")
+    @RespAdvice
+    public List<DataElementStandardVO> getStandardList(String dataElementId) {
+        return dataElementStandardService.getList(dataElementId);
     }
 }

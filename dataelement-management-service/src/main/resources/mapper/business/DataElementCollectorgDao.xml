@@ -150,5 +150,7 @@
     dept_code_or_area_code AS regionCode
     FROM
     data_element_collectorg
+    WHERE
+    data_element_id = #{dataElementId}
   </select>
 </mapper>

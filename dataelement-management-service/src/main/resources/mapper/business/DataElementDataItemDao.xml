@@ -155,4 +155,15 @@
       #{id,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="getList" resultType="com.inspur.dsp.direct.entity.vo.DataElementDataItemVO">
+    SELECT
+    data_resource_id AS dataResourceId,
+    data_resource_name AS dataResourceItemName,
+    data_resource_item_name AS dataResourceName
+    FROM
+    data_element_data_item
+    WHERE
+    data_element_name = #{dataElementName}
+  </select>
 </mapper>

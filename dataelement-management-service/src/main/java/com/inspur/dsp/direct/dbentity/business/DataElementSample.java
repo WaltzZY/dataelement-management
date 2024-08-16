@@ -41,6 +41,12 @@ public class DataElementSample implements Serializable {
     /**
      * 样例文本
      */
+    @TableField(value = "sample_title")
+    private String sampleTitle;
+
+    /**
+     * 样例文本
+     */
     @TableField(value = "sample_text")
     private String sampleText;
 

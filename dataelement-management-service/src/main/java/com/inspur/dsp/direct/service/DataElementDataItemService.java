@@ -11,5 +11,5 @@ import java.util.List;
  */
 public interface DataElementDataItemService extends IService<DataElementDataItem> {
 
-    List<DataElementDataItemVO> getList(String dataElementId);
+    List<DataElementDataItemVO> getList(String dataElementName);
 }
