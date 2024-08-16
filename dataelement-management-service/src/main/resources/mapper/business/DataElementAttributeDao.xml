@@ -142,4 +142,16 @@
       #{id,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="getDataElementAttributeByDataElementId" resultType="com.inspur.dsp.direct.entity.vo.ObjectVocabularyVO">
+    SELECT
+      dea.data_element_attribute_id as attributeId,
+      dea.data_element_attribute_value as dataElementAttributeValue,
+      ad.attribute_name as attributeName
+    FROM
+      `data_element_attribute` dea
+        LEFT JOIN attribute_definition ad ON dea.data_element_attribute_id = ad.attribute_id
+    WHERE
+      data_element_id = #{dataElementId}
+  </select>
 </mapper>

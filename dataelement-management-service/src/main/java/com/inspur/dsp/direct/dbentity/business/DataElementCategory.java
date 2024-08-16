@@ -60,6 +60,12 @@ public class DataElementCategory implements Serializable {
     private String dataElementCategoryName;
 
     /**
+     * 分类描述
+     */
+    @TableField(value = "data_element_category_desc")
+    private String dataElementCategoryDesc;
+
+    /**
      * 排序ID
      */
     @TableField(value = "sortid")
