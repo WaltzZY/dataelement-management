@@ -12,8 +12,10 @@ import com.inspur.dsp.direct.entity.bo.bsp.OrganTreeBO;
 import com.inspur.dsp.direct.entity.bo.business.DataElementCategoryInfoBO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedCountDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
+import com.inspur.dsp.direct.entity.dto.GovDeptDTO;
 import com.inspur.dsp.direct.entity.vo.DetailedCountVO;
 import com.inspur.dsp.direct.entity.vo.GetDetailedListVO;
+import com.inspur.dsp.direct.entity.vo.GovDeptVO;
 import com.inspur.dsp.direct.entity.vo.OrganMinistriesAndCommissions;
 import com.inspur.dsp.direct.entity.vo.RegionAndOrgan;
 import com.inspur.dsp.direct.entity.vo.RegionProvinceVO;
@@ -176,5 +178,16 @@ public class DataElementBaseServiceImpl extends ServiceImpl<DataElementBaseDao, 
         vo.setOrgan(organMinistriesAndCommissions);
         vo.setRegion(regionProvinceVOS);
         return vo;
+    }
+
+    /**
+     * 分页模糊查询全国部门
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public Page<GovDeptVO> getGovDept(GovDeptDTO dto) {
+        return null;
     }
 }

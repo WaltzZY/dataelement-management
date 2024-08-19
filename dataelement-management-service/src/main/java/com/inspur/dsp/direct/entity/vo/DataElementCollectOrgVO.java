@@ -1,8 +1,11 @@
 package com.inspur.dsp.direct.entity.vo;
 
+import lombok.Data;
+
 /**
  * 响应参数
  */
+@Data
 public class DataElementCollectOrgVO {
 
     /**

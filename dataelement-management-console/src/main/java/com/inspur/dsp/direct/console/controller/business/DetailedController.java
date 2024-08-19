@@ -2,6 +2,8 @@ package com.inspur.dsp.direct.console.controller.business;
 
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.annotation.SysLog;
+import com.inspur.dsp.direct.entity.dto.GovDeptDTO;
+import com.inspur.dsp.direct.entity.vo.GovDeptVO;
 import com.inspur.dsp.direct.entity.vo.RegionAndOrgan;
 import com.inspur.dsp.direct.httpService.BSPService;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
@@ -197,5 +199,12 @@ public class DetailedController {
     @RespAdvice
     public RegionAndOrgan regionAndOrgan() {
         return dataElementBaseService.regionAndOrgan();
+    }
+
+    @PostMapping("/govdept")
+    @SysLog(title = "基准数据元清单", modelName = "分页模糊查询全国部门")
+    @RespAdvice
+    public Page<GovDeptVO> getGovDept(@RequestBody GovDeptDTO dto) {
+        return dataElementBaseService.getGovDept(dto);
     }
 }
