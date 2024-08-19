@@ -38,11 +38,11 @@ public class CenterController {
      */
     @RespAdvice
     @GetMapping("/getList")
-    public Page<DataElementBase> getList( @RequestParam int currentPage,
+    public Page<DataElementBase> getList( @RequestParam int pageNum,
                                           @RequestParam int pageSize,
                                           @NotEmpty(message = "关键字不能为空") @RequestParam("searchValue")String searchValue){
         // 创建分页对象
-        Page<DataElementBase> page = new Page<>(currentPage, pageSize);
+        Page<DataElementBase> page = new Page<>(pageNum, pageSize);
         dataElementBaseService.lambdaQuery().eq(DataElementBase::getDataElementStatus, DataElementStatusEnum.PUBLISHED.getCode()).like(DataElementBase::getDataElementEnName, searchValue).or().like(DataElementBase::getDataElementDefinition, searchValue).
                 select(DataElementBase::getDataElementId, DataElementBase::getDataElementEnName, DataElementBase::getDataElementDefinition,DataElementBase::getModifyDate).page(page);
         return page;
