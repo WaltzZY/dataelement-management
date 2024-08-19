@@ -3,7 +3,9 @@ package com.inspur.dsp.direct.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
+import com.inspur.dsp.direct.entity.dto.GetDetailedCountDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
+import com.inspur.dsp.direct.entity.vo.DetailedCountVO;
 import com.inspur.dsp.direct.entity.vo.GetDetailedListVO;
 
 /**
@@ -17,4 +19,11 @@ public interface DataElementBaseService extends IService<DataElementBase> {
      * @return
      */
     Page<GetDetailedListVO> getDetailedList(GetDetailedListDTO dto);
+
+    /**
+     * 查询清单列表汇总
+     * @param dto
+     * @return
+     */
+    DetailedCountVO getDetailedCount(GetDetailedCountDTO dto);
 }

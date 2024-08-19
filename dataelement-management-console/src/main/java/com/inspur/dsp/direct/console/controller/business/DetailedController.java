@@ -1,20 +1,34 @@
 package com.inspur.dsp.direct.console.controller.business;
 
-import com.inspur.dsp.direct.annotation.RespAdvice;
-import com.inspur.dsp.direct.annotation.SysLog;
-import com.inspur.dsp.direct.entity.vo.*;
-import com.inspur.dsp.direct.service.*;
-import com.inspur.dsp.direct.dbentity.business.DataElementBase;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.annotation.SysLog;
+import com.inspur.dsp.direct.dbentity.business.DataElementBase;
+import com.inspur.dsp.direct.entity.dto.GetDetailedCountDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
+import com.inspur.dsp.direct.entity.vo.ClassIfiCationMethodVO;
+import com.inspur.dsp.direct.entity.vo.DataElementAttributeVO;
+import com.inspur.dsp.direct.entity.vo.DataElementCollectOrgVO;
+import com.inspur.dsp.direct.entity.vo.DataElementDataItemVO;
+import com.inspur.dsp.direct.entity.vo.DataElementSampleVO;
+import com.inspur.dsp.direct.entity.vo.DataElementSceneVO;
+import com.inspur.dsp.direct.entity.vo.DataElementStandardVO;
+import com.inspur.dsp.direct.entity.vo.DetailedCountVO;
 import com.inspur.dsp.direct.entity.vo.GetDetailedListVO;
+import com.inspur.dsp.direct.entity.vo.VocabularyVO;
+import com.inspur.dsp.direct.service.DataElementAttributeService;
 import com.inspur.dsp.direct.service.DataElementBaseService;
+import com.inspur.dsp.direct.service.DataElementBelongCategoryService;
+import com.inspur.dsp.direct.service.DataElementCollectOrgService;
+import com.inspur.dsp.direct.service.DataElementDataItemService;
+import com.inspur.dsp.direct.service.DataElementSampleService;
+import com.inspur.dsp.direct.service.DataElementSceneService;
+import com.inspur.dsp.direct.service.DataElementStandardService;
+import com.inspur.dsp.direct.service.DataElementVocabularyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +36,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.List;
-
 import java.util.List;
 
 /**
@@ -158,5 +170,12 @@ public class DetailedController {
     @RespAdvice
     public Page<GetDetailedListVO> getDetailedList(@RequestBody @Validated GetDetailedListDTO dto) {
         return dataElementBaseService.getDetailedList(dto);
+    }
+
+    @PostMapping("/count")
+    @SysLog(title = "基准数据元清单", modelName = "清单列表汇总")
+    @RespAdvice
+    public DetailedCountVO getDetailedCount(@RequestBody GetDetailedCountDTO dto) {
+        return dataElementBaseService.getDetailedCount(dto);
     }
 }

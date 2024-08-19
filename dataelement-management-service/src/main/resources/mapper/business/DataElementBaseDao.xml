@@ -309,4 +309,62 @@
       </where>
       order by deb.create_date desc
   </select>
+
+  <select id="getDetailedCount" resultMap="BaseResultMap">
+    select data_element_id,
+    data_element_name,
+    data_element_status
+    from data_element_base
+    <include refid="getDetailedCountParam"/>
+  </select>
+
+  <select id="getCollectOrgCount" resultType="java.lang.Integer">
+      select count(DISTINCT data_element_collect_org_code)
+      from data_element_collectorg
+      where data_element_id in (
+      select data_element_id
+      from data_element_base
+      <include refid="getDetailedCountParam"/>
+      )
+  </select>
+
+  <sql id="getDetailedCountParam">
+    <where>
+      <if test="dto.searchValue != null and dto.searchValue != ''">
+        and (data_element_name like concat('%', #{dto.searchValue}, '%')
+        or data_element_definition like concat('%', #{dto.searchValue}, '%'))
+      </if>
+      <if test="dto.categoryIds != null and dto.categoryIds.size() > 0">
+        and data_element_id in (
+        select data_element_id
+        from data_element_belong_category where data_element_category_code in
+        <foreach collection="dto.categoryIds" item="categoryId" open="(" separator="," close=")">
+          #{categoryId}
+        </foreach>
+        )
+      </if>
+      <if test="dto.orgCodes != null and dto.orgCodes.size() > 0">
+        and data_element_id in (
+        select data_element_id
+        from data_element_collectorg where data_element_collect_org_code in
+        <foreach collection="dto.orgCodes" item="orgCode" open="(" separator="," close=")">
+          #{orgCode}
+        </foreach>
+        )
+      </if>
+      <if test="dto.regionCodes != null and dto.regionCodes.size() > 0">
+        and data_element_id in (
+        select data_element_id
+        from data_element_collectorg where dept_code_or_area_code in
+        <foreach collection="dto.regionCodes" item="regionCode" open="(" close=")" separator=",">
+          #{regionCode}
+        </foreach>
+        )
+      </if>
+      <if test="dto.status != null and dto.status != ''">
+        and data_element_status = #{dto.status}
+      </if>
+    </where>
+    order by create_date desc
+  </sql>
 </mapper>

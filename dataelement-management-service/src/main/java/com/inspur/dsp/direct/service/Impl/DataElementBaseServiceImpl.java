@@ -9,7 +9,9 @@ import com.inspur.dsp.direct.dbentity.business.DataElementBase;
 import com.inspur.dsp.direct.dbentity.business.DataElementBelongCategory;
 import com.inspur.dsp.direct.dbentity.business.DataElementCollectorg;
 import com.inspur.dsp.direct.entity.bo.DataElementCategoryInfoBO;
+import com.inspur.dsp.direct.entity.dto.GetDetailedCountDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
+import com.inspur.dsp.direct.entity.vo.DetailedCountVO;
 import com.inspur.dsp.direct.entity.vo.GetDetailedListVO;
 import com.inspur.dsp.direct.enums.DataElementStatusEnum;
 import com.inspur.dsp.direct.httpService.BSPService;
@@ -95,5 +97,45 @@ public class DataElementBaseServiceImpl extends ServiceImpl<DataElementBaseDao, 
             vo.setDataElementDataType(dataTypeDictMap.get(vo.getDataElementDataType()));
         });
         return detailedList;
+    }
+
+    /**
+     * 查询清单列表汇总
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public DetailedCountVO getDetailedCount(GetDetailedCountDTO dto) {
+        // 初始化响应对象
+        DetailedCountVO vo = new DetailedCountVO(0, 0, 0, 0, 0, 0);
+        // 查询清单列表汇总
+        List<DataElementBase> detailedCount = dataElementBaseDao.getDetailedCount(dto);
+        if (CollectionUtils.isEmpty(detailedCount)) {
+            return vo;
+        }
+        // 数据元个数
+        vo.setDataelementCount(detailedCount.size());
+        // 查询关联单位个数
+        Integer collectOrgCount = dataElementBaseDao.getCollectOrgCount(dto);
+        vo.setDeptCount(collectOrgCount);
+        // 各状态数据元个数
+        Map<String, Integer> statusCountMap = detailedCount.stream()
+                .filter(l -> StringUtils.hasText(l.getDataElementStatus()))
+                .collect(Collectors.groupingBy(DataElementBase::getDataElementStatus
+                        , Collectors.collectingAndThen(Collectors.toList(), List::size
+                        )));
+        statusCountMap.forEach((k, v) -> {
+            if (DataElementStatusEnum.WAIT_SOURCE.getCode().equals(k)) {
+                vo.setStatus01(v);
+            } else if (DataElementStatusEnum.WAIT_STANDARD.getCode().equals(k)) {
+                vo.setStatus02(v);
+            } else if (DataElementStatusEnum.PUBLISHED.getCode().equals(k)) {
+                vo.setStatus03(v);
+            } else if (DataElementStatusEnum.DISCARDED.getCode().equals(k)) {
+                vo.setStatus04(v);
+            }
+        });
+        return vo;
     }
 }
