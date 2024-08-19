@@ -1,9 +1,10 @@
 package com.inspur.dsp.direct.console.controller.business;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.annotation.SysLog;
+import com.inspur.dsp.direct.httpService.BSPService;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.entity.dto.GetDetailedCountDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
 import com.inspur.dsp.direct.entity.vo.ClassIfiCationMethodVO;
@@ -37,6 +38,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 
 /**
  * 基准数据元清单
@@ -51,6 +55,7 @@ public class DetailedController {
     private final DataElementAttributeService dataElementAttributeService;
     private final DataElementVocabularyService dataElementVocabularyService;
     private final DataElementBelongCategoryService dataElementBelongCategoryService;
+    private final BSPService bspService;
     @Resource
     private DataElementCollectOrgService dataElementCollectOrgService;
     @Resource
@@ -62,6 +67,7 @@ public class DetailedController {
     @Resource
     private DataElementStandardService dataElementStandardService;
 
+
     /**
      * 数据元基本信息查询
      * @param dataElementId 数据元id
@@ -71,6 +77,12 @@ public class DetailedController {
     @GetMapping("/getDataelementInfo")
     public DataElementBase getDataelementInfo(@RequestParam("dataElementId")String dataElementId){
         DataElementBase dataElementBase = dataElementBaseService.getById(dataElementId);
+        // 查询数据类型
+        Map<String, String> dataTypeDictMap = bspService.getDataTypeDictMap();
+        //设置数据类型
+        if (Objects.nonNull(dataElementBase)){
+            dataElementBase.setDataElementDataType(dataTypeDictMap.get(dataElementBase.getDataElementDataType()));
+        }
         return dataElementBase;
     }
 
