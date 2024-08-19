@@ -8,7 +8,7 @@ import com.inspur.dsp.direct.dbentity.business.DataElementBelongCategory;
 import java.util.List;
 
 import com.inspur.dsp.direct.entity.vo.ClassIfiCationMethodVO;
-import com.inspur.dsp.direct.entity.bo.DataElementCategoryInfoBO;
+import com.inspur.dsp.direct.entity.bo.business.DataElementCategoryInfoBO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

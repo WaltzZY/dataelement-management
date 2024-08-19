@@ -37,6 +37,7 @@ spring:
   innerIp:
     start: 127.
   bsp:
+    top-region-code: "000000000000"
     root-organ-code: 200427114503
     url: http://10.110.26.81/bsp
   datasource:

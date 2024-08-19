@@ -7,6 +7,7 @@ import com.inspur.dsp.direct.entity.dto.GetDetailedCountDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
 import com.inspur.dsp.direct.entity.vo.DetailedCountVO;
 import com.inspur.dsp.direct.entity.vo.GetDetailedListVO;
+import com.inspur.dsp.direct.entity.vo.RegionAndOrgan;
 
 /**
  * 基准数据元表
@@ -26,4 +27,10 @@ public interface DataElementBaseService extends IService<DataElementBase> {
      * @return
      */
     DetailedCountVO getDetailedCount(GetDetailedCountDTO dto);
+
+    /**
+     * 获取一级行政区和国家部委
+     * @return
+     */
+    RegionAndOrgan regionAndOrgan();
 }

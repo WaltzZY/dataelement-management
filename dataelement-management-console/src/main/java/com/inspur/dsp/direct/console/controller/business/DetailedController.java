@@ -2,6 +2,7 @@ package com.inspur.dsp.direct.console.controller.business;
 
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.annotation.SysLog;
+import com.inspur.dsp.direct.entity.vo.RegionAndOrgan;
 import com.inspur.dsp.direct.httpService.BSPService;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -189,5 +190,12 @@ public class DetailedController {
     @RespAdvice
     public DetailedCountVO getDetailedCount(@RequestBody GetDetailedCountDTO dto) {
         return dataElementBaseService.getDetailedCount(dto);
+    }
+
+    @GetMapping("/regionAndOrgan")
+    @SysLog(title = "基准数据元清单", modelName = "获取一级行政区和国家部委")
+    @RespAdvice
+    public RegionAndOrgan regionAndOrgan() {
+        return dataElementBaseService.regionAndOrgan();
     }
 }

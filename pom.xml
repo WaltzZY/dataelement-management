@@ -51,11 +51,21 @@
         <xxl-rpc-core.version>1.4.1</xxl-rpc-core.version>
         <ueditor.version>1.4.3.3</ueditor.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <!--?<dsp.direct.version>1.0.0</dsp.direct.version>-->
+        <httpclient.version>4.5.13</httpclient.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpmime</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>

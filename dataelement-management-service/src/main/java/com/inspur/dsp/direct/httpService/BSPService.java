@@ -5,12 +5,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.inspur.dsp.common.utils.CollectionUtils;
 import com.inspur.dsp.direct.common.HttpClient;
 import com.inspur.dsp.direct.constant.Constants;
-import com.inspur.dsp.direct.entity.bo.BspOraanInfoBO;
-import com.inspur.dsp.direct.entity.bo.DictInfoBO;
-import com.inspur.dsp.direct.entity.bo.DictInfoVO;
+import com.inspur.dsp.direct.entity.bo.bsp.BspOraanInfoBO;
+import com.inspur.dsp.direct.entity.bo.bsp.DictInfoBO;
+import com.inspur.dsp.direct.entity.bo.bsp.DictInfoVO;
+import com.inspur.dsp.direct.entity.bo.bsp.OrganInfo;
+import com.inspur.dsp.direct.entity.bo.bsp.OrganTreeBO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -257,5 +260,55 @@ public class BSPService {
                 l -> l.stream().filter(Objects::nonNull)
                         .collect(Collectors.toMap(DictInfoVO::getCode, DictInfoVO::getName))
         ).orElse(new HashMap<>());
+    }
+
+    /**
+     * 获取国家部委
+     * @return
+     */
+    public OrganTreeBO getOrganAll() {
+        try {
+
+            String url = bspUrl + "/restapi/getOrganTree?appCode=&regionCode=200427114503";
+            log.info("getOrganTree url: " + url);
+            JSONObject jsonObject = HttpClient.httpGetMethod(url);
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONArray organ = data.getJSONArray("organ");
+            Integer max = data.getInteger("max");
+            OrganTreeBO organTreeBO = new OrganTreeBO();
+            if (!ObjectUtils.isEmpty(organ)) {
+                organTreeBO.setOrgan(organ.toJavaList(OrganInfo.class));
+            }
+            organTreeBO.setMax(max);
+            return organTreeBO;
+        } catch (Exception e) {
+            log.error("BSPService method getOrganTree error: ", e);
+            return new OrganTreeBO();
+        }
+    }
+
+    /**
+     * 组织接口--获取下级组织机构树--地方
+     **/
+    public OrganTreeBO getOrganTree(String regionCode) {
+        try {
+            // orderByCode参数，只有全国时为false，其他为true。
+            String orderByCode = "000000000000".equals(regionCode) ? "false" : "true";
+            String url = bspUrl + "/restapi/getOrganTree?appCode=&regionCode=" + regionCode + "&orderByCode=" + orderByCode;
+            log.info("getOrganTree url: " + url);
+            JSONObject jsonObject = HttpClient.httpGetMethod(url);
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONArray organ = data.getJSONArray("organ");
+            Integer max = data.getInteger("max");
+            OrganTreeBO organTreeBO = new OrganTreeBO();
+            if (!ObjectUtils.isEmpty(organ)) {
+                organTreeBO.setOrgan(organ.toJavaList(OrganInfo.class));
+            }
+            organTreeBO.setMax(max);
+            return organTreeBO;
+        } catch (Exception e) {
+            log.error("BSPService method getOrganTree error: ", e);
+            return new OrganTreeBO();
+        }
     }
 }

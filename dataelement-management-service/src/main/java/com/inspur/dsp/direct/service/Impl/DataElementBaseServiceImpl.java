@@ -6,18 +6,23 @@ import com.inspur.dsp.direct.dao.business.DataElementBaseDao;
 import com.inspur.dsp.direct.dao.business.DataElementBelongCategoryDao;
 import com.inspur.dsp.direct.dao.business.DataElementCollectorgDao;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
-import com.inspur.dsp.direct.dbentity.business.DataElementBelongCategory;
 import com.inspur.dsp.direct.dbentity.business.DataElementCollectorg;
-import com.inspur.dsp.direct.entity.bo.DataElementCategoryInfoBO;
+import com.inspur.dsp.direct.entity.bo.bsp.OrganInfo;
+import com.inspur.dsp.direct.entity.bo.bsp.OrganTreeBO;
+import com.inspur.dsp.direct.entity.bo.business.DataElementCategoryInfoBO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedCountDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
 import com.inspur.dsp.direct.entity.vo.DetailedCountVO;
 import com.inspur.dsp.direct.entity.vo.GetDetailedListVO;
+import com.inspur.dsp.direct.entity.vo.OrganMinistriesAndCommissions;
+import com.inspur.dsp.direct.entity.vo.RegionAndOrgan;
+import com.inspur.dsp.direct.entity.vo.RegionProvinceVO;
 import com.inspur.dsp.direct.enums.DataElementStatusEnum;
 import com.inspur.dsp.direct.httpService.BSPService;
 import com.inspur.dsp.direct.service.DataElementBaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -42,6 +47,12 @@ public class DataElementBaseServiceImpl extends ServiceImpl<DataElementBaseDao, 
     private final DataElementBelongCategoryDao belongCategoryDao;
     private final DataElementCollectorgDao collectorgDao;
     private final BSPService bspService;
+
+    /**
+     * 顶层区域code
+     */
+    @Value("${spring.bsp.top-region-code:''}")
+    private String topRegionCode;
 
     /**
      * 查询清单列表
@@ -136,6 +147,34 @@ public class DataElementBaseServiceImpl extends ServiceImpl<DataElementBaseDao, 
                 vo.setStatus04(v);
             }
         });
+        return vo;
+    }
+
+    /**
+     * 获取一级行政区和国家部委
+     *
+     * @return
+     */
+    @Override
+    public RegionAndOrgan regionAndOrgan() {
+        RegionAndOrgan vo = new RegionAndOrgan();
+        List<OrganMinistriesAndCommissions> organMinistriesAndCommissions = new ArrayList<>();
+        List<RegionProvinceVO> regionProvinceVOS = new ArrayList<>();
+        OrganTreeBO organAll = bspService.getOrganAll();
+        if (Objects.nonNull(organAll)) {
+            List<OrganInfo> organ = organAll.getOrgan();
+            organMinistriesAndCommissions = Optional.ofNullable(organ).map(l -> l.stream().filter(Objects::nonNull)
+                            .map(OrganMinistriesAndCommissions::toOmac).collect(Collectors.toList()))
+                    .orElse(new ArrayList<>());
+        }
+        OrganTreeBO regionTree = bspService.getOrganTree(topRegionCode);
+        if (Objects.nonNull(regionTree)) {
+            regionProvinceVOS = Optional.ofNullable(regionTree.getOrgan()).map(l -> l.stream().filter(Objects::nonNull)
+                            .map(RegionProvinceVO::toRegionProvinceVO).collect(Collectors.toList()))
+                    .orElse(new ArrayList<>());
+        }
+        vo.setOrgan(organMinistriesAndCommissions);
+        vo.setRegion(regionProvinceVOS);
         return vo;
     }
 }

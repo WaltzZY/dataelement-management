@@ -1,4 +1,4 @@
-package com.inspur.dsp.direct.entity.bo;
+package com.inspur.dsp.direct.entity.bo.business;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
