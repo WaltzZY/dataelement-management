@@ -44,5 +44,8 @@ public class Constants {
      * 默认账户
      */
     public static final String DEFAULT_USER_ACCOUNT = "system";
-
+    /**
+     * 空字符串
+     */
+    public static final String EMPTY_STRING = "";
 }

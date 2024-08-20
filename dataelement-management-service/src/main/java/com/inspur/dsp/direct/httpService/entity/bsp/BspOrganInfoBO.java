@@ -12,20 +12,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BspOraanInfoBO {
+public class BspOrganInfoBO {
 
 
     private String ORG_ID;
     private String ORGAN_LEVEL;
     private String REGION_CODE;
     private String SHORT_CODE;
+    /**
+     *  组织机构简称
+     */
     private String SHORT_NAME;
     /**
-     * 部门简称名称
+     * 组织机构名称
      */
     private String NAME;
     /**
-     * 部门编码
+     * 组织机构编码
      */
     private String CODE;
     private String ORGAN_TYPE;
@@ -38,8 +41,12 @@ public class BspOraanInfoBO {
      * 部门全称名称
      */
     private String ORGAN_LINE;
-    private String SORT_ORDER;
-    private String CHILDS;
+    private Integer SORT_ORDER;
+    private Integer CHILDS;
     private String ID;
+    /**
+     * 组织机构类型，0=部门
+     */
     private String TYPE;
+    private String REMARK;
 }

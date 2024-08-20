@@ -6,7 +6,7 @@ import com.inspur.dsp.common.utils.CollectionUtils;
 import com.inspur.dsp.direct.common.HttpClient;
 import com.inspur.dsp.direct.constant.Constants;
 import com.inspur.dsp.direct.httpService.BspService;
-import com.inspur.dsp.direct.httpService.entity.bsp.BspOraanInfoBO;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOrganInfoBO;
 import com.inspur.dsp.direct.httpService.entity.bsp.DictInfoBO;
 import com.inspur.dsp.direct.httpService.entity.bsp.DictInfoVO;
 import com.inspur.dsp.direct.httpService.entity.bsp.OrganInfo;
@@ -152,7 +152,7 @@ public class BspServiceImpl implements BspService {
      * @return 用户部门信息
      * @throws RuntimeException 自定义异常
      */
-    public BspOraanInfoBO getOrganInfoByCode(String organCode) {
+    public BspOrganInfoBO getOrganInfoByCode(String organCode) {
         if (!StringUtils.hasText(organCode)) {
             log.error("所查询用户所属部门编码未填写");
             return null;
@@ -160,7 +160,7 @@ public class BspServiceImpl implements BspService {
         String url = bspUrl + "/restapi/getOrganInfoByCode?organCode=" + organCode;
         JSONObject jsonObject = HttpClient.httpGetMethod(url);
         if (CollectionUtils.isNotEmpty(jsonObject) && 1 == jsonObject.getInteger("code")) {
-            return jsonObject.getObject("data", BspOraanInfoBO.class);
+            return jsonObject.getObject("data", BspOrganInfoBO.class);
         } else {
             log.error("接口获取失败");
             return null;
@@ -182,16 +182,16 @@ public class BspServiceImpl implements BspService {
         String topLevelOrganCode = organCode;
         // 循环查询父级部门,直到父级部门为根部门编码则不查询
         while (true) {
-            BspOraanInfoBO bspOraanInfoBO = getOrganInfoByCode(organCode);
-            if (bspOraanInfoBO != null) {
+            BspOrganInfoBO bspOrganInfoBO = getOrganInfoByCode(organCode);
+            if (bspOrganInfoBO != null) {
                 // 更改下一次查询的部门id
-                organCode = bspOraanInfoBO.getPARENT_CODE();
+                organCode = bspOrganInfoBO.getPARENT_CODE();
                 // 查询id为根部门id,则结束循环
                 if (rootOrganCode.equals(organCode)) {
                     break;
                 }
                 // 保存每次查询的父级部门id
-                topLevelOrganCode = bspOraanInfoBO.getPARENT_CODE();
+                topLevelOrganCode = bspOrganInfoBO.getPARENT_CODE();
             } else {
                 // 查不到对象,停止循环
                 break;
@@ -215,16 +215,16 @@ public class BspServiceImpl implements BspService {
         String topLevelOrganName = organCode;
         // 循环查询父级部门,直到父级部门为根部门编码则不查询
         while (true) {
-            BspOraanInfoBO bspOraanInfoBO = getOrganInfoByCode(organCode);
-            if (bspOraanInfoBO != null) {
+            BspOrganInfoBO bspOrganInfoBO = getOrganInfoByCode(organCode);
+            if (bspOrganInfoBO != null) {
                 // 更改下一次查询的部门id
-                organCode = bspOraanInfoBO.getPARENT_CODE();
+                organCode = bspOrganInfoBO.getPARENT_CODE();
                 // 查询id为根部门id,则结束循环
                 if (rootOrganCode.equals(organCode)) {
                     break;
                 }
                 // 保存每次查询的父级部门id
-                topLevelOrganName = bspOraanInfoBO.getNAME();
+                topLevelOrganName = bspOrganInfoBO.getNAME();
             } else {
                 // 查不到对象,停止循环
                 break;

@@ -1,7 +1,7 @@
 package com.inspur.dsp.direct.httpService;
 
 import com.alibaba.fastjson.JSONObject;
-import com.inspur.dsp.direct.httpService.entity.bsp.BspOraanInfoBO;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOrganInfoBO;
 import com.inspur.dsp.direct.httpService.entity.bsp.DictInfoVO;
 import com.inspur.dsp.direct.httpService.entity.bsp.OrganTreeBO;
 
@@ -74,7 +74,7 @@ public interface BspService {
      * @return 用户部门信息
      * @throws RuntimeException 自定义异常
      */
-    BspOraanInfoBO getOrganInfoByCode(String organCode);
+    BspOrganInfoBO getOrganInfoByCode(String organCode);
 
     /**
      * 获取用户的顶层部门编码

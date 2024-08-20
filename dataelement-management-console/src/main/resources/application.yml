@@ -7,8 +7,8 @@ server:
     tracking-modes: cookie
 spring:
   application:
-    id: DSP-DATAELEMENT
-    name: DSP-DATAELEMENT
+    id: DSP-ENTERPRISE
+    name: DSP-ENTERPRISE
     admin: true
     # rc文件服务内网地址
     inner_rcservice: http://10.110.26.81:80/rcservice
@@ -38,7 +38,8 @@ spring:
     start: 127.
   bsp:
     top-region-code: "000000000000"
-    root-organ-code: 200427114503
+    root-organ-code: "200427114503"
+    root-organ-name: "中华人民共和国"
     url: http://10.110.26.81/bsp
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
