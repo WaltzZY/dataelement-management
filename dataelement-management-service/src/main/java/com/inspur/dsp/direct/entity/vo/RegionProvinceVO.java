@@ -1,6 +1,6 @@
 package com.inspur.dsp.direct.entity.vo;
 
-import com.inspur.dsp.direct.entity.bo.bsp.OrganInfo;
+import com.inspur.dsp.direct.httpService.entity.bsp.OrganInfo;
 import lombok.Data;
 
 @Data
