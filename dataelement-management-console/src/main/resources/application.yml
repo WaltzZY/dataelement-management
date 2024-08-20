@@ -96,3 +96,7 @@ mybatis-plus:
 jasypt:
   encryptor:
     password: DataServicePlatform
+svc:
+  url:
+    catalog: http://10.110.26.81:80/catalog
+    resource: http://10.110.26.81:80/resource

@@ -14,6 +14,7 @@ import com.inspur.dsp.direct.entity.vo.DataElementDataItemVO;
 import com.inspur.dsp.direct.entity.vo.DataElementSampleVO;
 import com.inspur.dsp.direct.entity.vo.DataElementSceneVO;
 import com.inspur.dsp.direct.entity.vo.DataElementStandardVO;
+import com.inspur.dsp.direct.entity.vo.DataItemInfoVO;
 import com.inspur.dsp.direct.entity.vo.DetailedCountVO;
 import com.inspur.dsp.direct.entity.vo.GetDetailedListVO;
 import com.inspur.dsp.direct.entity.vo.GovDeptVO;
@@ -206,5 +207,12 @@ public class DetailedController {
     @RespAdvice
     public Page<GovDeptVO> getGovDept(@RequestBody GovDeptDTO dto) {
         return dataElementBaseService.getGovDept(dto);
+    }
+
+    @GetMapping("/getDataItemInfo")
+    @SysLog(title = "基准数据元清单详情", modelName = "查询关联资源详情")
+    @RespAdvice
+    public DataItemInfoVO getDataItemInfo(@RequestParam("dataResourceId") String dataResourceId) {
+        return dataElementDataItemService.getDataItemInfo(dataResourceId);
     }
 }

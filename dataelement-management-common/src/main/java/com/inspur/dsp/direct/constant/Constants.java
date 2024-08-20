@@ -48,4 +48,8 @@ public class Constants {
      * 空字符串
      */
     public static final String EMPTY_STRING = "";
+    /**
+     * 逗号分隔符
+     */
+    public static final String GNU_SED = ",";
 }
