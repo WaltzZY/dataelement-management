@@ -1,4 +1,4 @@
-package com.inspur.dsp.direct.entity.bo.bsp;
+package com.inspur.dsp.direct.httpService.entity.bsp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
