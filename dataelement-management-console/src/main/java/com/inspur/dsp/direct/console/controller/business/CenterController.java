@@ -43,8 +43,8 @@ public class CenterController {
                                           @NotEmpty(message = "关键字不能为空") @RequestParam("searchValue")String searchValue){
         // 创建分页对象
         Page<DataElementBase> page = new Page<>(pageNum, pageSize);
-        dataElementBaseService.lambdaQuery().eq(DataElementBase::getDataElementStatus, DataElementStatusEnum.PUBLISHED.getCode()).like(DataElementBase::getDataElementEnName, searchValue).or().like(DataElementBase::getDataElementDefinition, searchValue).
-                select(DataElementBase::getDataElementId, DataElementBase::getDataElementEnName, DataElementBase::getDataElementDefinition,DataElementBase::getModifyDate).page(page);
+        dataElementBaseService.lambdaQuery().eq(DataElementBase::getDataElementStatus, DataElementStatusEnum.PUBLISHED.getCode()).like(DataElementBase::getDataElementName, searchValue).or().like(DataElementBase::getDataElementDefinition, searchValue).
+                select(DataElementBase::getDataElementId, DataElementBase::getDataElementName, DataElementBase::getDataElementDefinition,DataElementBase::getModifyDate).page(page);
         return page;
     }
 
@@ -56,7 +56,7 @@ public class CenterController {
     @GetMapping("/hotspot")
     public List<DataElementBase> hotspot(){
         List<DataElementBase> list = dataElementBaseService.lambdaQuery().eq(DataElementBase::getDataElementStatus, DataElementStatusEnum.PUBLISHED.getCode()).orderByDesc(DataElementBase::getModifyDate).last("limit 45").
-                select(DataElementBase::getDataElementId, DataElementBase::getDataElementEnName, DataElementBase::getDataElementDefinition).list();
+                select(DataElementBase::getDataElementId, DataElementBase::getDataElementName, DataElementBase::getDataElementDefinition).list();
         return list;
     }
     /**
@@ -77,8 +77,8 @@ public class CenterController {
             // 提取查询结果中的词汇列表
             List<String> collect = dataElementVocabularies.stream().map(DataElementVocabulary::getVocabulary).collect(Collectors.toList());
             // 根据词汇列表查询数据元素，仅查询已发布状态的数据元素
-            list = dataElementBaseService.lambdaQuery().eq(DataElementBase::getDataElementStatus, DataElementStatusEnum.PUBLISHED.getCode()).in(DataElementBase::getDataElementEnName,collect).
-                    select(DataElementBase::getDataElementId, DataElementBase::getDataElementEnName, DataElementBase::getDataElementDefinition).list();
+            list = dataElementBaseService.lambdaQuery().eq(DataElementBase::getDataElementStatus, DataElementStatusEnum.PUBLISHED.getCode()).in(DataElementBase::getDataElementName,collect).
+                    select(DataElementBase::getDataElementId, DataElementBase::getDataElementName, DataElementBase::getDataElementDefinition).list();
         }
         // 返回查询到的数据元素列表
         return list;
