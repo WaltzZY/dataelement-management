@@ -7,8 +7,6 @@ import com.inspur.dsp.direct.dao.business.DataElementBelongCategoryDao;
 import com.inspur.dsp.direct.dao.business.DataElementCollectorgDao;
 import com.inspur.dsp.direct.dbentity.business.DataElementBase;
 import com.inspur.dsp.direct.dbentity.business.DataElementCollectorg;
-import com.inspur.dsp.direct.httpService.entity.bsp.OrganInfo;
-import com.inspur.dsp.direct.httpService.entity.bsp.OrganTreeBO;
 import com.inspur.dsp.direct.entity.bo.DataElementCategoryInfoBO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedCountDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetailedListDTO;
@@ -20,7 +18,9 @@ import com.inspur.dsp.direct.entity.vo.OrganMinistriesAndCommissions;
 import com.inspur.dsp.direct.entity.vo.RegionAndOrgan;
 import com.inspur.dsp.direct.entity.vo.RegionProvinceVO;
 import com.inspur.dsp.direct.enums.DataElementStatusEnum;
-import com.inspur.dsp.direct.httpService.BSPService;
+import com.inspur.dsp.direct.httpService.BspService;
+import com.inspur.dsp.direct.httpService.entity.bsp.OrganInfo;
+import com.inspur.dsp.direct.httpService.entity.bsp.OrganTreeBO;
 import com.inspur.dsp.direct.service.DataElementBaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class DataElementBaseServiceImpl extends ServiceImpl<DataElementBaseDao, 
     private final DataElementBaseDao dataElementBaseDao;
     private final DataElementBelongCategoryDao belongCategoryDao;
     private final DataElementCollectorgDao collectorgDao;
-    private final BSPService bspService;
+    private final BspService bspService;
 
     /**
      * 顶层区域code

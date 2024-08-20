@@ -1,10 +1,11 @@
-package com.inspur.dsp.direct.httpService;
+package com.inspur.dsp.direct.httpService.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.inspur.dsp.common.utils.CollectionUtils;
 import com.inspur.dsp.direct.common.HttpClient;
 import com.inspur.dsp.direct.constant.Constants;
+import com.inspur.dsp.direct.httpService.BspService;
 import com.inspur.dsp.direct.httpService.entity.bsp.BspOraanInfoBO;
 import com.inspur.dsp.direct.httpService.entity.bsp.DictInfoBO;
 import com.inspur.dsp.direct.httpService.entity.bsp.DictInfoVO;
@@ -30,8 +31,8 @@ import java.util.stream.Collectors;
  * @des bsp系统 dubbo调用转http调用
  **/
 @Slf4j
-@Service("bspService")
-public class BSPService {
+@Service
+public class BspServiceImpl implements BspService {
 
     @Value("${spring.bsp.url}")
     private String bspUrl;
@@ -172,7 +173,6 @@ public class BSPService {
      * @param organCode 用户部门编码
      * @return
      */
-
     public String getTopLevelOrganCode(String organCode) {
         if (!StringUtils.hasText(organCode)) {
             log.error("所查询用户所属部门编码未填写");
@@ -206,7 +206,6 @@ public class BSPService {
      * @param organCode 用户部门编码
      * @return
      */
-
     public String getTopLevelOrganName(String organCode) {
         if (!StringUtils.hasText(organCode)) {
             log.error("所查询用户所属部门编码未填写");
@@ -235,7 +234,7 @@ public class BSPService {
     }
 
     /**
-     * 查询bsp闭门数据
+     * 查询bsp部门数据
      **/
     public JSONObject getOrganTree() {
         try {

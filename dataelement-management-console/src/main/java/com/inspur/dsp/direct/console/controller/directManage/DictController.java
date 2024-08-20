@@ -2,7 +2,7 @@ package com.inspur.dsp.direct.console.controller.directManage;
 
 import com.alibaba.fastjson.JSONObject;
 import com.inspur.dsp.common.web.controller.BaseController;
-import com.inspur.dsp.direct.httpService.BSPService;
+import com.inspur.dsp.direct.httpService.BspService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ public class DictController extends BaseController {
     private Log log = LogFactory.getLog(DictController.class);
 
     @Autowired
-    private BSPService bspService;
+    private BspService bspService;
 
     @RequestMapping("/getDictInfo")
     @ResponseBody
