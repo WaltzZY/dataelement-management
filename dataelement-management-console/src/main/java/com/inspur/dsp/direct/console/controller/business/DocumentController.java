@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.console.controller.business;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.annotation.SysLog;
 import com.inspur.dsp.direct.entity.dto.ServiceInterfaceDocumentDTO;
@@ -8,10 +9,7 @@ import com.inspur.dsp.direct.entity.vo.ServiceInterfaceDocumentListVO;
 import com.inspur.dsp.direct.service.ServiceInterfaceBaseInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -35,7 +33,7 @@ public class DocumentController {
      */
     @PostMapping("/getList")
     @RespAdvice
-    public List<ServiceInterfaceDocumentListVO> getList(ServiceInterfaceDocumentDTO serviceInterfaceDocumentDTO) {
+    public Page<ServiceInterfaceDocumentListVO> getList(@RequestBody ServiceInterfaceDocumentDTO serviceInterfaceDocumentDTO) {
         return serviceInterfaceBaseInfoService.getList(serviceInterfaceDocumentDTO);
     }
 

@@ -11,7 +11,6 @@ import com.inspur.dsp.direct.service.ServiceInterfaceBaseInfoService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * 服务接口基本信息表
@@ -23,9 +22,9 @@ public class ServiceInterfaceBaseInfoServiceImpl extends ServiceImpl<ServiceInte
     private ServiceInterfaceBaseInfoDao serviceInterfaceBaseInfoDao;
 
     @Override
-    public List<ServiceInterfaceDocumentListVO> getList(ServiceInterfaceDocumentDTO serviceInterfaceDocumentDTO) {
-        Page page = new Page(serviceInterfaceDocumentDTO.getPageNum(), serviceInterfaceDocumentDTO.getPageSize());
-        List<ServiceInterfaceDocumentListVO> dataList = serviceInterfaceBaseInfoDao.getList(page, serviceInterfaceDocumentDTO);
+    public Page<ServiceInterfaceDocumentListVO> getList(ServiceInterfaceDocumentDTO serviceInterfaceDocumentDTO) {
+        Page<ServiceInterfaceDocumentListVO> page = new Page<>(serviceInterfaceDocumentDTO.getPageNum(), serviceInterfaceDocumentDTO.getPageSize());
+        Page<ServiceInterfaceDocumentListVO> dataList = serviceInterfaceBaseInfoDao.getList(page, serviceInterfaceDocumentDTO);
         return dataList;
     }
 

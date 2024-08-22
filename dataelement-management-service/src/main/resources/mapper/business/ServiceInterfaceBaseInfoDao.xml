@@ -193,8 +193,8 @@
     FROM
     service_interface_base_info
     <where>
-      <if test="keyWords != null and keyWords != ''">
-        POSITION(#{keyWords} IN interface_name) > 0
+      <if test="serviceInterfaceDocumentDTO.keyWords != null and serviceInterfaceDocumentDTO.keyWords != ''">
+        POSITION(#{serviceInterfaceDocumentDTO.keyWords} IN interface_name) > 0
       </if>
     </where>
   </select>

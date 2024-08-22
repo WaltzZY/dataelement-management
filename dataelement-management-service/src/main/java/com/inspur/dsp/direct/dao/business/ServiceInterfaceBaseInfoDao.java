@@ -21,7 +21,7 @@ public interface ServiceInterfaceBaseInfoDao extends BaseMapper<ServiceInterface
 
     int deleteByPrimaryKeyIn(List<String> list);
 
-    List<ServiceInterfaceDocumentListVO> getList(Page page, ServiceInterfaceDocumentDTO serviceInterfaceDocumentDTO);
+    Page<ServiceInterfaceDocumentListVO> getList(Page<?> page, @Param("serviceInterfaceDocumentDTO") ServiceInterfaceDocumentDTO serviceInterfaceDocumentDTO);
 
     ServiceInterfaceDocumentDetailVO getDetail(String id);
 }
