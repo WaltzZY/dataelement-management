@@ -9,10 +9,6 @@ import lombok.Data;
 public class ServiceInterfaceDocumentDetailVO {
 
     /**
-     * 文档id
-     */
-    private String id;
-    /**
      * 接口名称
      */
     private String interfaceName;
@@ -25,6 +21,10 @@ public class ServiceInterfaceDocumentDetailVO {
      */
     private String interfaceAddress;
     /**
+     * 接口状态
+     */
+    private String interfaceStatus;
+    /**
      * 接口说明文本
      */
     private String interfaceExplanation;
@@ -36,4 +36,8 @@ public class ServiceInterfaceDocumentDetailVO {
      * 修改时间
      */
     private String modifyDate;
+    /**
+     * 接口所对应的数据资源系统中的资源id
+     */
+    private String interfaceResId;
 }

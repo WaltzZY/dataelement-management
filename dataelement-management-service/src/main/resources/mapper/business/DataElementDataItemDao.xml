@@ -159,8 +159,8 @@
   <select id="getList" resultType="com.inspur.dsp.direct.entity.vo.DataElementDataItemVO">
     SELECT
     data_resource_id AS dataResourceId,
-    data_resource_name AS dataResourceNam,
-    data_resource_item_name AS dataResourceItemNamee
+    data_resource_name AS dataResourceName,
+    data_resource_item_name AS dataResourceItemName
     FROM
     data_element_data_item
     WHERE

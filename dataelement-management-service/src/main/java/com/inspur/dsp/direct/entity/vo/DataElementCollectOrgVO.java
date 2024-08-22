@@ -28,4 +28,8 @@ public class DataElementCollectOrgVO {
      * 行政区划
      */
     private String regionName;
+    /**
+     * 行政区划编码
+     */
+    private String regionCode;
 }

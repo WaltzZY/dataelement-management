@@ -197,18 +197,19 @@
         POSITION(#{serviceInterfaceDocumentDTO.keyWords} IN interface_name) > 0
       </if>
     </where>
+    ORDER BY create_date DESC
   </select>
 
   <select id="getDetail" resultType="com.inspur.dsp.direct.entity.vo.ServiceInterfaceDocumentDetailVO">
     SELECT
-    id,
     interface_name AS interfaceName,
     interface_title AS interfaceTitle,
-    interface_title AS interfaceAddress,
+    interface_address AS interfaceAddress,
     interface_status AS interfaceStatus,
     interface_explanation AS interfaceExplanation,
     create_date AS createDate,
-    modify_date AS modifyDate
+    modify_date AS modifyDate,
+    interface_res_id AS interfaceResId
     FROM
     service_interface_base_info
     WHERE
