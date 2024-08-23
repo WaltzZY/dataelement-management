@@ -10,6 +10,7 @@
     <result column="interface_address" jdbcType="VARCHAR" property="interfaceAddress" />
     <result column="interface_status" jdbcType="VARCHAR" property="interfaceStatus" />
     <result column="interface_explanation" jdbcType="LONGVARCHAR" property="interfaceExplanation" />
+    <result column="interface_desc" jdbcType="VARCHAR" property="interfaceDesc" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
     <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
     <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
@@ -18,7 +19,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, interface_name, interface_title, interface_address, interface_status, interface_explanation, 
+    id, interface_name, interface_title, interface_address, interface_status, interface_explanation, interface_desc,
     create_date, create_user_id, modify_date, modify_user_id, interface_res_id
   </sql>
   <update id="updateBatch" parameterType="java.util.List">
@@ -48,6 +49,11 @@
       <trim prefix="interface_explanation = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
           when id = #{item.id,jdbcType=VARCHAR} then #{item.interfaceExplanation,jdbcType=LONGVARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="interface_desc = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=VARCHAR} then #{item.interfaceDesc,jdbcType=VARCHAR}
         </foreach>
       </trim>
       <trim prefix="create_date = case" suffix="end,">
@@ -120,6 +126,13 @@
           </if>
         </foreach>
       </trim>
+      <trim prefix="interface_desc = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.interfaceDesc != null">
+            when id = #{item.id,jdbcType=VARCHAR} then #{item.interfaceDesc,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
       <trim prefix="create_date = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
           <if test="item.createDate != null">
@@ -164,13 +177,13 @@
   <insert id="batchInsert" parameterType="map">
     <!--@mbg.generated-->
     insert into service_interface_base_info
-    (id, interface_name, interface_title, interface_address, interface_status, interface_explanation, 
+    (id, interface_name, interface_title, interface_address, interface_status, interface_explanation, interface_desc,
       create_date, create_user_id, modify_date, modify_user_id, interface_res_id)
     values
     <foreach collection="list" item="item" separator=",">
       (#{item.id,jdbcType=VARCHAR}, #{item.interfaceName,jdbcType=VARCHAR}, #{item.interfaceTitle,jdbcType=VARCHAR}, 
         #{item.interfaceAddress,jdbcType=VARCHAR}, #{item.interfaceStatus,jdbcType=VARCHAR}, 
-        #{item.interfaceExplanation,jdbcType=LONGVARCHAR}, #{item.createDate,jdbcType=TIMESTAMP}, 
+        #{item.interfaceExplanation,jdbcType=LONGVARCHAR}, #{item.interfaceDesc,jdbcType=VARCHAR}, #{item.createDate,jdbcType=TIMESTAMP},
         #{item.createUserId,jdbcType=VARCHAR}, #{item.modifyDate,jdbcType=TIMESTAMP}, #{item.modifyUserId,jdbcType=VARCHAR}, 
         #{item.interfaceResId,jdbcType=VARCHAR})
     </foreach>
@@ -188,13 +201,14 @@
     id,
     interface_name AS interfaceName,
     interface_title AS interfaceTitle,
-    interface_title AS interfaceAddress,
+    interface_desc AS interfaceDesc,
+    interface_address AS interfaceAddress,
     interface_status AS interfaceStatus
     FROM
     service_interface_base_info
     <where>
       <if test="serviceInterfaceDocumentDTO.keyWords != null and serviceInterfaceDocumentDTO.keyWords != ''">
-        POSITION(#{serviceInterfaceDocumentDTO.keyWords} IN interface_name) > 0
+        (POSITION(#{serviceInterfaceDocumentDTO.keyWords} IN interface_title) > 0 OR POSITION(#{serviceInterfaceDocumentDTO.keyWords} IN interface_desc) > 0)
       </if>
     </where>
     ORDER BY create_date DESC
@@ -204,9 +218,11 @@
     SELECT
     interface_name AS interfaceName,
     interface_title AS interfaceTitle,
+    interface_desc AS interfaceDesc,
     interface_address AS interfaceAddress,
     interface_status AS interfaceStatus,
     interface_explanation AS interfaceExplanation,
+    interface_status AS interfaceStatus,
     create_date AS createDate,
     modify_date AS modifyDate,
     interface_res_id AS interfaceResId

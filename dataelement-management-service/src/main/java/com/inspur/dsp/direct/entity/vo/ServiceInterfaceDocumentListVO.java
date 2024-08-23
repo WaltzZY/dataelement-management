@@ -21,6 +21,10 @@ public class ServiceInterfaceDocumentListVO {
      */
     private String interfaceTitle;
     /**
+     * 接口描述
+     */
+    private String interfaceDesc;
+    /**
      * 接口地址
      */
     private String interfaceAddress;
