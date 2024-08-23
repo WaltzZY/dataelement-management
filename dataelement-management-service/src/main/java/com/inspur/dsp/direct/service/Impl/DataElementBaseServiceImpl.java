@@ -67,6 +67,9 @@ public class DataElementBaseServiceImpl extends ServiceImpl<DataElementBaseDao, 
         Page<GetDetailedListVO> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         Page<GetDetailedListVO> detailedList = dataElementBaseDao.getDetailedList(page, dto);
         List<GetDetailedListVO> records = detailedList.getRecords();
+        if (CollectionUtils.isEmpty(records)) {
+            return detailedList;
+        }
         List<String> ids = records.stream().map(GetDetailedListVO::getDataElementId).collect(Collectors.toList());
         // 查询数据元id和数据元分类code
         List<DataElementCategoryInfoBO> categoryList = belongCategoryDao.selectDataElementIdAndCategoryNameByDataElementIdIn(ids);
