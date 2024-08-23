@@ -66,6 +66,13 @@ public class ServiceInterfaceBaseInfo implements Serializable {
     private String interfaceExplanation;
 
     /**
+     * 接口描述
+     */
+    @TableField(value = "interface_desc")
+    @Size(max = 300,message = "接口描述最大长度要小于 300")
+    private String interfaceDesc;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_date", fill = FieldFill.INSERT)
