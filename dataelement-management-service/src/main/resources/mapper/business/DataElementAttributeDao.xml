@@ -143,7 +143,7 @@
     </foreach>
   </delete>
 
-  <select id="getDataElementAttributeByDataElementId" resultType="com.inspur.dsp.direct.entity.vo.ObjectVocabularyVO">
+  <select id="getDataElementAttributeByDataElementId" resultType="com.inspur.dsp.direct.entity.vo.DataElementAttributeVO">
     SELECT
       dea.data_element_attribute_id as attributeId,
       dea.data_element_attribute_value as dataElementAttributeValue,
