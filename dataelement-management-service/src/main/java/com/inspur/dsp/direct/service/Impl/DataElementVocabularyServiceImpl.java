@@ -2,7 +2,9 @@ package com.inspur.dsp.direct.service.Impl;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.inspur.dsp.direct.dao.business.DataElementBaseDao;
 import com.inspur.dsp.direct.dao.business.DataElementVocabularyDao;
+import com.inspur.dsp.direct.dbentity.business.DataElementBase;
 import com.inspur.dsp.direct.dbentity.business.DataElementVocabulary;
 import com.inspur.dsp.direct.entity.vo.ObjectVocabularyVO;
 import com.inspur.dsp.direct.entity.vo.SubjectVocabularyVO;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class DataElementVocabularyServiceImpl extends ServiceImpl<DataElementVocabularyDao, DataElementVocabulary> implements DataElementVocabularyService {
     @Resource
     private DataElementVocabularyDao dataElementVocabularyDao;
+    @Resource
+    private DataElementBaseDao dataElementBaseDao;
 
     /**
      * 查询数据元关联词汇数据
@@ -31,6 +35,8 @@ public class DataElementVocabularyServiceImpl extends ServiceImpl<DataElementVoc
     @Override
     public VocabularyVO getVocabularylist(String dataElementId){
         VocabularyVO vocabularyVO = new VocabularyVO();
+        DataElementBase dataElementBase = dataElementBaseDao.selectById(dataElementId);
+        vocabularyVO.setDataElementName(dataElementBase.getDataElementName());
         List<SubjectVocabularyVO> subjectVocabularys = dataElementVocabularyDao.getSubjectVocabularyByDataElementId(dataElementId);
         vocabularyVO.setVocabularyList(subjectVocabularys);
         if (CollectionUtils.isNotEmpty(subjectVocabularys)){
