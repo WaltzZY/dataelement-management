@@ -11,9 +11,9 @@ spring:
     name: DSP-ENTERPRISE
     admin: true
     # rc文件服务内网地址
-    inner_rcservice: http://10.110.26.81:80/rcservice
+    inner_rcservice: http://10.110.26.178:8443/rcservice
     # rc文件服务外网地址
-    outer_rcservice: http://10.110.26.81:80/rcservice
+    outer_rcservice: http://10.110.26.178:8443/rcservice
     # 一些登录配置
     login: /login
     login.exclude.path: /,/index,/login,/logout,/error,/restapi/**,/direct/manage/**,/captcha,/getMenuData,/captcha,/loginStatus
@@ -23,7 +23,7 @@ spring:
     rootContext: http://localhost:4200/dsp-vatalog/#
     outRootContext: http://localhost:4200/dsp-vatalog/#
     # 单点登录地址
-    ucenter: http://10.110.26.81/ucenter/
+    ucenter: http://10.110.26.178:8443/ucenter/
     sso:
       code: ''
     version: 1.0
@@ -40,7 +40,7 @@ spring:
     top-region-code: "000000000000"
     root-organ-code: "200427114503"
     root-organ-name: "中华人民共和国"
-    url: http://10.110.26.81/bsp
+    url: http://10.110.26.178:8443/bsp
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -58,8 +58,8 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
   redis:
-    host: 10.110.26.90
-    password: ENC(Du9ECPUmoOcfjiMiKxvHi9jDMmIpzzoj)
+    host: 10.110.26.187
+    password: GuoJia2024PT?!
     port: 16379
   web:
     locale: zh_CN
@@ -73,7 +73,7 @@ dubbo:
     payload: 104857600
     port: 20891
   registry:
-    address: 10.110.26.90:2186
+    address: 10.110.26.187:20001
     protocol: zookeeper
     timeout: 200000
   scan:
@@ -98,5 +98,4 @@ jasypt:
     password: DataServicePlatform
 svc:
   url:
-    catalog: http://10.110.26.81:80/catalog
-    resource: http://10.110.26.81:80/resource
+    catalog: http://10.110.26.178:8443/catalog
