@@ -6,7 +6,9 @@ import com.inspur.dsp.common.utils.CollectionUtils;
 import com.inspur.dsp.direct.common.HttpClient;
 import com.inspur.dsp.direct.constant.Constants;
 import com.inspur.dsp.direct.httpService.BspService;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOragePageReq;
 import com.inspur.dsp.direct.httpService.entity.bsp.BspOrganInfoBO;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOrganPageResp;
 import com.inspur.dsp.direct.httpService.entity.bsp.DictInfoBO;
 import com.inspur.dsp.direct.httpService.entity.bsp.DictInfoVO;
 import com.inspur.dsp.direct.httpService.entity.bsp.OrganInfo;
@@ -263,6 +265,7 @@ public class BspServiceImpl implements BspService {
 
     /**
      * 获取国家部委
+     *
      * @return
      */
     public OrganTreeBO getOrganAll() {
@@ -309,5 +312,24 @@ public class BspServiceImpl implements BspService {
             log.error("BSPService method getOrganTree error: ", e);
             return new OrganTreeBO();
         }
+    }
+
+    /**
+     * 组织接口--获取组织机构列表--分页
+     *
+     * @param bspOragePageReq
+     * @return
+     */
+    @Override
+    public BspOrganPageResp getOrganPage(BspOragePageReq bspOragePageReq) {
+        String url = bspUrl + "/restapi/getOrganList?appCode=&regionCode="
+                + bspOragePageReq.getRegionCode() + "&page="
+                + bspOragePageReq.getPage() + "&size="
+                + bspOragePageReq.getSize() + "&$dataPower="
+                + bspOragePageReq.getDataPower()
+                + "&name=" + bspOragePageReq.getName();
+        log.info("getOrganPage url: " + url);
+        JSONObject jsonObject = HttpClient.httpGetMethodHandleHtml(url);
+        return jsonObject.toJavaObject(BspOrganPageResp.class);
     }
 }

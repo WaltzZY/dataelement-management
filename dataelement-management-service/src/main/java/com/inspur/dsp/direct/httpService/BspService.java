@@ -1,7 +1,9 @@
 package com.inspur.dsp.direct.httpService;
 
 import com.alibaba.fastjson.JSONObject;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOragePageReq;
 import com.inspur.dsp.direct.httpService.entity.bsp.BspOrganInfoBO;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOrganPageResp;
 import com.inspur.dsp.direct.httpService.entity.bsp.DictInfoVO;
 import com.inspur.dsp.direct.httpService.entity.bsp.OrganTreeBO;
 
@@ -118,5 +120,10 @@ public interface BspService {
      **/
     OrganTreeBO getOrganTree(String regionCode);
 
-
+    /**
+     * 组织接口--获取组织机构列表--分页
+     * @param bspOragePageReq
+     * @return
+     */
+    BspOrganPageResp getOrganPage(BspOragePageReq bspOragePageReq);
 }

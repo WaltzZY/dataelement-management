@@ -11,9 +11,9 @@ public class GovDeptDTO {
     /**
      * 页码
      */
-    private String pageNum;
+    private Integer pageNum;
     /**
      * 每页条数
      */
-    private String pageSize;
+    private Integer pageSize;
 }

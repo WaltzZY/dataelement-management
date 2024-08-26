@@ -19,6 +19,9 @@ import com.inspur.dsp.direct.entity.vo.RegionAndOrgan;
 import com.inspur.dsp.direct.entity.vo.RegionProvinceVO;
 import com.inspur.dsp.direct.enums.DataElementStatusEnum;
 import com.inspur.dsp.direct.httpService.BspService;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOragePageReq;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOrganPageColumnsResp;
+import com.inspur.dsp.direct.httpService.entity.bsp.BspOrganPageResp;
 import com.inspur.dsp.direct.httpService.entity.bsp.OrganInfo;
 import com.inspur.dsp.direct.httpService.entity.bsp.OrganTreeBO;
 import com.inspur.dsp.direct.service.DataElementBaseService;
@@ -191,6 +194,23 @@ public class DataElementBaseServiceImpl extends ServiceImpl<DataElementBaseDao, 
      */
     @Override
     public Page<GovDeptVO> getGovDept(GovDeptDTO dto) {
-        return null;
+        BspOragePageReq bspOragePageReq = new BspOragePageReq();
+        bspOragePageReq.setPage(dto.getPageNum());
+        bspOragePageReq.setSize(dto.getPageSize());
+        bspOragePageReq.setName(dto.getName());
+        Page<GovDeptVO> govDeptVOPage = new Page<>();
+        govDeptVOPage.setSize(dto.getPageSize());
+        govDeptVOPage.setCurrent(dto.getPageNum());
+        BspOrganPageResp organPage = bspService.getOrganPage(bspOragePageReq);
+        if (Objects.nonNull(organPage)) {
+            govDeptVOPage.setTotal(organPage.getTotal());
+            List<BspOrganPageColumnsResp> array = organPage.getArray();
+            if (!CollectionUtils.isEmpty(array)) {
+                govDeptVOPage.setRecords(array.stream().filter(Objects::nonNull).map(
+                        l -> BspOrganPageColumnsResp.toGovDeptVO(l.getColumns())
+                ).collect(Collectors.toList()));
+            }
+        }
+        return govDeptVOPage;
     }
 }

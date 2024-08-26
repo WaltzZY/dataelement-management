@@ -56,6 +56,27 @@ public class HttpClient {
         return exchange.getBody();
     }
 
+    /**
+     * 处理响应头为text/html,实际响应数据为json的数据
+     *
+     * @param getUrl
+     * @return
+     */
+    public static JSONObject httpGetMethodHandleHtml(String getUrl) {
+        RestTemplate restTemplate = new RestTemplate();
+        // 增加自定义解析器
+        restTemplate.getMessageConverters().add(new BspMappingJackson2HttpMessageConverter());
+        getUrl = getUrl.replaceAll(" ", "%20");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Charset", "UTF-8");
+        headers.set("Connection", "Keep-Alive");
+        headers.set("accept", "*/*");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<JSONObject> exchange = restTemplate.exchange(getUrl, HttpMethod.GET, entity, JSONObject.class);
+        return exchange.getBody();
+    }
+
     public static FileData httpGetFileMethod(String fileUrl) {
         RestTemplate restTemplate = new RestTemplate();
         // 你可以根据需要调整headers，比如设置认证信息、接受类型等
@@ -79,6 +100,7 @@ public class HttpClient {
 
     /**
      * 上传文件
+     *
      * @param uploadUrl
      * @param data
      * @param file
@@ -119,6 +141,7 @@ public class HttpClient {
 
     /**
      * 获取文件流
+     *
      * @param fileUrl
      * @return
      * @throws IOException
