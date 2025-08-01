@@ -2,7 +2,7 @@ package com.inspur.dsp.direct.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import dm.jdbc.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -79,7 +79,7 @@ public class CacheUtils {
      */
     public static Integer getInt(String key){
         String value = stringRedisTemplate.boundValueOps(key).get();
-        if(StringUtil.isNotEmpty(value)){
+        if(StringUtils.isNotEmpty(value)){
             return Integer.valueOf(value);
         }
         return null;
@@ -236,7 +236,7 @@ public class CacheUtils {
      */
     public static double getDouble(String key) {
         String value = stringRedisTemplate.boundValueOps(key).get();
-        if(StringUtil.isNotEmpty(value)){
+        if(StringUtils.isNotEmpty(value)){
             return Double.valueOf(value);
         }
         return 0d;

@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.inspur.dsp.enterprise</groupId>
+        <groupId>com.inspur.dsp.dataelement</groupId>
         <artifactId>dataelement-management</artifactId>
         <version>1.0.0</version>
     </parent>
     <artifactId>dataelement-management-common</artifactId>
-    <name>dsp-enterprise-common</name>
+    <name>dsp-dataelement-common</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,24 +37,8 @@
     </profiles>
     <dependencies>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc7</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.dm</groupId>
-            <artifactId>dm7jdbc18</artifactId>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>

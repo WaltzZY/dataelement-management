@@ -33,23 +33,9 @@ public class Constants {
      */
     public static final String DIC_REPORTTYPE = "dic_reporttype";
     /**
-     * 数据类型
+     *  数据类型
      */
     public static final String DIC_DATATYPE = "dic_datatype";
-    /**
-     * DSP会话token
-     */
-    public static final String DSP_SESSION_TOKEN = "_Dsp_Session_Token_";
-    /**
-     * 默认账户
-     */
-    public static final String DEFAULT_USER_ACCOUNT = "system";
-    /**
-     * 空字符串
-     */
-    public static final String EMPTY_STRING = "";
-    /**
-     * 逗号分隔符
-     */
-    public static final String GNU_SED = ",";
+
+
 }

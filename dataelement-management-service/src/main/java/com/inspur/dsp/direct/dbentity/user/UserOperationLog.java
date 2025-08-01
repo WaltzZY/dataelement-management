@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.validation.constraints.NotBlank;
@@ -23,6 +24,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @TableName(value = "user_operation_log")
 public class UserOperationLog implements Serializable {
+    private static final long serialVersionUID = 1L;
     /**
      * 日志唯一标识
      */
@@ -112,32 +114,4 @@ public class UserOperationLog implements Serializable {
     @TableField(value = "create_time")
     @NotNull(message = "日期生成时间不能为null")
     private Date createTime;
-
-    /**
-     * 创建时间
-     */
-    @TableField(value = "create_date")
-    private Date createDate;
-
-    /**
-     * 创建人账号
-     */
-    @TableField(value = "createuse_rid")
-    @Size(max = 30, message = "创建人账号最大长度要小于 30")
-    private String createuseRid;
-
-    /**
-     * 修改时间
-     */
-    @TableField(value = "modify_date")
-    private Date modifyDate;
-
-    /**
-     * 修改人账号
-     */
-    @TableField(value = "modify_user_id")
-    @Size(max = 30, message = "修改人账号最大长度要小于 30")
-    private String modifyUserId;
-
-    private static final long serialVersionUID = 1L;
 }

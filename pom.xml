@@ -9,7 +9,7 @@
         <version>2.6.7</version>
     </parent>
 
-    <groupId>com.inspur.dsp.enterprise</groupId>
+    <groupId>com.inspur.dsp.dataelement</groupId>
     <artifactId>dataelement-management</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
@@ -24,13 +24,11 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dsp.common.version>v3.2.2-upgrade-springframework</dsp.common.version>
+        <dsp.common.version>v3.2.4-upgrade-springframework</dsp.common.version>
         <dubbo.version>2.7.18</dubbo.version>
         <easyexcel.version>4.0.1</easyexcel.version>
         <commons-io.version>2.15.0</commons-io.version>
         <cloud-dependencies.version>2021.0.2</cloud-dependencies.version>
-        <objec7.version>12.1.0.2</objec7.version>
-        <dm7jdbc18.version>18</dm7jdbc18.version>
         <jackson-mapper-asl.version>1.9.13</jackson-mapper-asl.version>
         <json-lib.version>2.4</json-lib.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
@@ -46,26 +44,13 @@
         <curator-framework.version>4.2.0</curator-framework.version>
         <jasypt.version>2.1.2</jasypt.version>
         <ifxdriver.version>1.0.0</ifxdriver.version>
-        <xxl-job-core.version>2.1.0</xxl-job-core.version>
-        <xxl-registry.version>1.0.2</xxl-registry.version>
-        <xxl-rpc-core.version>1.4.1</xxl-rpc-core.version>
         <ueditor.version>1.4.3.3</ueditor.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <httpclient.version>4.5.13</httpclient.version>
+        <!--?<dsp.direct.version>1.0.0</dsp.direct.version>-->
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpmime</artifactId>
-                <version>${httpclient.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
@@ -80,21 +65,6 @@
                 <groupId>com.gitee.qdbp.thirdparty</groupId>
                 <artifactId>ueditor</artifactId>
                 <version>${ueditor.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.xuxueli</groupId>
-                <artifactId>xxl-job-core</artifactId>
-                <version>${xxl-job-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.xuxueli</groupId>
-                <artifactId>xxl-registry-client</artifactId>
-                <version>${xxl-registry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.xuxueli</groupId>
-                <artifactId>xxl-rpc-core</artifactId>
-                <version>${xxl-rpc-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.gbase</groupId>
@@ -132,16 +102,6 @@
                 <version>${cloud-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle</groupId>
-                <artifactId>ojdbc7</artifactId>
-                <version>${objec7.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.dm</groupId>
-                <artifactId>dm7jdbc18</artifactId>
-                <version>${dm7jdbc18.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>

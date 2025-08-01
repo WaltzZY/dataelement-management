@@ -1,14 +1,14 @@
 server:
-  port: 10003
+  port: 10216
   servlet:
-    context-path: /dataelement
+    context-path: /baseDataelementManage
   session-timeout: 7200
   session:
     tracking-modes: cookie
 spring:
   application:
-    id: DSP-ENTERPRISE
-    name: DSP-ENTERPRISE
+    id: DSP-BASEDATAELEMENTMANAGE
+    name: DSP-BASEDATAELEMENTMANAGE
     admin: true
     # rc文件服务内网地址
     inner_rcservice: http://10.110.26.178:8443/rcservice
@@ -37,9 +37,7 @@ spring:
   innerIp:
     start: 127.
   bsp:
-    top-region-code: "000000000000"
-    root-organ-code: "200427114503"
-    root-organ-name: "中华人民共和国"
+    root-organ-code: 200427114503
     url: http://10.110.26.178:8443/bsp
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
@@ -65,13 +63,13 @@ spring:
     locale: zh_CN
 dubbo:
   application:
-    name: DSP-ENTERPRISE
+    name: DSP-BASEDATAELEMENTMANAGE
   config-center:
     timeout: 10000
   protocol:
     name: dubbo
     payload: 104857600
-    port: 20891
+    port: 20001
   registry:
     address: 10.110.26.187:20001
     protocol: zookeeper
@@ -91,11 +89,3 @@ mybatis-plus:
   type-aliases-package: com.inspur.dsp.*.dbentity
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-# 检测时候注掉
-jasypt:
-  encryptor:
-    password: DataServicePlatform
-svc:
-  url:
-    catalog: http://10.110.26.178:8443/catalog

@@ -49,7 +49,7 @@ public class AESUtil {
             // 率较低，并且在和 SSL 一起使用时会造成严重风险 [1]。请改用 CCM
             // (Counter with CBC-MAC) 模式，或者如果更注重性能，则使用 GCM
             //（Galois/Counter Mode）模式（如可用）。
-            Cipher cipher = Cipher.getInstance("AES");
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             byte[] b = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
             return Base64.encodeBase64String(b);
@@ -96,7 +96,7 @@ public class AESUtil {
             // 率较低，并且在和 SSL 一起使用时会造成严重风险 [1]。请改用 CCM
             // (Counter with CBC-MAC) 模式，或者如果更注重性能，则使用 GCM
             //（Galois/Counter Mode）模式（如可用）。
-            Cipher cipher = Cipher.getInstance("AES");
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return new String(cipher.doFinal(Base64.decodeBase64(miwen)), StandardCharsets.UTF_8);
         } catch (NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException |

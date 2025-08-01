@@ -58,7 +58,7 @@ public class AESEncrypter {
 
     public String encrypt(String msg) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         try {
-            Cipher ecipher = Cipher.getInstance("AES");
+            Cipher ecipher = Cipher.getInstance("AES/GCM/NoPadding");
             ecipher.init(Cipher.ENCRYPT_MODE, aesKey);
             return Hex.encodeHexString(ecipher.doFinal(msg.getBytes()));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
@@ -73,7 +73,7 @@ public class AESEncrypter {
 
     public byte[] decrypt(char[] msgCharArray) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DecoderException {
         try {
-            Cipher dcipher = Cipher.getInstance("AES");
+            Cipher dcipher = Cipher.getInstance("AES/GCM/NoPadding");
             dcipher.init(Cipher.ENCRYPT_MODE, aesKey);
             return dcipher.doFinal(Hex.decodeHex(msgCharArray));
         } catch (NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |

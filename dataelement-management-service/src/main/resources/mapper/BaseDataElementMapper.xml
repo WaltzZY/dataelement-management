@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.BaseDataElementMapper">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.BaseDataElement">
+    <!--@mbg.generated-->
+    <!--@Table base_data_element-->
+    <id column="dataid" jdbcType="VARCHAR" property="dataid" />
+    <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="definition" jdbcType="LONGVARCHAR" property="definition" />
+    <result column="datatype" jdbcType="VARCHAR" property="datatype" />
+    <result column="data_format" jdbcType="VARCHAR" property="dataFormat" />
+    <result column="value_domain" jdbcType="LONGVARCHAR" property="valueDomain" />
+    <result column="source_unit_code" jdbcType="VARCHAR" property="sourceUnitCode" />
+    <result column="source_unit_name" jdbcType="VARCHAR" property="sourceUnitName" />
+    <result column="publish_date" jdbcType="TIMESTAMP" property="publishDate" />
+    <result column="remarks" jdbcType="LONGVARCHAR" property="remarks" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
+    <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate" />
+    <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain, 
+    source_unit_code, source_unit_name, publish_date, remarks, create_date, create_account, 
+    last_modify_date, last_modify_account
+  </sql>
+</mapper>
