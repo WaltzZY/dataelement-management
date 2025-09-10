@@ -2,7 +2,7 @@ package com.inspur.dsp.direct.console.controller.directManage;
 
 import com.alibaba.fastjson.JSONObject;
 import com.inspur.dsp.common.web.controller.BaseController;
-import com.inspur.dsp.direct.service.httpService.BSPService;
+import com.inspur.dsp.direct.httpService.BSPService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

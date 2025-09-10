@@ -12,7 +12,7 @@ import com.inspur.dsp.direct.httpentity.vo.GetOrganByNameLikeVo;
 import com.inspur.dsp.direct.httpentity.vo.OrganInfoVo;
 import com.inspur.dsp.direct.httpentity.vo.RegionOrganTreeVo;
 import com.inspur.dsp.direct.service.CommonService;
-import com.inspur.dsp.direct.service.httpService.BSPService;
+import com.inspur.dsp.direct.httpService.BSPService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
