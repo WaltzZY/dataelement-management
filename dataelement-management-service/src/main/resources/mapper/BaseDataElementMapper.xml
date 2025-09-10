@@ -15,6 +15,7 @@
     <result column="source_unit_code" jdbcType="VARCHAR" property="sourceUnitCode" />
     <result column="source_unit_name" jdbcType="VARCHAR" property="sourceUnitName" />
     <result column="publish_date" jdbcType="TIMESTAMP" property="publishDate" />
+    <result column="send_date" jdbcType="TIMESTAMP" property="sendDate" />
     <result column="remarks" jdbcType="LONGVARCHAR" property="remarks" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
     <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
@@ -23,8 +24,113 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain, 
-    source_unit_code, source_unit_name, publish_date, remarks, create_date, create_account, 
-    last_modify_date, last_modify_account
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
+    source_unit_code, source_unit_name, publish_date, send_date, remarks, create_date,
+    create_account, last_modify_date, last_modify_account
   </sql>
+
+  <resultMap id="DataElementPageInfoVoResultMap" type="com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo">
+      <result column="dataid" property="dataid"/>
+      <result column="name" property="name"/>
+      <result column="definition" property="definition"/>
+      <result column="sendDate" property="sendDate"/>
+      <result column="collectDeptName" property="collectDeptName"/>
+      <result column="publish_date" property="publishDate"/>
+      <result column="sourceUnitCode" property="sourceUnitCode"/>
+      <result column="sourceUnitName" property="sourceUnitName"/>
+      <result column="status" property="status"/>
+  </resultMap>
+  <select id="getDataElementPage" resultMap="DataElementPageInfoVoResultMap">
+      select
+      bde.dataid as dataid,
+      bde.name as name,
+      bde.definition as definition,
+      bde.send_date as sendDate,
+      bde.publish_date as publish_date,
+      dde.source_unit_name as collectDeptName,
+      bde.source_unit_code as sourceUnitCode,
+      bde.source_unit_name as sourceUnitName,
+      bde.status as status
+      from base_data_element bde
+               left join domain_data_element dde on bde.dataid = dde.base_dataelement_dataid
+      <where>
+          <if test="dto.deptCodes != null and dto.deptCodes.size() != 0">
+              dde.source_unit_code in
+              <foreach close=")" collection="dto.deptCodes" item="item" open="(" separator=",">
+                  #{item}
+              </foreach>
+          </if>
+          <if test="dto.statusList != null and dto.statusList.size() != 0">
+              and bde.status in
+              <foreach close=")" collection="dto.statusList" item="item" open="(" separator=",">
+                  #{item}
+              </foreach>
+          </if>
+          <if test="dto.search != null and dto.search != ''">
+              and (bde.name like #{dto.search} or bde.definition like #{dto.search}
+              or bde.source_unit_name like #{dto.search} or dde.source_unit_name like #{dto.search}
+              )
+          </if>
+          <if test="dto.initiationTimeStart != null and dto.initiationTimeEnd != null">
+              and bde.send_date between #{dto.initiationTimeStart} and #{dto.initiationTimeEnd}
+          </if>
+          <if test="dto.sourceTimeStart != null and dto.sourceTimeEnd != null">
+              and bde.publish_date between #{dto.sourceTimeStart} and #{dto.sourceTimeEnd}
+          </if>
+      </where>
+      <if test="sortSql != null and sortSql != ''">
+          order by ${sortSql}
+      </if>
+  </select>
+
+    <resultMap id="GetCollectDataVoResultMap" type="com.inspur.dsp.direct.entity.vo.GetCollectDataVo">
+        <result column="dataElementId" property="dataElementId"/>
+        <result column="dataid" property="dataid"/>
+        <result column="datatype" property="datatype"/>
+        <result column="definition" property="definition"/>
+        <result column="handleTime" property="handleTime"/>
+        <result column="name" property="name"/>
+        <result column="receiveTime" property="receiveTime"/>
+        <result column="status" property="status"/>
+    </resultMap>
+    <select id="getCollectData" resultMap="GetCollectDataVoResultMap">
+        select bde.data_element_id as dataElementId,
+               bde.dataid          as dataid,
+               bde.datatype        as datatype,
+               bde.definition      as definition,
+               bde.send_date       as receiveTime,
+               bde.name            as name,
+               bde.status          as status,
+               ct.processing_date  as handleTime
+        from base_data_element bde
+                 left join (select dataid, source_unit_code, source_unit_name, base_dataelement_dataid
+                            from domain_data_element) dde on bde.dataid = dde.base_dataelement_dataid
+                 left join confirmation_task ct on bde.dataid = ct.base_dataelement_dataid
+        where dde.source_unit_code = #{organCode,jdbcType=VARCHAR}
+            <if test="dto.auditStatus == 'pending'">
+                and bde.status = 'confirming'
+            </if>
+            <if test="dto.auditStatus == 'processed'">
+                and bde.status in ('confirmed', 'pending_approval', 'rejected', 'negotiating', 'confirmed')
+            </if>
+            <if test="dto.receiveTimeStart != null and dto.receiveTimeEnd != null">
+                and bde.send_date between #{dto.receiveTimeStart} and #{dto.receiveTimeEnd}
+            </if>
+            <if test="dto.handleTimeStart != null and dto.handleTimeEnd != null">
+                and ct.processing_date between #{dto.handleTimeStart} and #{dto.handleTimeEnd}
+            </if>
+            <if test="dto.statusList != null and dto.statusList.size() != 0">
+                and bde.status in
+                <foreach collection="dto.statusList" separator="," item="item" open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="dto.serarch != null and dto.serarch != ''">
+                and (bde.name like concat('%', #{dto.serarch}, '%')
+                or bde.definition like concat('%', #{dto.serarch}, '%'))
+            </if>
+        <if test="sortSql != null and sortSql != ''">
+            order by ${sortSql}
+        </if>
+    </select>
 </mapper>

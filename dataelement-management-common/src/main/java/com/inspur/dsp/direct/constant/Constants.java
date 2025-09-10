@@ -5,6 +5,14 @@ package com.inspur.dsp.direct.constant;
  */
 public class Constants {
     /**
+     * 逗号
+     */
+    public static final String COMMA = ",";
+    /**
+     * 空字符串
+     */
+    public static final String EMPTY_STRING = "";
+    /**
      * 业务管理人员
      */
     public static final String EF_BUSINESS = "EF-Business";

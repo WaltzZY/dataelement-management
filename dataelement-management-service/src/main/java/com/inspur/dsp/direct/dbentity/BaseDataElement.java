@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
 import java.util.Date;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -20,12 +21,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "base_data_element")
-public class BaseDataElement {
+public class BaseDataElement implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * 数据行唯一标识
      */
     @TableId(value = "dataid", type = IdType.INPUT)
-    @Size(max = 36,message = "数据行唯一标识最大长度要小于 36")
+    @Size(max = 36, message = "数据行唯一标识最大长度要小于 36")
     @NotBlank(message = "数据行唯一标识不能为空")
     private String dataid;
 
@@ -33,21 +36,21 @@ public class BaseDataElement {
      * 数据元编码
      */
     @TableField(value = "data_element_id")
-    @Size(max = 16,message = "数据元编码最大长度要小于 16")
+    @Size(max = 16, message = "数据元编码最大长度要小于 16")
     private String dataElementId;
 
     /**
      * 数据元状态
      */
     @TableField(value = "`status`")
-    @Size(max = 20,message = "数据元状态最大长度要小于 20")
+    @Size(max = 20, message = "数据元状态最大长度要小于 20")
     private String status;
 
     /**
      * 数据元名称
      */
     @TableField(value = "`name`")
-    @Size(max = 50,message = "数据元名称最大长度要小于 50")
+    @Size(max = 50, message = "数据元名称最大长度要小于 50")
     private String name;
 
     /**
@@ -60,14 +63,14 @@ public class BaseDataElement {
      * 数据类型
      */
     @TableField(value = "datatype")
-    @Size(max = 20,message = "数据类型最大长度要小于 20")
+    @Size(max = 20, message = "数据类型最大长度要小于 20")
     private String datatype;
 
     /**
      * 数据格式
      */
     @TableField(value = "data_format")
-    @Size(max = 50,message = "数据格式最大长度要小于 50")
+    @Size(max = 50, message = "数据格式最大长度要小于 50")
     private String dataFormat;
 
     /**
@@ -80,14 +83,14 @@ public class BaseDataElement {
      * 数源单位统一社会信用代码
      */
     @TableField(value = "source_unit_code")
-    @Size(max = 18,message = "数源单位统一社会信用代码最大长度要小于 18")
+    @Size(max = 18, message = "数源单位统一社会信用代码最大长度要小于 18")
     private String sourceUnitCode;
 
     /**
      * 数源单位名称
      */
     @TableField(value = "source_unit_name")
-    @Size(max = 200,message = "数源单位名称最大长度要小于 200")
+    @Size(max = 200, message = "数源单位名称最大长度要小于 200")
     private String sourceUnitName;
 
     /**
@@ -95,6 +98,12 @@ public class BaseDataElement {
      */
     @TableField(value = "publish_date")
     private Date publishDate;
+
+    /**
+     * 发起定源时间
+     */
+    @TableField(value = "send_date")
+    private Date sendDate;
 
     /**
      * 备注
@@ -112,7 +121,7 @@ public class BaseDataElement {
      * 创建人账号
      */
     @TableField(value = "create_account")
-    @Size(max = 30,message = "创建人账号最大长度要小于 30")
+    @Size(max = 30, message = "创建人账号最大长度要小于 30")
     private String createAccount;
 
     /**
@@ -125,6 +134,6 @@ public class BaseDataElement {
      * 最后修改人账号
      */
     @TableField(value = "last_modify_account")
-    @Size(max = 30,message = "最后修改人账号最大长度要小于 30")
+    @Size(max = 30, message = "最后修改人账号最大长度要小于 30")
     private String lastModifyAccount;
 }

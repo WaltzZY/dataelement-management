@@ -1,18 +1,26 @@
 package com.inspur.dsp.direct.service.httpService;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.inspur.dsp.common.utils.CollectionUtils;
 import com.inspur.dsp.direct.common.HttpClient;
 import com.inspur.dsp.direct.entity.bo.BspOraanInfoBO;
+import com.inspur.dsp.direct.httpentity.dto.GetOrganByNameLikeDto;
+import com.inspur.dsp.direct.httpentity.vo.GetOrganByNameLikeVo;
+import com.inspur.dsp.direct.httpentity.vo.OrganInfoVo;
+import com.inspur.dsp.direct.httpentity.vo.RegionOrganTreeVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -233,7 +241,52 @@ public class BSPService {
             log.error("BSPService method getOrganTree error: ", e);
             return new JSONObject();
         }
+    }
 
+    /**
+     * 模糊查询部门数据分页
+     */
+    public GetOrganByNameLikeVo getOrganByNameLike(GetOrganByNameLikeDto dto) {
+        String url = bspUrl + "/restapi/getOrganByNameLike";
+        JSONObject jsonObject = HttpClient.httpPostMethod(url, JSONObject.toJSONString(dto));
+        if (jsonObject != null && jsonObject.getInteger("code") == 200) {
+            return JSON.toJavaObject(jsonObject.getJSONObject("data"), GetOrganByNameLikeVo.class);
+        }
+        log.error("[getOrganByNameLike]接口获取失败");
+        return new GetOrganByNameLikeVo(0L, new ArrayList<>());
+    }
+
+    /**
+     * 查询部门树
+     */
+    public List<RegionOrganTreeVo> getRegionOrganTree(String parentCode) {
+        if (!StringUtils.hasText(parentCode)) {
+            parentCode = "#";
+        }
+        // 调用bsp接口,查询部门树数据
+        String url = bspUrl + "/restapi/getRegionOrganTree?parentCode=" + parentCode;
+        JSONObject jsonObject = HttpClient.httpPostMethod(url,  "");
+        if (jsonObject != null && jsonObject.getInteger("code") == 200) {
+            return JSON.parseArray(jsonObject.getJSONArray("data").toJSONString(), RegionOrganTreeVo.class);
+        }
+        log.error("[getRegionOrganTree]接口获取失败");
+        return new ArrayList<>();
+    }
+
+    /**
+     * 获取组织信息
+     */
+    public OrganInfoVo getOrganInfo(String code) {
+        String url = bspUrl + "/restapi/getOrganByCode?code=";
+        if (StringUtils.hasText(code)) {
+            url += code;
+        }
+        JSONObject jsonObject = HttpClient.httpGetMethod(url);
+        if (Objects.nonNull(jsonObject) && 200 == jsonObject.getInteger("code")) {
+            JSONObject data = jsonObject.getJSONObject("data");
+            return JSON.toJavaObject(data, OrganInfoVo.class);
+        }
+        return null;
     }
 
 }
