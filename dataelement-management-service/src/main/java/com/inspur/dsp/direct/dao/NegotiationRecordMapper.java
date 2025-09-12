@@ -8,11 +8,9 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface NegotiationRecordMapper extends BaseMapper<NegotiationRecord> {
-
     default NegotiationRecord selectFirstByBaseDataelementDataid(String baseDataelementDataid) {
         LambdaQueryWrapper<NegotiationRecord> myQuery = Wrappers.lambdaQuery(NegotiationRecord.class);
         myQuery.eq(NegotiationRecord::getBaseDataelementDataid, baseDataelementDataid);
         return selectOne(myQuery);
     }
-
 }

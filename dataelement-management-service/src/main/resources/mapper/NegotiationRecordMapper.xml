@@ -9,16 +9,10 @@
     <result column="send_date" jdbcType="TIMESTAMP" property="sendDate" />
     <result column="sender_account" jdbcType="VARCHAR" property="senderAccount" />
     <result column="sender_name" jdbcType="VARCHAR" property="senderName" />
-    <result column="negotiation_unit_code" jdbcType="VARCHAR" property="negotiationUnitCode" />
-    <result column="negotiation_unit_name" jdbcType="VARCHAR" property="negotiationUnitName" />
-    <result column="negotiation_result" jdbcType="LONGVARCHAR" property="negotiationResult" />
-    <result column="recorder_account" jdbcType="VARCHAR" property="recorderAccount" />
-    <result column="recorder_name" jdbcType="VARCHAR" property="recorderName" />
-    <result column="result_date" jdbcType="TIMESTAMP" property="resultDate" />
+    <result column="negotiation_content" jdbcType="LONGVARCHAR" property="negotiationContent" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    record_id, base_dataelement_dataid, send_date, sender_account, sender_name, negotiation_unit_code, 
-    negotiation_unit_name, negotiation_result, recorder_account, recorder_name, result_date
+    record_id, base_dataelement_dataid, send_date, sender_account, sender_name, negotiation_content
   </sql>
 </mapper>

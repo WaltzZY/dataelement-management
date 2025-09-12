@@ -8,12 +8,9 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface ConfirmationTaskMapper extends BaseMapper<ConfirmationTask> {
-
     default ConfirmationTask selectFirstByBaseDataelementDataid(String baseDataelementDataid) {
         LambdaQueryWrapper<ConfirmationTask> myQuery = Wrappers.lambdaQuery(ConfirmationTask.class);
         myQuery.eq(ConfirmationTask::getBaseDataelementDataid, baseDataelementDataid);
         return selectOne(myQuery);
     }
-
-
 }

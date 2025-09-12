@@ -16,6 +16,7 @@
     <result column="source_unit_name" jdbcType="VARCHAR" property="sourceUnitName" />
     <result column="publish_date" jdbcType="TIMESTAMP" property="publishDate" />
     <result column="send_date" jdbcType="TIMESTAMP" property="sendDate" />
+    <result column="confirm_date" jdbcType="TIMESTAMP" property="confirmDate" />
     <result column="remarks" jdbcType="LONGVARCHAR" property="remarks" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
     <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
@@ -24,21 +25,21 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
-    source_unit_code, source_unit_name, publish_date, send_date, remarks, create_date,
-    create_account, last_modify_date, last_modify_account
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain, 
+    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, remarks, 
+    create_date, create_account, last_modify_date, last_modify_account
   </sql>
 
   <resultMap id="DataElementPageInfoVoResultMap" type="com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo">
-      <result column="dataid" property="dataid"/>
-      <result column="name" property="name"/>
-      <result column="definition" property="definition"/>
-      <result column="sendDate" property="sendDate"/>
-      <result column="collectDeptName" property="collectDeptName"/>
-      <result column="publish_date" property="publishDate"/>
-      <result column="sourceUnitCode" property="sourceUnitCode"/>
-      <result column="sourceUnitName" property="sourceUnitName"/>
-      <result column="status" property="status"/>
+      <result column="dataid" property="dataid" />
+      <result column="name" property="name" />
+      <result column="definition" property="definition" />
+      <result column="sendDate" property="sendDate" />
+      <result column="collectDeptName" property="collectDeptName" />
+      <result column="publish_date" property="publishDate" />
+      <result column="sourceUnitCode" property="sourceUnitCode" />
+      <result column="sourceUnitName" property="sourceUnitName" />
+      <result column="status" property="status" />
   </resultMap>
   <select id="getDataElementPage" resultMap="DataElementPageInfoVoResultMap">
       select
@@ -84,14 +85,14 @@
   </select>
 
     <resultMap id="GetCollectDataVoResultMap" type="com.inspur.dsp.direct.entity.vo.GetCollectDataVo">
-        <result column="dataElementId" property="dataElementId"/>
-        <result column="dataid" property="dataid"/>
-        <result column="datatype" property="datatype"/>
-        <result column="definition" property="definition"/>
-        <result column="handleTime" property="handleTime"/>
-        <result column="name" property="name"/>
-        <result column="receiveTime" property="receiveTime"/>
-        <result column="status" property="status"/>
+        <result column="dataElementId" property="dataElementId" />
+        <result column="dataid" property="dataid" />
+        <result column="datatype" property="datatype" />
+        <result column="definition" property="definition" />
+        <result column="handleTime" property="handleTime" />
+        <result column="name" property="name" />
+        <result column="receiveTime" property="receiveTime" />
+        <result column="status" property="status" />
     </resultMap>
     <select id="getCollectData" resultMap="GetCollectDataVoResultMap">
         select bde.data_element_id as dataElementId,
@@ -121,7 +122,7 @@
             </if>
             <if test="dto.statusList != null and dto.statusList.size() != 0">
                 and bde.status in
-                <foreach collection="dto.statusList" separator="," item="item" open="(" close=")">
+                <foreach close=")" collection="dto.statusList" item="item" open="(" separator=",">
                     #{item}
                 </foreach>
             </if>

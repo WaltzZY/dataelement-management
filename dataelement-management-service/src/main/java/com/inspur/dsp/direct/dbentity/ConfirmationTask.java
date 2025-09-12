@@ -60,10 +60,10 @@ public class ConfirmationTask implements Serializable {
     private String senderName;
 
     /**
-     * 状态
+     * 状态(待确认、确认、拒绝)
      */
     @TableField(value = "`status`")
-    @Size(max = 20, message = "状态最大长度要小于 20")
+    @Size(max = 20, message = "状态(待确认、确认、拒绝)最大长度要小于 20")
     private String status;
 
     /**
@@ -113,24 +113,4 @@ public class ConfirmationTask implements Serializable {
     @TableField(value = "processor_name")
     @Size(max = 30, message = "处理人姓名最大长度要小于 30")
     private String processorName;
-
-    /**
-     * 核定时间
-     */
-    @TableField(value = "approval_date")
-    private Date approvalDate;
-
-    /**
-     * 核定人账号
-     */
-    @TableField(value = "approval_account")
-    @Size(max = 30, message = "核定人账号最大长度要小于 30")
-    private String approvalAccount;
-
-    /**
-     * 核定人姓名
-     */
-    @TableField(value = "approval_name")
-    @Size(max = 30, message = "核定人姓名最大长度要小于 30")
-    private String approvalName;
 }

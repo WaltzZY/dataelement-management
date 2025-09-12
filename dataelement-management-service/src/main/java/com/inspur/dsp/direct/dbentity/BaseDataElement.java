@@ -106,6 +106,12 @@ public class BaseDataElement implements Serializable {
     private Date sendDate;
 
     /**
+     * 确定数源单位时间
+     */
+    @TableField(value = "confirm_date")
+    private Date confirmDate;
+
+    /**
      * 备注
      */
     @TableField(value = "remarks")

@@ -31,7 +31,7 @@ public class CommonController {
     private final CommonService commonService;
 
     /**
-     *
+     * 001-001-选择采集/协商单位-树形结构返回
      * @param dto
      * @return
      */
@@ -41,13 +41,22 @@ public class CommonController {
         return commonService.getCollectionDeptTree(dto);
     }
 
-
+    /**
+     * 001-001-选择采集/协商单位 - 搜索功能返回
+     * @param dto
+     * @return
+     */
     @PostMapping("/getCollectionDeptSearch")
     @RespAdvice
     public GetDeptSearchVo getCollectionDeptSearch(@RequestBody GetDeptSearchDto dto) {
         return commonService.getCollectionDeptSearch(dto);
     }
 
+    /**
+     * 获取组织架构信息
+     * @param code
+     * @return
+     */
     @GetMapping("/getOrganInfo/{code}")
     @RespAdvice
     public GetOrganInfoVo getOrganInfo(@PathVariable("code") String code) {

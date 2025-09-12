@@ -30,8 +30,8 @@ import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -338,15 +338,7 @@ public class OrganisersServiceImpl implements OrganisersService {
         record.setSendDate(new Date());
         record.setSenderAccount(userInfo.getAccount());
         record.setSenderName(userInfo.getName());
-        record.setNegotiationUnitCode(negotiationUnitCodes.stream()
-                .map(NegotiationObj::getNegotiationUnitCode)
-                .filter(StringUtils::hasText)
-                .collect(Collectors.joining(",")));
-        record.setNegotiationUnitName(negotiationUnitCodes.stream()
-                .map(NegotiationObj::getNegotiationUnitName)
-                .filter(StringUtils::hasText)
-                .collect(Collectors.joining(",")));
-        record.setNegotiationResult(dto.getNegotiateDesc());
+        // TODO 协商业务需要重写
         negotiationTaskMapper.insert(record);
         // 修改数据元状态为协商中
         baseDataElement.setStatus(StatusEnums.NEGOTIATING.getCode());
@@ -372,6 +364,7 @@ public class OrganisersServiceImpl implements OrganisersService {
      * @param dto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void verifiedDataSource(VerifiedDataSourceDto dto) {
         String dataid = dto.getDataid();
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataid);
