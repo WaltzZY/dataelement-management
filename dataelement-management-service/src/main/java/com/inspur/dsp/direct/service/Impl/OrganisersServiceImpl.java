@@ -80,6 +80,7 @@ public class OrganisersServiceImpl implements OrganisersService {
      * @param deIds
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchInitiateSource(List<String> deIds) {
         // 获取当前登录人信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
