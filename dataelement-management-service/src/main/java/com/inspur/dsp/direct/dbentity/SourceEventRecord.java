@@ -33,97 +33,64 @@ public class SourceEventRecord implements Serializable {
     private String recordId;
 
     /**
-     * 基准数据元唯一标识
+     * 数据元的唯一标识
      */
-    @TableField(value = "base_dataelement_dataid")
-    @Size(max = 36, message = "基准数据元唯一标识最大长度要小于 36")
-    private String baseDataelementDataid;
+    @TableField(value = "data_element_id")
+    @Size(max = 36, message = "数据元的唯一标识最大长度要小于 36")
+    private String dataElementId;
 
     /**
-     * 事件类型(发起定源、确认成为数源单位、拒绝成为数源单位、核定数源单位、发起协商、结束协商)
+     * 数据元名称
      */
-    @TableField(value = "event_type")
-    @Size(max = 50, message = "事件类型(发起定源、确认成为数源单位、拒绝成为数源单位、核定数源单位、发起协商、结束协商)最大长度要小于 50")
-    private String eventType;
+    @TableField(value = "data_element_name")
+    @Size(max = 100, message = "数据元名称最大长度要小于 100")
+    private String dataElementName;
 
     /**
-     * 发出单位统一社会信用代码
+     * 定源类型(确认型核定/认领型核定/协商结果录入/手动定源/导入定源)
      */
-    @TableField(value = "send_unit_code")
-    @Size(max = 18, message = "发出单位统一社会信用代码最大长度要小于 18")
-    private String sendUnitCode;
+    @TableField(value = "source_type")
+    @Size(max = 30, message = "定源类型(确认型核定/认领型核定/协商结果录入/手动定源/导入定源)最大长度要小于 30")
+    private String sourceType;
 
     /**
-     * 发出单位名称
+     * 定源时间
      */
-    @TableField(value = "send_unit_name")
-    @Size(max = 200, message = "发出单位名称最大长度要小于 200")
-    private String sendUnitName;
+    @TableField(value = "source_date")
+    private Date sourceDate;
 
     /**
-     * 事件源单位统一社会信用代码
-     */
-    @TableField(value = "event_source_unit_code")
-    @Size(max = 18, message = "事件源单位统一社会信用代码最大长度要小于 18")
-    private String eventSourceUnitCode;
-
-    /**
-     * 事件源单位名称
-     */
-    @TableField(value = "event_source_unit_name")
-    @Size(max = 200, message = "事件源单位名称最大长度要小于 200")
-    private String eventSourceUnitName;
-
-    /**
-     * 事件目标单位统一社会信用代码
-     */
-    @TableField(value = "event_target_unit_code")
-    @Size(max = 18, message = "事件目标单位统一社会信用代码最大长度要小于 18")
-    private String eventTargetUnitCode;
-
-    /**
-     * 事件目标单位名称
-     */
-    @TableField(value = "event_target_unit_name")
-    @Size(max = 200, message = "事件目标单位名称最大长度要小于 200")
-    private String eventTargetUnitName;
-
-    /**
-     * 事件描述
-     */
-    @TableField(value = "event_description")
-    private String eventDescription;
-
-    /**
-     * 事件状态
-     */
-    @TableField(value = "event_status")
-    @Size(max = 20, message = "事件状态最大长度要小于 20")
-    private String eventStatus;
-
-    /**
-     * 事件时间
-     */
-    @TableField(value = "event_time")
-    private Date eventTime;
-
-    /**
-     * 操作人账号
+     * 定源操作人账号
      */
     @TableField(value = "operator_account")
-    @Size(max = 30, message = "操作人账号最大长度要小于 30")
+    @Size(max = 30, message = "定源操作人账号最大长度要小于 30")
     private String operatorAccount;
 
     /**
-     * 操作人姓名
+     * 数源单位统一社会信用代码
      */
-    @TableField(value = "operator_name")
-    @Size(max = 30, message = "操作人姓名最大长度要小于 30")
-    private String operatorName;
+    @TableField(value = "source_unit_code")
+    @Size(max = 30, message = "数源单位统一社会信用代码最大长度要小于 30")
+    private String sourceUnitCode;
 
     /**
-     * 创建日期
+     * 数源单位名称
      */
-    @TableField(value = "create_date")
-    private Date createDate;
+    @TableField(value = "source_unit_name")
+    @Size(max = 200, message = "数源单位名称最大长度要小于 200")
+    private String sourceUnitName;
+
+    /**
+     * 确定数据单位的单位统一社会信用代码
+     */
+    @TableField(value = "send_unit_code")
+    @Size(max = 30, message = "确定数据单位的单位统一社会信用代码最大长度要小于 30")
+    private String sendUnitCode;
+
+    /**
+     * 确定数据单位的单位数源单位名称
+     */
+    @TableField(value = "send_unit_name")
+    @Size(max = 200, message = "确定数据单位的单位数源单位名称最大长度要小于 200")
+    private String sendUnitName;
 }

@@ -5,25 +5,19 @@
     <!--@mbg.generated-->
     <!--@Table source_event_record-->
     <id column="record_id" jdbcType="VARCHAR" property="recordId" />
-    <result column="base_dataelement_dataid" jdbcType="VARCHAR" property="baseDataelementDataid" />
-    <result column="event_type" jdbcType="VARCHAR" property="eventType" />
+    <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId" />
+    <result column="data_element_name" jdbcType="VARCHAR" property="dataElementName" />
+    <result column="source_type" jdbcType="VARCHAR" property="sourceType" />
+    <result column="source_date" jdbcType="TIMESTAMP" property="sourceDate" />
+    <result column="operator_account" jdbcType="VARCHAR" property="operatorAccount" />
+    <result column="source_unit_code" jdbcType="VARCHAR" property="sourceUnitCode" />
+    <result column="source_unit_name" jdbcType="VARCHAR" property="sourceUnitName" />
     <result column="send_unit_code" jdbcType="VARCHAR" property="sendUnitCode" />
     <result column="send_unit_name" jdbcType="VARCHAR" property="sendUnitName" />
-    <result column="event_source_unit_code" jdbcType="VARCHAR" property="eventSourceUnitCode" />
-    <result column="event_source_unit_name" jdbcType="VARCHAR" property="eventSourceUnitName" />
-    <result column="event_target_unit_code" jdbcType="VARCHAR" property="eventTargetUnitCode" />
-    <result column="event_target_unit_name" jdbcType="VARCHAR" property="eventTargetUnitName" />
-    <result column="event_description" jdbcType="LONGVARCHAR" property="eventDescription" />
-    <result column="event_status" jdbcType="VARCHAR" property="eventStatus" />
-    <result column="event_time" jdbcType="TIMESTAMP" property="eventTime" />
-    <result column="operator_account" jdbcType="VARCHAR" property="operatorAccount" />
-    <result column="operator_name" jdbcType="VARCHAR" property="operatorName" />
-    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    record_id, base_dataelement_dataid, event_type, send_unit_code, send_unit_name, event_source_unit_code, 
-    event_source_unit_name, event_target_unit_code, event_target_unit_name, event_description, 
-    event_status, event_time, operator_account, operator_name, create_date
+    record_id, data_element_id, data_element_name, source_type, source_date, operator_account, 
+    source_unit_code, source_unit_name, send_unit_code, send_unit_name
   </sql>
 </mapper>
