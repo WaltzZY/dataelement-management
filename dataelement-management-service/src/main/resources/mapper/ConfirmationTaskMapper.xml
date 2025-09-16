@@ -6,6 +6,9 @@
     <!--@Table confirmation_task-->
     <id column="task_id" jdbcType="VARCHAR" property="taskId" />
     <result column="base_dataelement_dataid" jdbcType="VARCHAR" property="baseDataelementDataid" />
+    <result column="tasktype" jdbcType="VARCHAR" property="tasktype" />
+    <result column="send_unit_code" jdbcType="VARCHAR" property="sendUnitCode" />
+    <result column="send_unit_name" jdbcType="VARCHAR" property="sendUnitName" />
     <result column="send_date" jdbcType="TIMESTAMP" property="sendDate" />
     <result column="sender_account" jdbcType="VARCHAR" property="senderAccount" />
     <result column="sender_name" jdbcType="VARCHAR" property="senderName" />
@@ -20,8 +23,8 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    task_id, base_dataelement_dataid, send_date, sender_account, sender_name, `status`, 
-    processing_unit_code, processing_unit_name, processing_date, processing_result, processing_opinion, 
-    processor_account, processor_name
+    task_id, base_dataelement_dataid, tasktype, send_unit_code, send_unit_name, send_date, 
+    sender_account, sender_name, `status`, processing_unit_code, processing_unit_name, 
+    processing_date, processing_result, processing_opinion, processor_account, processor_name
   </sql>
 </mapper>

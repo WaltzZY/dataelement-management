@@ -40,6 +40,27 @@ public class ConfirmationTask implements Serializable {
     private String baseDataelementDataid;
 
     /**
+     * 任务类型(确认任务/认领任务)
+     */
+    @TableField(value = "tasktype")
+    @Size(max = 20, message = "任务类型(确认任务/认领任务)最大长度要小于 20")
+    private String tasktype;
+
+    /**
+     * 发出单位统一社会信用代码
+     */
+    @TableField(value = "send_unit_code")
+    @Size(max = 18, message = "发出单位统一社会信用代码最大长度要小于 18")
+    private String sendUnitCode;
+
+    /**
+     * 发出单位名称
+     */
+    @TableField(value = "send_unit_name")
+    @Size(max = 200, message = "发出单位名称最大长度要小于 200")
+    private String sendUnitName;
+
+    /**
      * 发出日期
      */
     @TableField(value = "send_date")
@@ -60,10 +81,10 @@ public class ConfirmationTask implements Serializable {
     private String senderName;
 
     /**
-     * 状态(待确认、确认、拒绝)
+     * 确认任务状态(待确认、已确认、已拒绝);认领任务状态(待认领,已认领,不认领)
      */
     @TableField(value = "`status`")
-    @Size(max = 20, message = "状态(待确认、确认、拒绝)最大长度要小于 20")
+    @Size(max = 20, message = "确认任务状态(待确认、已确认、已拒绝);认领任务状态(待认领,已认领,不认领)最大长度要小于 20")
     private String status;
 
     /**
