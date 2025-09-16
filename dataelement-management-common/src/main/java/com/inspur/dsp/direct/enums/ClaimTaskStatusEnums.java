@@ -11,7 +11,7 @@ import com.inspur.dsp.direct.constant.Constants;
 public enum ClaimTaskStatusEnums {
 
     PENDING_CLAIMED("pending_claimed", "待认领"),
-    CLAIMED("claimed", "认领"),
+    CLAIMED("claimed", "已认领"),
     NOT_CLAIMED("not_claimed", "不认领");
 
     private final String code;

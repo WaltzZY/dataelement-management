@@ -12,8 +12,8 @@ import com.inspur.dsp.direct.constant.Constants;
 public enum ConfirmationTaskEnums {
 
     PENDING("pending", "待确认"),
-    CONFIRMED("confirmed", "确认"),
-    REJECTED("rejected", "拒绝");
+    CONFIRMED("confirmed", "已确认"),
+    REJECTED("rejected", "已拒绝");
 
     private final String code;
     private final String desc;
