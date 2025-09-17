@@ -4,14 +4,15 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.util.Date;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 定源事件记录表
@@ -65,6 +66,20 @@ public class SourceEventRecord implements Serializable {
     @TableField(value = "operator_account")
     @Size(max = 30, message = "定源操作人账号最大长度要小于 30")
     private String operatorAccount;
+
+    /**
+     * 定源联系人电话
+     */
+    @TableField(value = "contact_phone")
+    @Size(max = 20, message = "定源联系人电话最大长度要小于 20")
+    private String contactPhone;
+
+    /**
+     * 定源联系人姓名
+     */
+    @TableField(value = "contact_name")
+    @Size(max = 30, message = "定源联系人姓名最大长度要小于 30")
+    private String contactName;
 
     /**
      * 数源单位统一社会信用代码

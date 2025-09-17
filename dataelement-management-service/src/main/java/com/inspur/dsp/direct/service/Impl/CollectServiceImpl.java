@@ -58,6 +58,7 @@ public class CollectServiceImpl implements CollectService {
      * @param dto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void refuse(RefuseDto dto) {
         // 校验数据元是否存在
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dto.getDataid());

@@ -6,6 +6,7 @@ import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.dao.ConfirmationTaskMapper;
 import com.inspur.dsp.direct.dao.DomainDataElementMapper;
 import com.inspur.dsp.direct.dao.NegotiationRecordMapper;
+import com.inspur.dsp.direct.dao.SourceEventRecordMapper;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.dbentity.DomainDataElement;
@@ -53,6 +54,7 @@ public class OrganisersServiceImpl implements OrganisersService {
     private final DomainDataElementMapper domainDataElementMapper;
     private final ConfirmationTaskMapper confirmationTaskMapper;
     private final NegotiationRecordMapper negotiationTaskMapper;
+    private final SourceEventRecordMapper sourceEventRecordMapper;
 
     /**
      * 组织方获取数据元分页列表

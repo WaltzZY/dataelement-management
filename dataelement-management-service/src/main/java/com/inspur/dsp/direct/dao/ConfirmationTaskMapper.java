@@ -5,6 +5,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Collection;
+import java.util.List;
 
 @Mapper
 public interface ConfirmationTaskMapper extends BaseMapper<ConfirmationTask> {
@@ -13,4 +17,7 @@ public interface ConfirmationTaskMapper extends BaseMapper<ConfirmationTask> {
         myQuery.eq(ConfirmationTask::getBaseDataelementDataid, baseDataelementDataid);
         return selectOne(myQuery);
     }
+
+    List<ConfirmationTask> selectAllByStatusAndBaseDataelementDataidIn(@Param("status")String status,@Param("baseDataelementDataidCollection")Collection<String> baseDataelementDataidCollection);
+
 }

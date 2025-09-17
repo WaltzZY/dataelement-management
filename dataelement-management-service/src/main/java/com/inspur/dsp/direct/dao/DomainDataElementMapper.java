@@ -20,4 +20,7 @@ public interface DomainDataElementMapper extends BaseMapper<DomainDataElement> {
     List<DomainSourceUnitInfo> selectSourceUnitInfoByBaseDataid(@Param("baseDataIds") Collection<String> baseDataIds);
 
     DomainDataElement selectFirstByBaseDataelementDataid(@Param("baseDataelementDataid") String baseDataelementDataid);
+
+    List<DomainDataElement> selectAllByBaseDataelementDataid(@Param("baseDataelementDataid")String baseDataelementDataid);
+
 }
