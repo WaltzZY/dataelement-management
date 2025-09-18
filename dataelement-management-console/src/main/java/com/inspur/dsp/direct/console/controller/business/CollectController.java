@@ -39,13 +39,15 @@ public class CollectController {
     }
 
     /**
-     * 002-001、002-拒绝/通过成为数源单位
+     * 002-001、002-拒绝/通过成为数源单位 TODO 改成批量处理
      */
     @PostMapping("/refuse")
     @RespAdvice
     public void refuse(@RequestBody @Validated RefuseDto dto) {
         collectService.refuse(dto);
     }
+
+    // TODO 导出
 
     /**
      * 002-1-详情

@@ -23,9 +23,11 @@ import com.inspur.dsp.direct.entity.vo.DataElementInfoVo;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
 import com.inspur.dsp.direct.entity.vo.SelectSourceUnitVo;
 import com.inspur.dsp.direct.entity.vo.SourceRequestList;
+import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.enums.NodeStatusEnums;
 import com.inspur.dsp.direct.enums.SortFieldEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
+import com.inspur.dsp.direct.enums.TaskTypeEnums;
 import com.inspur.dsp.direct.service.OrganisersService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.RequiredArgsConstructor;
@@ -113,9 +115,13 @@ public class OrganisersServiceImpl implements OrganisersService {
                 confirmationTask.setSendDate(date);
                 confirmationTask.setSenderAccount(userInfo.getAccount());
                 confirmationTask.setSenderName(userInfo.getName());
-                confirmationTask.setStatus(StatusEnums.CONFIRMING.getCode());
+                // 待确认
+                confirmationTask.setTasktype(TaskTypeEnums.CONFIRMATION_TASK.getCode());
+                confirmationTask.setStatus(ConfirmationTaskEnums.PENDING.getCode());
                 confirmationTask.setProcessingUnitCode(info.getSourceUnitCode());
                 confirmationTask.setProcessingUnitName(info.getSourceUnitName());
+                confirmationTask.setSendUnitCode(userInfo.getOrgCode());
+                confirmationTask.setSendUnitName(userInfo.getOrgName());
                 confirmationTasks.add(confirmationTask);
                 // 更新相关基准数据元的发起定源时间,状态为确认中
                 BaseDataElement baseDataElement = new BaseDataElement();
@@ -137,7 +143,7 @@ public class OrganisersServiceImpl implements OrganisersService {
                                         ConfirmationTask confirmationTask,
                                         BaseDataElement baseDataElement,
                                         String dataid) {
-        if (confirmationTask.getStatus().equals(StatusEnums.REJECTED.getCode())) {
+        if (confirmationTask.getStatus().equals(StatusEnums.PENDING_NEGOTIATION.getCode())) {
             // 被拒绝的情况：四个节点
             buildRejectedSourceRequestList(sourceRequestLists, confirmationTask, baseDataElement, dataid);
         } else {
@@ -413,7 +419,7 @@ public class OrganisersServiceImpl implements OrganisersService {
         // 封装流程节点信息, 默认是三个节点, 发起定源, 采集单位确认, 核定数源单位
         // 通过状态判断,需要创建几个节点
         // 定源任务状态如果不是已拒绝,则创建三个流程节点,否则创建四个流程节点
-        if (Objects.nonNull(confirmationTask) && StatusEnums.REJECTED.getCode().equals(confirmationTask.getStatus())) {
+        if (Objects.nonNull(confirmationTask) && StatusEnums.PENDING_NEGOTIATION.getCode().equals(confirmationTask.getStatus())) {
             // 创建四个流程节点,发起定源(已通过), 采集单位确认(已拒绝), 发起协商(判断条件,是否关联表有值), 手动定源(判断条件,已经发起协商的数据元状态为已定源)
             // 第一个节点, 发起定源
             SourceRequestList one = new SourceRequestList();

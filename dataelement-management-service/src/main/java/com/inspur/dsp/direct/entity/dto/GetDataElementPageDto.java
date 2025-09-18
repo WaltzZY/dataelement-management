@@ -26,11 +26,11 @@ public class GetDataElementPageDto {
     /**
      * 页码
      */
-    private long pageNum;
+    private long pageNum = 1;
     /**
      * 每页条数
      */
-    private long pageSize;
+    private long pageSize = 10;
     /**
      * 模糊搜索：基准数据元名称、定义、数源单位、采集单位
      */

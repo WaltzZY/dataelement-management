@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.service;
 
+import com.inspur.dsp.direct.dbentity.OrganizationUnit;
 import com.inspur.dsp.direct.entity.dto.GetCollectionDeptTreeDto;
 import com.inspur.dsp.direct.entity.dto.GetDeptSearchDto;
 import com.inspur.dsp.direct.entity.vo.CollectionDeptTreeVo;
@@ -23,4 +24,12 @@ public interface CommonService {
      * 获取部门信息
      */
     GetOrganInfoVo getOrganInfo(String organCode);
+
+    /**
+     * 获取部门信息-产品内部部门表
+     * @param orgCode 部门统一社会信用代码
+     *
+     * @return 部门信息
+     */
+    OrganizationUnit getOrgInfoByOrgCode(String orgCode);
 }

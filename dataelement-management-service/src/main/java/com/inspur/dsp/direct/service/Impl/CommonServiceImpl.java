@@ -1,5 +1,7 @@
 package com.inspur.dsp.direct.service.Impl;
 
+import com.inspur.dsp.direct.dao.OrganizationUnitMapper;
+import com.inspur.dsp.direct.dbentity.OrganizationUnit;
 import com.inspur.dsp.direct.entity.dto.GetCollectionDeptTreeDto;
 import com.inspur.dsp.direct.entity.dto.GetDeptSearchDto;
 import com.inspur.dsp.direct.entity.vo.CollectionDeptTreeVo;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class CommonServiceImpl implements CommonService {
 
     private final BSPService bspService;
+    private final OrganizationUnitMapper organizationUnitMapper;
 
     /**
      * 获取部门树
@@ -92,5 +95,16 @@ public class CommonServiceImpl implements CommonService {
             return getOrganInfoVo;
         }
         throw new RuntimeException("未查询到部门信息");
+    }
+
+    /**
+     * 获取部门信息-产品内部部门表
+     *
+     * @param orgCode 部门统一社会信用代码
+     * @return 部门信息
+     */
+    @Override
+    public OrganizationUnit getOrgInfoByOrgCode(String orgCode) {
+        return organizationUnitMapper.selectFirstByUnitCode(orgCode);
     }
 }

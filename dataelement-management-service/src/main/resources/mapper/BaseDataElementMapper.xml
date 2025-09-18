@@ -26,8 +26,8 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain, 
-    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty, 
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
+    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty,
     remarks, create_date, create_account, last_modify_date, last_modify_account
   </sql>
 
@@ -37,7 +37,7 @@
       <result column="definition" property="definition" />
       <result column="sendDate" property="sendDate" />
       <result column="collectDeptName" property="collectDeptName" />
-      <result column="publish_date" property="publishDate" />
+      <result column="confirm_date" property="confirmDate" />
       <result column="sourceUnitCode" property="sourceUnitCode" />
       <result column="sourceUnitName" property="sourceUnitName" />
       <result column="status" property="status" />
@@ -48,7 +48,7 @@
       bde.name as name,
       bde.definition as definition,
       bde.send_date as sendDate,
-      bde.publish_date as publish_date,
+      bde.confirm_date as confirm_date,
       dde.source_unit_name as collectDeptName,
       bde.source_unit_code as sourceUnitCode,
       bde.source_unit_name as sourceUnitName,
@@ -56,8 +56,9 @@
       from base_data_element bde
                left join domain_data_element dde on bde.dataid = dde.base_dataelement_dataid
       <where>
+          bde.collectunitqty = 1
           <if test="dto.deptCodes != null and dto.deptCodes.size() != 0">
-              dde.source_unit_code in
+              and dde.source_unit_code in
               <foreach close=")" collection="dto.deptCodes" item="item" open="(" separator=",">
                   #{item}
               </foreach>
@@ -77,7 +78,7 @@
               and bde.send_date between #{dto.initiationTimeStart} and #{dto.initiationTimeEnd}
           </if>
           <if test="dto.sourceTimeStart != null and dto.sourceTimeEnd != null">
-              and bde.publish_date between #{dto.sourceTimeStart} and #{dto.sourceTimeEnd}
+              and bde.confirm_date between #{dto.sourceTimeStart} and #{dto.sourceTimeEnd}
           </if>
       </where>
       <if test="sortSql != null and sortSql != ''">
@@ -102,18 +103,13 @@
                bde.definition      as definition,
                bde.send_date       as receiveTime,
                bde.name            as name,
-               bde.status          as status,
+               ct.status           as status,
                ct.processing_date  as handleTime
         from base_data_element bde
-                 left join (select dataid, source_unit_code, source_unit_name, base_dataelement_dataid
-                            from domain_data_element) dde on bde.dataid = dde.base_dataelement_dataid
                  left join confirmation_task ct on bde.dataid = ct.base_dataelement_dataid
-        where dde.source_unit_code = #{organCode,jdbcType=VARCHAR}
+        where ct.processing_unit_code = #{organCode,jdbcType=VARCHAR}
             <if test="dto.auditStatus == 'pending'">
-                and bde.status = 'confirming'
-            </if>
-            <if test="dto.auditStatus == 'processed'">
-                and bde.status in ('confirmed', 'pending_approval', 'rejected', 'negotiating', 'confirmed')
+                and ct.status = 'pending'
             </if>
             <if test="dto.receiveTimeStart != null and dto.receiveTimeEnd != null">
                 and bde.send_date between #{dto.receiveTimeStart} and #{dto.receiveTimeEnd}
@@ -122,7 +118,7 @@
                 and ct.processing_date between #{dto.handleTimeStart} and #{dto.handleTimeEnd}
             </if>
             <if test="dto.statusList != null and dto.statusList.size() != 0">
-                and bde.status in
+                and ct.status in
                 <foreach close=")" collection="dto.statusList" item="item" open="(" separator=",">
                     #{item}
                 </foreach>
@@ -135,4 +131,94 @@
             order by ${sortSql}
         </if>
     </select>
+
+    <!-- 分页查询待核定基准数据元列表 -->
+    <resultMap id="GetPendingApprovalPageVoResultMap" type="com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo">
+        <result column="dataid" property="dataid"/>
+        <result column="name" property="name"/>
+        <result column="definition" property="definition"/>
+        <result column="status" property="status"/>
+        <result column="paUnitCode" property="paUnitCode"/>
+        <result column="paUnitName" property="paUnitName"/>
+        <result column="sendDate" property="sendDate"/>
+    </resultMap>
+    <select id="selectPaPage" resultMap="GetPendingApprovalPageVoResultMap">
+        SELECT
+        bdl.dataid,
+        bdl.name,
+        bdl.definition,
+        bdl.status,
+        ct.processing_unit_code AS paUnitCode,
+        ct.processing_unit_name AS paUnitName,
+        bdl.send_date AS sendDate
+        FROM base_data_element bdl
+        LEFT JOIN confirmation_task ct ON bdl.dataid = ct.base_dataelement_dataid
+        AND (ct.status in ('claimed', 'confirmed'))
+        WHERE bdl.status = 'pending_approval'
+        <if test="dto.sendDateStart != null">
+            AND bdl.send_date >= #{dto.sendDateStart}
+        </if>
+        <if test="dto.sendDateEnd != null">
+            AND bdl.send_date &lt;= #{dto.sendDateEnd}
+        </if>
+        <if test="dto.search != null and dto.search != ''">
+            AND (bdl.name LIKE CONCAT('%', #{dto.search}, '%')
+            OR bdl.definition LIKE CONCAT('%', #{dto.search}, '%')
+            OR ct.processing_unit_name LIKE CONCAT('%', #{dto.search}, '%'))
+        </if>
+        <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
+            ORDER BY ${sortSql}
+        </if>
+        <if test="dto.sortField == null or dto.sortField == ''">
+            ORDER BY ct.processing_date DESC
+        </if>
+    </select>
+
+    <!-- 分页查询已定源基准数据元列表 -->
+    <select id="selectConfirmedPage" resultType="com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo">
+        SELECT
+        dataid,
+        name,
+        definition,
+        status,
+        source_unit_code AS sourceUnitCode,
+        source_unit_name AS sourceUnitName,
+        source_unit_code AS paUnitCode,
+        source_unit_name AS paUnitName,
+        send_date AS sendDate,
+        confirm_date AS confirmDate,
+        collectunitqty
+        FROM base_data_element bdl
+        WHERE status = 'confirmed'
+        <if test="dto.sendDateStart != null">
+            AND send_date >= #{dto.sendDateStart}
+        </if>
+        <if test="dto.sendDateEnd != null">
+            AND send_date &lt;= #{dto.sendDateEnd}
+        </if>
+        <if test="dto.confirmDateStart != null">
+            AND confirm_date >= #{dto.confirmDateStart}
+        </if>
+        <if test="dto.confirmDateEnd != null">
+            AND confirm_date &lt;= #{dto.confirmDateEnd}
+        </if>
+        <if test="dto.unitCodes != null and dto.unitCodes.size() > 0">
+            AND source_unit_code IN
+            <foreach collection="dto.unitCodes" item="unitCode" open="(" separator="," close=")">
+                #{unitCode}
+            </foreach>
+        </if>
+        <if test="dto.search != null and dto.search != ''">
+            AND (name LIKE CONCAT('%', #{dto.search}, '%')
+            OR definition LIKE CONCAT('%', #{dto.search}, '%')
+            OR source_unit_name LIKE CONCAT('%', #{dto.search}, '%'))
+        </if>
+        <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
+            ORDER BY ${sortSql}
+        </if>
+        <if test="dto.sortField == null or dto.sortField == ''">
+            ORDER BY bdl.confirm_date DESC
+        </if>
+    </select>
+
 </mapper>

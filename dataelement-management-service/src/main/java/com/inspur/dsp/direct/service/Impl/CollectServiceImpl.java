@@ -11,7 +11,9 @@ import com.inspur.dsp.direct.entity.dto.RefuseDto;
 import com.inspur.dsp.direct.entity.vo.CollectDataInfoVo;
 import com.inspur.dsp.direct.entity.vo.GetCollectDataVo;
 import com.inspur.dsp.direct.enums.CollSortFieldEnums;
+import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
+import com.inspur.dsp.direct.enums.TaskTypeEnums;
 import com.inspur.dsp.direct.service.CollectService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.RequiredArgsConstructor;
@@ -65,14 +67,22 @@ public class CollectServiceImpl implements CollectService {
         if (Objects.isNull(baseDataElement)) {
             throw new RuntimeException("数据元不存在!!!");
         }
+        // 拿到数据元任务
+        ConfirmationTask confirmationTask = confirmationTaskMapper.selectFirstByBaseDataelementDataid(dto.getDataid());
         String handleStatus = dto.getHandleStatus();
         String dataStatus = "";
+        String confirmationTaskStatus = "";
         if (StatusEnums.PENDING_APPROVAL.getCode().equals(handleStatus)) {
-            // 待核定状态的数据元就是已确认了
+            // 已确认状态 -> 确认 -> 待核定
             dataStatus = StatusEnums.PENDING_APPROVAL.getCode();
+            if (TaskTypeEnums.CONFIRMATION_TASK.getCode().equals(confirmationTask.getTasktype())) {
+                // 确认任务状态:已确认
+                confirmationTaskStatus = ConfirmationTaskEnums.CONFIRMED.getCode();
+            }
         }
-        if (StatusEnums.REJECTED.getCode().equals(handleStatus)) {
-            dataStatus = StatusEnums.REJECTED.getCode();
+        if (StatusEnums.PENDING_NEGOTIATION.getCode().equals(handleStatus)) {
+            dataStatus = StatusEnums.PENDING_NEGOTIATION.getCode();
+            confirmationTaskStatus = ConfirmationTaskEnums.REJECTED.getCode();
         }
         if (!StringUtils.hasText(dataStatus)) {
             throw  new RuntimeException("请选择处理状态!");
@@ -83,9 +93,8 @@ public class CollectServiceImpl implements CollectService {
         baseDataElement.setLastModifyAccount(userInfo.getAccount());
         baseDataElement.setLastModifyDate(new Date());
         baseDataElementMapper.updateById(baseDataElement);
-        // 更新数据元确认状态
-        ConfirmationTask confirmationTask = confirmationTaskMapper.selectFirstByBaseDataelementDataid(dto.getDataid());
-        confirmationTask.setStatus(dataStatus);
+        // 更新数据元任务状态
+        confirmationTask.setStatus(confirmationTaskStatus);
         confirmationTask.setProcessingDate(new Date());
         confirmationTask.setProcessingResult(dto.getOpinion());
         confirmationTask.setProcessingOpinion(dto.getOpinion());

@@ -29,9 +29,9 @@ public class DataElementPageInfoVo {
     /**
      * 定源时间
      */
-    private Date publishDate;
+    private Date confirmDate;
     /**
-     * 数源单位名称
+     * 数源单位code
      */
     private String sourceUnitCode;
     /**

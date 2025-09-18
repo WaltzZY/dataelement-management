@@ -44,7 +44,7 @@ public class DataElementExcel {
      * 定源时间
      */
     @ExcelProperty(index = 6, value = "定源时间")
-    private Date publishDate;
+    private Date confirmDate;
 
     public static DataElementExcel toExcel(DataElementPageInfoVo vo) {
         DataElementExcel excel = new DataElementExcel();
@@ -54,7 +54,7 @@ public class DataElementExcel {
         excel.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
         excel.setSourceUnitName(vo.getSourceUnitName());
         excel.setSendDate(vo.getSendDate());
-        excel.setPublishDate(vo.getPublishDate());
+        excel.setConfirmDate(vo.getConfirmDate());
         return excel;
     }
 }

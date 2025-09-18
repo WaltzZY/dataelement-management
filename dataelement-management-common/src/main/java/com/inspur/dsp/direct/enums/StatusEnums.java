@@ -6,16 +6,18 @@ import com.inspur.dsp.direct.constant.Constants;
  * 数据元状态枚举类
  * 待定源 pending_source
  * 确认中 confirming
+ * 认领中 claimed
  * 待核定 pending_approval
- * 已拒绝 rejected
+ * 待协商 pending_negotiation
  * 协商中 negotiating
  * 已定源 confirmed
  */
 public enum StatusEnums {
     PENDING_SOURCE("pending_source", "待定源"),
     CONFIRMING("confirming", "确认中"),
+    CLAIMED("claimed", "认领中"),
     PENDING_APPROVAL("pending_approval", "待核定"),
-    REJECTED("rejected", "已拒绝"),
+    PENDING_NEGOTIATION("pending_negotiation", "待协商"),
     NEGOTIATING("negotiating", "协商中"),
     CONFIRMED("confirmed", "已定源");
 
