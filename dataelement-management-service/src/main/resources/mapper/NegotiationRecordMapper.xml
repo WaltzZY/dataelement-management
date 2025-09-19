@@ -43,4 +43,15 @@
     from negotiation_record_detail
     where record_id = #{recordId}
   </select>
+
+  <insert id="insertSelectiveDetail">
+    INSERT INTO negotiation_record_detail (record_detail_id, record_id, negotiation_unit_code, negotiation_unit_name,
+    negotiation_result, recorder_account, recorder_name, result_date)
+    VALUES
+    <foreach collection="negotiationRecordDetailList" item="detail" separator=",">
+      (#{detail.recordDetailId,jdbcType=VARCHAR}, #{detail.recordId,jdbcType=VARCHAR}, #{detail.negotiationUnitCode,jdbcType=VARCHAR},
+      #{detail.negotiationUnitName,jdbcType=VARCHAR}, #{detail.negotiationResult,jdbcType=LONGVARCHAR},
+      #{detail.recorderAccount,jdbcType=VARCHAR}, #{detail.recorderName,jdbcType=VARCHAR}, #{detail.resultDate})
+    </foreach>
+  </insert>
 </mapper>
