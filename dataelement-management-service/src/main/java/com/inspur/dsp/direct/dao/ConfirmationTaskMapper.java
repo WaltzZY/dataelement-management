@@ -20,4 +20,12 @@ public interface ConfirmationTaskMapper extends BaseMapper<ConfirmationTask> {
 
     List<ConfirmationTask> selectAllByStatusAndBaseDataelementDataidIn(@Param("status")String status,@Param("baseDataelementDataidCollection")Collection<String> baseDataelementDataidCollection);
 
+    /**
+     * 查询任务列表,条件为任务类型和数据元id
+     * @param tasktype 任务类型
+     * @param baseDataelementDataid 数据元id
+     * @return
+     */
+    List<ConfirmationTask> selectAllByTasktypeAndBaseDataelementDataid(@Param("tasktype")String tasktype,@Param("baseDataelementDataid")String baseDataelementDataid);
+
 }

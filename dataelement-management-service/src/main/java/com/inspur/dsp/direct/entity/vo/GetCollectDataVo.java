@@ -24,7 +24,7 @@ public class GetCollectDataVo {
     /**
      * 处理时间
      */
-    private String handleTime;
+    private String processingDate;
     /**
      * 数据元名称
      */

@@ -91,7 +91,7 @@
         <result column="dataid" property="dataid" />
         <result column="datatype" property="datatype" />
         <result column="definition" property="definition" />
-        <result column="handleTime" property="handleTime" />
+        <result column="processingDate" property="processingDate" />
         <result column="name" property="name" />
         <result column="receiveTime" property="receiveTime" />
         <result column="status" property="status" />
@@ -104,7 +104,7 @@
                bde.send_date       as receiveTime,
                bde.name            as name,
                ct.status           as status,
-               ct.processing_date  as handleTime
+               ct.processing_date  as processingDate
         from base_data_element bde
                  left join confirmation_task ct on bde.dataid = ct.base_dataelement_dataid
         where ct.processing_unit_code = #{organCode,jdbcType=VARCHAR}
