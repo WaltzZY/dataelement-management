@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.entity.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,6 +14,7 @@ public class DataElementPageInfoVo {
     /**
      * 发起时间
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date sendDate;
     /**
      * 数据行唯一标识，ID 编号
@@ -29,6 +31,7 @@ public class DataElementPageInfoVo {
     /**
      * 定源时间
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date confirmDate;
     /**
      * 数源单位code

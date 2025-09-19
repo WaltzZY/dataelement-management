@@ -5,10 +5,8 @@ import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
 import com.inspur.dsp.direct.enums.StatusEnums;
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
-public class DataElementExcel {
+public class PsDataElementExcel {
 
     /**
      * 数据元名称
@@ -30,19 +28,13 @@ public class DataElementExcel {
      */
     @ExcelProperty(index = 3, value = "状态")
     private String statusDesc;
-    /**
-     * 发起时间
-     */
-    @ExcelProperty(index = 4, value = "发起时间")
-    private Date sendDate;
 
-    public static DataElementExcel toExcel(DataElementPageInfoVo vo) {
-        DataElementExcel excel = new DataElementExcel();
+    public static PsDataElementExcel toExcel(DataElementPageInfoVo vo) {
+        PsDataElementExcel excel = new PsDataElementExcel();
         excel.setName(vo.getName());
         excel.setDefinition(vo.getDefinition());
         excel.setCollectDeptName(vo.getCollectDeptName());
         excel.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
-        excel.setSendDate(vo.getSendDate());
         return excel;
     }
 }

@@ -12,17 +12,17 @@ public class GetDataElementPageDto {
     /**
      * 采集单位code集合
      */
-    private List<String> deptCodes;
+    private List<String> collectUnitCodeList;
     /**
      * 发起时间结束
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", locale = "zh", shape = JsonFormat.Shape.STRING)
-    private Date initiationTimeEnd;
+    private Date sendDateEnd;
     /**
      * 发起时间开始
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", locale = "zh", shape = JsonFormat.Shape.STRING)
-    private Date initiationTimeStart;
+    private Date sendDateBegin;
     /**
      * 页码
      */
@@ -34,17 +34,18 @@ public class GetDataElementPageDto {
     /**
      * 模糊搜索：基准数据元名称、定义、数源单位、采集单位
      */
-    private String search;
+    private String keyword;
     /**
      * 定源时间结束
      */
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", locale = "zh", shape = JsonFormat.Shape.STRING)
-    private Date sourceTimeEnd;
+    private Date confirmDateEnd;
     /**
      * 定源时间开始
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", locale = "zh", shape = JsonFormat.Shape.STRING)
-    private Date sourceTimeStart;
+    private Date confirmDateBegin;
     /**
      * 数据元状态集合
      */

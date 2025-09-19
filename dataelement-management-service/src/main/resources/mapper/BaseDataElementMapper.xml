@@ -57,9 +57,9 @@
                left join domain_data_element dde on bde.dataid = dde.base_dataelement_dataid
       <where>
           bde.collectunitqty = 1
-          <if test="dto.deptCodes != null and dto.deptCodes.size() != 0">
+          <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() != 0">
               and dde.source_unit_code in
-              <foreach close=")" collection="dto.deptCodes" item="item" open="(" separator=",">
+              <foreach close=")" collection="dto.collectUnitCodeList" item="item" open="(" separator=",">
                   #{item}
               </foreach>
           </if>
@@ -69,16 +69,16 @@
                   #{item}
               </foreach>
           </if>
-          <if test="dto.search != null and dto.search != ''">
-              and (bde.name like #{dto.search} or bde.definition like #{dto.search}
-              or bde.source_unit_name like #{dto.search} or dde.source_unit_name like #{dto.search}
+          <if test="dto.keyword != null and dto.keyword != ''">
+              and (bde.name like #{dto.keyword} or bde.definition like #{dto.keyword}
+              or bde.source_unit_name like #{dto.keyword} or dde.source_unit_name like #{dto.keyword}
               )
           </if>
-          <if test="dto.initiationTimeStart != null and dto.initiationTimeEnd != null">
-              and bde.send_date between #{dto.initiationTimeStart} and #{dto.initiationTimeEnd}
+          <if test="dto.sendDateBegin != null and dto.sendDateEnd != null">
+              and bde.send_date between #{dto.sendDateBegin} and #{dto.sendDateEnd}
           </if>
-          <if test="dto.sourceTimeStart != null and dto.sourceTimeEnd != null">
-              and bde.confirm_date between #{dto.sourceTimeStart} and #{dto.sourceTimeEnd}
+          <if test="dto.confirmDateBegin != null and dto.confirmDateEnd != null">
+              and bde.confirm_date between #{dto.confirmDateBegin} and #{dto.confirmDateEnd}
           </if>
       </where>
       <if test="sortSql != null and sortSql != ''">

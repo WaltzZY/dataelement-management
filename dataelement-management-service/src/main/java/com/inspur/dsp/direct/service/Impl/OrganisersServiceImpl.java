@@ -19,6 +19,7 @@ import com.inspur.dsp.direct.entity.dto.ManualSourceDto;
 import com.inspur.dsp.direct.entity.dto.NegotiationObj;
 import com.inspur.dsp.direct.entity.dto.VerifiedDataSourceDto;
 import com.inspur.dsp.direct.entity.excel.DataElementExcel;
+import com.inspur.dsp.direct.entity.excel.PsDataElementExcel;
 import com.inspur.dsp.direct.entity.vo.DataElementInfoVo;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
 import com.inspur.dsp.direct.entity.vo.SelectSourceUnitVo;
@@ -294,27 +295,47 @@ public class OrganisersServiceImpl implements OrganisersService {
         if (CollectionUtils.isEmpty(list)) {
             throw new IllegalArgumentException("没有可导出的数据!");
         }
-        // 转换成Excel数据实体
-        List<DataElementExcel> excelList = list.stream().map(DataElementExcel::toExcel).collect(Collectors.toList());
         // 设置响应头信息
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
+        // 根据状态设置文件名
+        String baseFileName = "数据元列表";
+        if (dto.getStatusList().contains(StatusEnums.PENDING_SOURCE.getCode())) {
+            baseFileName = "待定源数据元列表";
+        } else {
+            baseFileName = "确认中数据元列表";
+        }
         try {
-            String fileName = java.net.URLEncoder.encode("数据元列表", "UTF-8");
+            String fileName = java.net.URLEncoder.encode(baseFileName, "UTF-8");
             response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
         } catch (Exception e) {
             log.error("设置文件名失败", e);
             throw new RuntimeException("设置文件名失败", e);
         }
-
-        // 使用easyexcel导出数据
-        try {
-            EasyExcel.write(response.getOutputStream(), DataElementExcel.class)
-                    .sheet("数据元列表")
-                    .doWrite(excelList);
-        } catch (IOException e) {
-            log.error("导出数据元失败", e);
-            throw new RuntimeException("导出数据元失败", e);
+        if (dto.getStatusList().contains(StatusEnums.PENDING_SOURCE.getCode())) {
+            // 转换成Excel数据实体
+            List<PsDataElementExcel> psExcelList = list.stream().map(PsDataElementExcel::toExcel).collect(Collectors.toList());
+            // 使用easyexcel导出数据
+            try {
+                EasyExcel.write(response.getOutputStream(), PsDataElementExcel.class)
+                        .sheet("数据元列表")
+                        .doWrite(psExcelList);
+            } catch (IOException e) {
+                log.error("导出数据元失败", e);
+                throw new RuntimeException("导出数据元失败", e);
+            }
+        } else {
+            // 转换成Excel数据实体
+            List<DataElementExcel> excelList = list.stream().map(DataElementExcel::toExcel).collect(Collectors.toList());
+            // 使用easyexcel导出数据
+            try {
+                EasyExcel.write(response.getOutputStream(), DataElementExcel.class)
+                        .sheet("数据元列表")
+                        .doWrite(excelList);
+            } catch (IOException e) {
+                log.error("导出数据元失败", e);
+                throw new RuntimeException("导出数据元失败", e);
+            }
         }
     }
 
