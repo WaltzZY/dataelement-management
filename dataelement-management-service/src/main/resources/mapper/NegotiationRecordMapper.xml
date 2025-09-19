@@ -10,9 +10,37 @@
     <result column="sender_account" jdbcType="VARCHAR" property="senderAccount" />
     <result column="sender_name" jdbcType="VARCHAR" property="senderName" />
     <result column="negotiation_content" jdbcType="LONGVARCHAR" property="negotiationContent" />
+    <collection property="negotiationRecordDetailList" ofType="com.inspur.dsp.direct.dbentity.NegotiationRecordDetail"
+                javaType="list" column="record_id" select="selectAllNegotiationRecordDetailListByRecordId"/>
+  </resultMap>
+
+  <resultMap id="NegotiationRecordDetailResultMap" type="com.inspur.dsp.direct.dbentity.NegotiationRecordDetail">
+    <!--@mbg.generated-->
+    <!--@Table negotiation_record_detail-->
+    <id column="record_detail_id" jdbcType="VARCHAR" property="recordDetailId" />
+    <result column="record_id" jdbcType="VARCHAR" property="recordId" />
+    <result column="negotiation_unit_code" jdbcType="VARCHAR" property="negotiationUnitCode" />
+    <result column="negotiation_unit_name" jdbcType="VARCHAR" property="negotiationUnitName" />
+    <result column="negotiation_result" jdbcType="LONGVARCHAR" property="negotiationResult" />
+    <result column="recorder_account" jdbcType="VARCHAR" property="recorderAccount" />
+    <result column="recorder_name" jdbcType="VARCHAR" property="recorderName" />
+    <result column="result_date" jdbcType="TIMESTAMP" property="resultDate" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     record_id, base_dataelement_dataid, send_date, sender_account, sender_name, negotiation_content
   </sql>
+
+  <select id="selectById" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from negotiation_record
+    where record_id = #{id}
+  </select>
+
+  <select id="selectAllNegotiationRecordDetailListByRecordId" resultMap="NegotiationRecordDetailResultMap">
+    select record_detail_id, record_id, negotiation_unit_code, negotiation_unit_name, negotiation_result,
+    recorder_account, recorder_name, result_date
+    from negotiation_record_detail
+    where record_id = #{recordId}
+  </select>
 </mapper>

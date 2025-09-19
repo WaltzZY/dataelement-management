@@ -4,14 +4,16 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.util.Date;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 协商记录表
@@ -64,4 +66,10 @@ public class NegotiationRecord implements Serializable {
      */
     @TableField(value = "negotiation_content")
     private String negotiationContent;
+
+    /**
+     * 协商记录明细数据
+     */
+    @TableField(exist = false)
+    private List<NegotiationRecordDetail> negotiationRecordDetailList;
 }

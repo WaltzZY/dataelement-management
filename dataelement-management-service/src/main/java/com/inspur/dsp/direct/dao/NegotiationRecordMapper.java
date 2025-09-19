@@ -13,4 +13,9 @@ public interface NegotiationRecordMapper extends BaseMapper<NegotiationRecord> {
         myQuery.eq(NegotiationRecord::getBaseDataelementDataid, baseDataelementDataid);
         return selectOne(myQuery);
     }
+
+    /**
+     * 重新selectById方法,将协商相关的详情也查询出来
+     */
+    NegotiationRecord selectById(String id);
 }
