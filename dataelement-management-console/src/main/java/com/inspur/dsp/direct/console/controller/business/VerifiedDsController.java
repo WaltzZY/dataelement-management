@@ -2,12 +2,12 @@ package com.inspur.dsp.direct.console.controller.business;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.annotation.RespAdvice;
-import com.inspur.dsp.direct.entity.dto.ExportPaDataDto;
 import com.inspur.dsp.direct.entity.dto.GetPendingApprovalPageDto;
 import com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo;
 import com.inspur.dsp.direct.service.VerifiedDsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +33,7 @@ public class VerifiedDsController {
      */
     @RespAdvice
     @PostMapping("/getPaPage")
-    public Page<GetPendingApprovalPageVo> getPaPage(@RequestBody GetPendingApprovalPageDto dto) {
+    public Page<GetPendingApprovalPageVo> getPaPage(@RequestBody @Validated GetPendingApprovalPageDto dto) {
         return verifiedDsService.getPaPage(dto);
     }
 
@@ -43,7 +43,7 @@ public class VerifiedDsController {
      */
     @RespAdvice
     @PostMapping("/exportPaData")
-    public void exportPaData(@RequestBody ExportPaDataDto dto, HttpServletResponse response) {
+    public void exportPaData(@RequestBody @Validated GetPendingApprovalPageDto dto, HttpServletResponse response) {
         verifiedDsService.exportPaData(dto, response);
     }
 

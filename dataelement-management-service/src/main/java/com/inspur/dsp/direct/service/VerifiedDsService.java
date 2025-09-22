@@ -1,7 +1,6 @@
 package com.inspur.dsp.direct.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.inspur.dsp.direct.entity.dto.ExportPaDataDto;
 import com.inspur.dsp.direct.entity.dto.GetPendingApprovalPageDto;
 import com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo;
 
@@ -25,7 +24,7 @@ public interface VerifiedDsService {
      * @param dto 查询条件
      * @param response HTTP响应
      */
-    void exportPaData(ExportPaDataDto dto, HttpServletResponse response);
+    void exportPaData(GetPendingApprovalPageDto dto, HttpServletResponse response);
 
     /**
      * 批量发起核定, 单条核定

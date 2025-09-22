@@ -158,16 +158,16 @@
         LEFT JOIN confirmation_task ct ON bdl.dataid = ct.base_dataelement_dataid
         AND (ct.status in ('claimed', 'confirmed'))
         WHERE bdl.status = 'pending_approval'
-        <if test="dto.sendDateStart != null">
-            AND bdl.send_date >= #{dto.sendDateStart}
+        <if test="dto.sendDateBegin != null and dto.sendDateBegin != ''">
+            AND bdl.send_date >= #{dto.sendDateBegin}
         </if>
-        <if test="dto.sendDateEnd != null">
+        <if test="dto.sendDateEnd != null and dto.sendDateEnd != ''">
             AND bdl.send_date &lt;= #{dto.sendDateEnd}
         </if>
-        <if test="dto.search != null and dto.search != ''">
-            AND (bdl.name LIKE CONCAT('%', #{dto.search}, '%')
-            OR bdl.definition LIKE CONCAT('%', #{dto.search}, '%')
-            OR ct.processing_unit_name LIKE CONCAT('%', #{dto.search}, '%'))
+        <if test="dto.keyword != null and dto.keyword != ''">
+            AND (bdl.name LIKE CONCAT('%', #{dto.keyword}, '%')
+            OR bdl.definition LIKE CONCAT('%', #{dto.keyword}, '%')
+            OR ct.processing_unit_name LIKE CONCAT('%', #{dto.keyword}, '%'))
         </if>
         <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
             ORDER BY ${sortSql}
@@ -193,28 +193,28 @@
         collectunitqty
         FROM base_data_element bdl
         WHERE status = 'confirmed'
-        <if test="dto.sendDateStart != null">
-            AND send_date >= #{dto.sendDateStart}
+        <if test="dto.sendDateBegin != null and dto.sendDateBegin != ''">
+            AND send_date >= #{dto.sendDateBegin}
         </if>
-        <if test="dto.sendDateEnd != null">
+        <if test="dto.sendDateEnd != null and dto.sendDateEnd != ''">
             AND send_date &lt;= #{dto.sendDateEnd}
         </if>
-        <if test="dto.confirmDateStart != null">
-            AND confirm_date >= #{dto.confirmDateStart}
+        <if test="dto.confirmDateBegin != null and dto.confirmDateBegin != ''">
+            AND confirm_date >= #{dto.confirmDateBegin}
         </if>
-        <if test="dto.confirmDateEnd != null">
+        <if test="dto.confirmDateEnd != null and dto.confirmDateEnd != ''">
             AND confirm_date &lt;= #{dto.confirmDateEnd}
         </if>
-        <if test="dto.unitCodes != null and dto.unitCodes.size() > 0">
+        <if test="dto.sourceUnitCodeList != null and dto.sourceUnitCodeList.size() > 0">
             AND source_unit_code IN
-            <foreach collection="dto.unitCodes" item="unitCode" open="(" separator="," close=")">
+            <foreach collection="dto.sourceUnitCodeList" item="unitCode" open="(" separator="," close=")">
                 #{unitCode}
             </foreach>
         </if>
-        <if test="dto.search != null and dto.search != ''">
-            AND (name LIKE CONCAT('%', #{dto.search}, '%')
-            OR definition LIKE CONCAT('%', #{dto.search}, '%')
-            OR source_unit_name LIKE CONCAT('%', #{dto.search}, '%'))
+        <if test="dto.keyword != null and dto.keyword != ''">
+            AND (name LIKE CONCAT('%', #{dto.keyword}, '%')
+            OR definition LIKE CONCAT('%', #{dto.keyword}, '%')
+            OR source_unit_name LIKE CONCAT('%', #{dto.keyword}, '%'))
         </if>
         <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
             ORDER BY ${sortSql}

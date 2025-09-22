@@ -38,6 +38,10 @@ public class CommonServiceImpl implements CommonService {
      */
     @Override
     public List<CollectionDeptTreeVo> getCollectionDeptTree(GetCollectionDeptTreeDto dto) {
+        // 查询部门区划树内部表
+        List<OrganizationUnit> organizationUnits = organizationUnitMapper.getCollectionDeptTree(dto);
+
+
         // 调用bsp接口,查询部门树数据
         List<RegionOrganTreeVo> regionOrganTree = bspService.getRegionOrganTree(dto.getParentCode());
         return regionOrganTree.stream().map(regionOrganTreeVo -> {

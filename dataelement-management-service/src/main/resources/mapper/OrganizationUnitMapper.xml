@@ -33,4 +33,10 @@
     from organization_unit
     where unit_code=#{unitCode,jdbcType=VARCHAR} limit 1
   </select>
+
+  <select id="getCollectionDeptTree" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+    from organization_unit
+    where parent_node_id = #{parentCode,jdbcType=VARCHAR}
+  </select>
 </mapper>

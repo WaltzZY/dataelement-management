@@ -12,7 +12,6 @@ import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.dbentity.OrganizationUnit;
 import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.domain.UserLoginInfo;
-import com.inspur.dsp.direct.entity.dto.ExportPaDataDto;
 import com.inspur.dsp.direct.entity.dto.GetPendingApprovalPageDto;
 import com.inspur.dsp.direct.entity.excel.ConfirmationExcel;
 import com.inspur.dsp.direct.entity.excel.PaExcel;
@@ -56,7 +55,7 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
         String sortSql = PaPageSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
         Page<GetPendingApprovalPageVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         List<GetPendingApprovalPageVo> vos;
-        if (StatusEnums.PENDING_APPROVAL.getCode().equals(dto.getTabStatus())) {
+        if (StatusEnums.PENDING_APPROVAL.getCode().equals(dto.getAuditStatus())) {
             // 查询待核定数据
             vos = baseDataElementMapper.selectPaPage(page, dto, sortSql);
         } else {
@@ -73,29 +72,17 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
     }
 
     @Override
-    public void exportPaData(ExportPaDataDto dto, HttpServletResponse response) {
+    public void exportPaData(GetPendingApprovalPageDto dto, HttpServletResponse response) {
         try {
             // 排序处理
             String sortSql = PaPageSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
             List<GetPendingApprovalPageVo> vos;
-            if ("pending_approval".equals(dto.getTabStatus())) {
+            if ("pending_approval".equals(dto.getAuditStatus())) {
                 // 查询待核定数据
-                vos = baseDataElementMapper.selectPaPage(null,
-                        GetPendingApprovalPageDto.builder()
-                                .sendDateStart(dto.getSendDateStart())
-                                .sendDateEnd(dto.getSendDateEnd())
-                                .search(dto.getSearch())
-                                .tabStatus(dto.getTabStatus())
-                                .build(), sortSql);
+                vos = baseDataElementMapper.selectPaPage(null, dto, sortSql);
             } else {
                 // 查询已定源数据
-                vos = baseDataElementMapper.selectConfirmedPage(null,
-                        GetPendingApprovalPageDto.builder()
-                                .sendDateStart(dto.getSendDateStart())
-                                .sendDateEnd(dto.getSendDateEnd())
-                                .search(dto.getSearch())
-                                .tabStatus(dto.getTabStatus())
-                                .build(), sortSql);
+                vos = baseDataElementMapper.selectConfirmedPage(null, dto, sortSql);
             }
             // 设置响应头
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -103,13 +90,13 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
             String fileName = URLEncoder.encode("核定数源单位数据", "UTF-8").replaceAll("\\+", "%20");
             response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
 
-            if ("pending_approval".equals(dto.getTabStatus())) {
+            if ("pending_approval".equals(dto.getAuditStatus())) {
                 // 转为待核定导出对象
                 List<PaExcel> paExcelList = vos.stream().map(vo -> {
                     return PaExcel.builder()
                             .name(vo.getName())
                             .definition(vo.getDefinition())
-                            .statusDesc(vo.getStatusDesc())
+                            .statusDesc(StatusEnums.getDescByCode(vo.getStatusDesc()))
                             .paUnitName(vo.getPaUnitName())
                             .sendDate(vo.getSendDate())
                             .build();
@@ -125,7 +112,7 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
                             .name(vo.getName())
                             .definition(vo.getDefinition())
                             .collectunitqty(vo.getCollectunitqty())
-                            .statusDesc(vo.getStatusDesc())
+                            .statusDesc(StatusEnums.getDescByCode(vo.getStatusDesc()))
                             .sendDate(vo.getSendDate())
                             .sourceUnitName(vo.getSourceUnitName())
                             .confirmDate(vo.getConfirmDate())
