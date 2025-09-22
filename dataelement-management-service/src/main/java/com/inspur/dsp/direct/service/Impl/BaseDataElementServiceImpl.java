@@ -40,6 +40,13 @@ public class BaseDataElementServiceImpl implements BaseDataElementService {
             return;
         }
 
+        // 判断认领任务状态, 任务中存在  ConfirmationTaskEnums.PENDING_CLAIMED 状态的,退出方法, 因为只要有一个认领任务未完成,则不能更新状态
+        long count = claimTasks.stream().filter(task -> ConfirmationTaskEnums.PENDING_CLAIMED.getCode().equals(task.getStatus())).count();
+        if (count > 0) {
+            log.warn("有认领任务未完成,退出方法[updateBaseDataElementStatusByClaimTask]");
+            return;
+        }
+
         // 有认领任务,判断认领任务状态
         long claimedCount = claimTasks.stream()
                 .filter(task -> ConfirmationTaskEnums.CLAIMED.getCode().equals(task.getStatus()))
