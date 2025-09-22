@@ -1,6 +1,5 @@
 package com.inspur.dsp.direct.service.Impl;
 
-import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.constant.Constants;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -80,48 +78,35 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
             if ("pending_approval".equals(dto.getAuditStatus())) {
                 // 查询待核定数据
                 vos = baseDataElementMapper.selectPaPage(null, dto, sortSql);
-            } else {
-                // 查询已定源数据
-                vos = baseDataElementMapper.selectConfirmedPage(null, dto, sortSql);
-            }
-            // 设置响应头
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setCharacterEncoding("utf-8");
-            String fileName = URLEncoder.encode("核定数源单位数据", "UTF-8").replaceAll("\\+", "%20");
-            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-
-            if ("pending_approval".equals(dto.getAuditStatus())) {
                 // 转为待核定导出对象
                 List<PaExcel> paExcelList = vos.stream().map(vo -> {
                     return PaExcel.builder()
                             .name(vo.getName())
                             .definition(vo.getDefinition())
-                            .statusDesc(StatusEnums.getDescByCode(vo.getStatusDesc()))
+                            .statusDesc(StatusEnums.getDescByCode(vo.getStatus()))
                             .paUnitName(vo.getPaUnitName())
                             .sendDate(vo.getSendDate())
                             .build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
-                EasyExcel.write(response.getOutputStream(), PaExcel.class)
-                        .sheet("核定数源单位数据")
-                        .doWrite(paExcelList);
+                commonService.exportExcelData(paExcelList, response,"待核定数源单位数据", PaExcel.class);
             } else {
+                // 查询已定源数据
+                vos = baseDataElementMapper.selectConfirmedPage(null, dto, sortSql);
                 // 转为已定源导出对象
                 List<ConfirmationExcel> confirmationExcels = vos.stream().map(vo -> {
                     return ConfirmationExcel.builder()
                             .name(vo.getName())
                             .definition(vo.getDefinition())
                             .collectunitqty(vo.getCollectunitqty())
-                            .statusDesc(StatusEnums.getDescByCode(vo.getStatusDesc()))
+                            .statusDesc(StatusEnums.getDescByCode(vo.getStatus()))
                             .sendDate(vo.getSendDate())
                             .sourceUnitName(vo.getSourceUnitName())
                             .confirmDate(vo.getConfirmDate())
                             .build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
-                EasyExcel.write(response.getOutputStream(), ConfirmationExcel.class)
-                        .sheet("核定数源单位数据")
-                        .doWrite(confirmationExcels);
+                commonService.exportExcelData(confirmationExcels, response,"已定源数据", ConfirmationExcel.class);
             }
         } catch (Exception e) {
             log.error("导出数据失败", e);
