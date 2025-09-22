@@ -6,6 +6,8 @@ import com.inspur.dsp.direct.entity.dto.RefuseDto;
 import com.inspur.dsp.direct.entity.vo.CollectDataInfoVo;
 import com.inspur.dsp.direct.entity.vo.GetCollectDataVo;
 
+import javax.servlet.http.HttpServletResponse;
+
 public interface CollectService {
 
     /**
@@ -27,4 +29,11 @@ public interface CollectService {
      * @return
      */
     CollectDataInfoVo info(String id);
+
+    /**
+     * 导出数据
+     * @param dto
+     * @param response
+     */
+    void exportData(CollectDataElementPageDto dto, HttpServletResponse response);
 }

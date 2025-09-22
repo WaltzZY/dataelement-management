@@ -17,7 +17,6 @@ import com.inspur.dsp.direct.entity.dto.GetPendingApprovalPageDto;
 import com.inspur.dsp.direct.entity.excel.ConfirmationExcel;
 import com.inspur.dsp.direct.entity.excel.PaExcel;
 import com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo;
-import com.inspur.dsp.direct.enums.ClaimTaskStatusEnums;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.enums.PaPageSortFieldEnums;
 import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
@@ -158,7 +157,7 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
         List<BaseDataElement> baseList = baseDataElementMapper.selectBatchIds(dataids);
 
         // 查询已认领的任务
-        List<ConfirmationTask> claimedTasks = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(ClaimTaskStatusEnums.CLAIMED.getCode(), dataids);
+        List<ConfirmationTask> claimedTasks = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(ConfirmationTaskEnums.CLAIMED.getCode(), dataids);
 
         // 查询已确认的任务
         List<ConfirmationTask> confirmedTasks = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(ConfirmationTaskEnums.CONFIRMED.getCode(), dataids);

@@ -37,4 +37,8 @@ public class GetCollectDataVo {
      * 数据元状态
      */
     private String status;
+    /**
+     * 数据元状态描述
+     */
+    private String statusDesc;
 }

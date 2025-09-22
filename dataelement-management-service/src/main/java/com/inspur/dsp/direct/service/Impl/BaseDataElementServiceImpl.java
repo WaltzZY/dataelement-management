@@ -5,7 +5,7 @@ import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.dao.ConfirmationTaskMapper;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.dbentity.ConfirmationTask;
-import com.inspur.dsp.direct.enums.ClaimTaskStatusEnums;
+import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.enums.TaskTypeEnums;
 import com.inspur.dsp.direct.service.BaseDataElementService;
@@ -42,7 +42,7 @@ public class BaseDataElementServiceImpl implements BaseDataElementService {
 
         // 有认领任务,判断认领任务状态
         long claimedCount = claimTasks.stream()
-                .filter(task -> ClaimTaskStatusEnums.CLAIMED.getCode().equals(task.getStatus()))
+                .filter(task -> ConfirmationTaskEnums.CLAIMED.getCode().equals(task.getStatus()))
                 .count();
 
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataid);

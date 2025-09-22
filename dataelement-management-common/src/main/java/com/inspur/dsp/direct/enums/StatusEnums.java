@@ -19,7 +19,7 @@ public enum StatusEnums {
     PENDING_APPROVAL("pending_approval", "待核定"),
     PENDING_NEGOTIATION("pending_negotiation", "待协商"),
     NEGOTIATING("negotiating", "协商中"),
-    CONFIRMED("confirmed", "已定源");
+    CONFIRMED("confirmed", "已定源"),
 
     ;
 

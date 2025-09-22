@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 采集方
  */
@@ -39,15 +41,22 @@ public class CollectController {
     }
 
     /**
-     * 002-001、002-拒绝/通过成为数源单位 TODO 改成批量处理
+     * 导出数据
+     */
+    @PostMapping("/exportData")
+    @RespAdvice
+    public void exportData(@RequestBody CollectDataElementPageDto dto, HttpServletResponse response) {
+        collectService.exportData(dto, response);
+    }
+
+    /**
+     * 002-001、002-拒绝/通过成为数源单位 改成批量处理
      */
     @PostMapping("/refuse")
     @RespAdvice
     public void refuse(@RequestBody @Validated RefuseDto dto) {
         collectService.refuse(dto);
     }
-
-    // TODO 导出
 
     /**
      * 002-1-详情

@@ -13,11 +13,11 @@ public class CollectDataElementPageDto {
     /**
      * 处理时间结束
      */
-    private String handleTimeEnd;
+    private String processDateEnd;
     /**
      * 处理时间开始
      */
-    private String handleTimeStart;
+    private String processDateBegin;
     /**
      * 页码
      */
@@ -37,7 +37,7 @@ public class CollectDataElementPageDto {
     /**
      * 基准数据元名称、定义
      */
-    private String serarch;
+    private String keyword;
     /**
      * 状态集合，状态
      */
