@@ -6,7 +6,10 @@ import com.inspur.dsp.direct.entity.dto.GetDeptSearchDto;
 import com.inspur.dsp.direct.entity.vo.CollectionDeptTreeVo;
 import com.inspur.dsp.direct.entity.vo.GetDeptSearchVo;
 import com.inspur.dsp.direct.entity.vo.GetOrganInfoVo;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 
 public interface CommonService {
@@ -32,4 +35,27 @@ public interface CommonService {
      * @return 部门信息
      */
     OrganizationUnit getOrgInfoByOrgCode(String orgCode);
+
+    /**
+     * excel导入统一处理方法
+     */
+    /**
+     * excel导入统一处理方法
+     * @param file Excel文件
+     * @param clazz Excel数据实体类类型
+     * @param <T> 数据实体类型
+     * @return 解析后的数据列表
+     */
+    <T> List<T> importExcelData(MultipartFile file, Class<T> clazz);
+
+    /**
+     * excel导出统一处理方法
+     * @param dataList 导出的数据集合
+     * @param response HttpServletResponse对象
+     * @param fileName 导出的文件名
+     * @param clazz Excel数据实体类类型
+     * @param <T> 数据实体类型
+     * @throws IOException IO异常
+     */
+    <T> void exportExcelData(List<T> dataList, HttpServletResponse response, String fileName, Class<T> clazz) throws IOException;
 }
