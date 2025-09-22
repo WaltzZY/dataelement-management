@@ -1,0 +1,55 @@
+package com.inspur.dsp.direct.console.controller.best;
+
+import com.inspur.dsp.direct.annotation.RespAdvice;
+import com.inspur.dsp.direct.dbentity.BaseDataElement;
+import com.inspur.dsp.direct.dbentity.ConfirmationTask;
+import com.inspur.dsp.direct.dbentity.SourceEventRecord;
+import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
+import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
+import com.inspur.dsp.direct.service.ViewDetailService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/viewCommon")
+public class ViewDetailController {
+
+    @Autowired
+    private ViewDetailService viewDetailService;
+
+    @RespAdvice
+    @GetMapping("/getDuPontInfo/{dataId}")
+    public GetDuPontInfoVo getDuPontInfo(@PathVariable("dataId") String dataId) {
+        return viewDetailService.getDuPontInfo(dataId);
+    }
+
+    @RespAdvice
+    @PostMapping("/getElementDetail/{dataId}")
+    public BaseDataElement getElementDetail(@PathVariable("dataId") String dataId) {
+        return viewDetailService.getElementDetail(dataId);
+    }
+
+
+    @RespAdvice
+    @PostMapping("/getSourceEventRecord/{dataId}")
+    public SourceEventRecord getSourceEventRecord(@PathVariable("dataId") String dataId) {
+        return viewDetailService.getSourceEventRecord(dataId);
+    }
+
+
+    @RespAdvice
+    @PostMapping("/getCollectUnitList/{dataId}")
+    public List<ConfirmationTask> getCollectUnitList(@PathVariable("dataId") String dataId) {
+        return viewDetailService.getCollectUnitList(dataId);
+    }
+
+
+    @RespAdvice
+    @GetMapping("/getFlowInfo/{dataId}")
+    public List<FlowNodeDTO> getFlowInfo(@PathVariable("dataId") String dataId) {
+        return viewDetailService.getFlowInfo(dataId);
+    }
+
+}

@@ -7,5 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface SourceEventRecordMapper extends BaseMapper<SourceEventRecord> {
+
     SourceEventRecord selectFirstByDataElementIdOrderBySourceDateDesc(@Param("dataElementId") String dataElementId);
+
 }

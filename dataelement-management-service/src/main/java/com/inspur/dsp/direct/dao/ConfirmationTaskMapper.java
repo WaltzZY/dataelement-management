@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.inspur.dsp.direct.dbentity.ConfirmationTask;
+import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -39,5 +40,21 @@ public interface ConfirmationTaskMapper extends BaseMapper<ConfirmationTask> {
      * @return
      */
     List<ConfirmationTask> selectAllByTasktypeAndBaseDataelementDataid(@Param("tasktype") String tasktype, @Param("baseDataelementDataid") String baseDataelementDataid);
+
+    /**
+     * 根据数据ID查询确认任务列表
+     *
+     * @param baseDataElementSearchDTO 查询条件
+     * @return 确认任务列表
+     */
+    List<ConfirmationTask> getTaskByDataId(@Param("dto") BaseDataElementSearchDTO baseDataElementSearchDTO);
+
+    int insert(ConfirmationTask entity);
+
+    List<ConfirmationTask> selectAllByStatusAndBaseDataelementDataidIn(
+            @Param("status") String status,
+            @Param("baseDataelementDataid") String baseDataelementDataid);
+
+    int updateById(ConfirmationTask entity);
 
 }

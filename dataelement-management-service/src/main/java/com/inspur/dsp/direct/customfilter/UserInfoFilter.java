@@ -39,6 +39,7 @@ public class UserInfoFilter implements Filter {
         if (requestURI.contains("loginStatus") || requestURI.contains("login") || requestURI.contains("logout") || requestURI.contains("captcha")
                 // 这个接口前端本地测试加不上cookie
                 || requestURI.contains("/dataItem/join")
+                || requestURI.contains("/viewCommon") || requestURI.contains("/collector/situation") || requestURI.contains("/determineResult/organiser") || requestURI.contains("/determineResult/collector")
         ) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {

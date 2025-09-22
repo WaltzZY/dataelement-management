@@ -149,4 +149,12 @@ public class BaseDataElement implements Serializable {
     @TableField(value = "last_modify_account")
     @Size(max = 30, message = "最后修改人账号最大长度要小于 30")
     private String lastModifyAccount;
+
+    /**
+     * 最后修改人账号
+     */
+    @TableField(exist = false)
+    private SourceEventRecord sourceEventRecord;
+
+
 }

@@ -49,4 +49,6 @@ public class BspLoginUserInfoUtils {
         log.warn("当前登录人在此系统中未分配角色");
         return new ArrayList<>();
     }
+
+
 }
