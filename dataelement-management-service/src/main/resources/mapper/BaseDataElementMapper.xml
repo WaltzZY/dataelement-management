@@ -192,7 +192,7 @@
         confirm_date AS confirmDate,
         collectunitqty
         FROM base_data_element bdl
-        WHERE status = 'confirmed'
+        WHERE status = 'designated_source'
         <if test="dto.sendDateBegin != null and dto.sendDateBegin != ''">
             AND send_date >= #{dto.sendDateBegin}
         </if>

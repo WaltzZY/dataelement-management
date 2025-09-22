@@ -173,7 +173,7 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
                 // 创建基准数据元更新对象
                 BaseDataElement updateBase = BaseDataElement.builder()
                         .dataid(baseInfo.getDataid())
-                        .status(StatusEnums.CONFIRMED.getCode())
+                        .status(StatusEnums.DESIGNATED_SOURCE.getCode())
                         .lastModifyDate(new Date())
                         .confirmDate(new Date())
                         .lastModifyAccount(userInfo.getAccount())

@@ -10,7 +10,7 @@ import com.inspur.dsp.direct.constant.Constants;
  * 待核定 pending_approval
  * 待协商 pending_negotiation
  * 协商中 negotiating
- * 已定源 confirmed
+ * 已定源 designated_source
  */
 public enum StatusEnums {
     PENDING_SOURCE("pending_source", "待定源"),
@@ -19,7 +19,7 @@ public enum StatusEnums {
     PENDING_APPROVAL("pending_approval", "待核定"),
     PENDING_NEGOTIATION("pending_negotiation", "待协商"),
     NEGOTIATING("negotiating", "协商中"),
-    CONFIRMED("confirmed", "已定源"),
+    DESIGNATED_SOURCE("designated_source", "已定源"),
 
     ;
 

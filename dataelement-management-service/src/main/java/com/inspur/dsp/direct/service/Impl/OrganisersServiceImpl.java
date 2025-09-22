@@ -193,7 +193,7 @@ public class OrganisersServiceImpl implements OrganisersService {
         manualSourceNode.setNodeName("手动定源");
         if (confirmationTask.getStatus().equals(StatusEnums.NEGOTIATING.getCode())) {
             manualSourceNode.setNodeShowStatus(NodeStatusEnums.HANDLING.getStatus());
-        } else if (confirmationTask.getStatus().equals(StatusEnums.CONFIRMED.getCode())) {
+        } else if (confirmationTask.getStatus().equals(StatusEnums.DESIGNATED_SOURCE.getCode())) {
             manualSourceNode.setNodeShowStatus(NodeStatusEnums.HANDLE_COMPLETE.getStatus());
             manualSourceNode.setNodeHandleUserName(baseDataElement.getLastModifyAccount());
             manualSourceNode.setPassDate(baseDataElement.getLastModifyDate());
@@ -231,7 +231,7 @@ public class OrganisersServiceImpl implements OrganisersService {
                     confirmationTask.getProcessingDate(),
                     confirmationTask.getProcessingResult()));
             sourceRequestLists.add(createSourceRequestListNode("核定数源单位", NodeStatusEnums.HANDLING.getStatus()));
-        } else if (status.equals(StatusEnums.CONFIRMED.getCode())) {
+        } else if (status.equals(StatusEnums.DESIGNATED_SOURCE.getCode())) {
             // 已定源
             sourceRequestLists.add(createSourceRequestListNode("发起定源",
                     NodeStatusEnums.HANDLE_COMPLETE.getStatus(),
@@ -409,7 +409,7 @@ public class OrganisersServiceImpl implements OrganisersService {
         // 修改基准数据元定源信息
         baseDataElement.setSourceUnitCode(dto.getSourceUnitCode());
         baseDataElement.setSourceUnitName(dto.getSourceUnitName());
-        baseDataElement.setStatus(StatusEnums.CONFIRMED.getCode());
+        baseDataElement.setStatus(StatusEnums.DESIGNATED_SOURCE.getCode());
         baseDataElement.setPublishDate(new Date());
         baseDataElement.setLastModifyAccount(userInfo.getAccount());
         baseDataElement.setLastModifyDate(new Date());
@@ -483,7 +483,7 @@ public class OrganisersServiceImpl implements OrganisersService {
                 four.setNodeShowStatus(NodeStatusEnums.HANDLING.getStatus());
             }
             // 如果状态是已经定源, 则展示完成
-            if (confirmationTask.getStatus().equals(StatusEnums.CONFIRMED.getCode())) {
+            if (confirmationTask.getStatus().equals(StatusEnums.DESIGNATED_SOURCE.getCode())) {
                 four.setNodeShowStatus(NodeStatusEnums.HANDLE_COMPLETE.getStatus());
                 // 处理人信息取基准元数据对象中的最后修改人信息
                 four.setNodeHandleUserName(baseDataElement.getLastModifyAccount());
@@ -543,7 +543,7 @@ public class OrganisersServiceImpl implements OrganisersService {
                 sourceRequestLists.add(three);
             }
             // 订单状态为已定源, 三个节点, 发起定源节点显示状态为完成, 采集单位确认节点为完成, 核定数源单位节点为完成
-            if (Objects.nonNull(confirmationTask) && confirmationTask.getStatus().equals(StatusEnums.CONFIRMED.getCode())) {
+            if (Objects.nonNull(confirmationTask) && confirmationTask.getStatus().equals(StatusEnums.DESIGNATED_SOURCE.getCode())) {
                 SourceRequestList one = new SourceRequestList();
                 one.setNodeName("发起定源");
                 one.setNodeShowStatus(NodeStatusEnums.HANDLE_COMPLETE.getStatus());
@@ -607,7 +607,7 @@ public class OrganisersServiceImpl implements OrganisersService {
         // 修改基准数据元定源信息
         baseDataElement.setSourceUnitCode(dto.getSourceUnitCode());
         baseDataElement.setSourceUnitName(dto.getSourceUnitName());
-        baseDataElement.setStatus(StatusEnums.CONFIRMED.getCode());
+        baseDataElement.setStatus(StatusEnums.DESIGNATED_SOURCE.getCode());
         baseDataElement.setPublishDate(new Date());
         baseDataElement.setLastModifyAccount(userInfo.getAccount());
         baseDataElement.setLastModifyDate(new Date());
