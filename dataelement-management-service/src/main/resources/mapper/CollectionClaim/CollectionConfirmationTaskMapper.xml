@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.CollectionClaim.CollectionConfirmationTaskMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="ConfirmationTaskResultMap" type="com.inspur.dsp.direct.dbentity.ConfirmationTask">
+        <id column="task_id" property="taskId" jdbcType="VARCHAR"/>
+        <result column="base_dataelement_dataid" property="baseDataelementDataid" jdbcType="VARCHAR"/>
+        <result column="tasktype" property="tasktype" jdbcType="VARCHAR"/>
+        <result column="send_unit_code" property="sendUnitCode" jdbcType="VARCHAR"/>
+        <result column="send_unit_name" property="sendUnitName" jdbcType="VARCHAR"/>
+        <result column="send_date" property="sendDate" jdbcType="TIMESTAMP"/>
+        <result column="sender_account" property="senderAccount" jdbcType="VARCHAR"/>
+        <result column="sender_name" property="senderName" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="processing_unit_code" property="processingUnitCode" jdbcType="VARCHAR"/>
+        <result column="processing_unit_name" property="processingUnitName" jdbcType="VARCHAR"/>
+        <result column="processing_date" property="processingDate" jdbcType="TIMESTAMP"/>
+        <result column="processing_result" property="processingResult" jdbcType="VARCHAR"/>
+        <result column="processing_opinion" property="processingOpinion" jdbcType="VARCHAR"/>
+        <result column="processor_account" property="processorAccount" jdbcType="VARCHAR"/>
+        <result column="processor_name" property="processorName" jdbcType="VARCHAR"/>
+<!--        <result column="approval_date" property="approvalDate" jdbcType="TIMESTAMP"/>-->
+<!--        <result column="approval_account" property="approvalAccount" jdbcType="VARCHAR"/>-->
+<!--        <result column="approval_name" property="approvalName" jdbcType="VARCHAR"/>-->
+<!--        <result column="text" property="text" jdbcType="LONGVARCHAR"/>-->
+    </resultMap>
+
+    <!-- 根据数据元ID查询确认任务 -->
+    <select id="selectConfirmationTaskByDataElementDataId" resultMap="ConfirmationTaskResultMap">
+        SELECT *
+        FROM confirmation_task
+        WHERE base_dataelement_dataid = #{dataElementDataId}
+        AND tasktype = '认领任务'
+        ORDER BY send_date DESC
+    </select>
+
+    <!-- 更新确认任务状态 -->
+    <update id="updateConfirmationTaskStatus">
+        UPDATE confirmation_task
+        SET status = #{status},
+        processing_date = #{processingDate},
+        processor_account = #{processorAccount},
+        processor_name = #{processorName},
+        processing_unit_code = #{processingUnitCode},
+        processing_unit_name = #{processingUnitName},
+        processing_opinion = #{processingOpinion}
+<!--        <if test="text != null and text != ''">-->
+<!--            , text = #{text}-->
+<!--        </if>-->
+        WHERE task_id = #{taskId}
+    </update>
+
+    <!-- 批量更新确认任务状态 -->
+    <update id="batchUpdateConfirmationTaskStatus">
+        <foreach collection="taskIds" item="taskId" separator=";">
+            UPDATE confirmation_task
+            SET status = #{status},
+            processing_date = NOW(),
+            processor_account = #{processorAccount},
+            processor_name = #{processorName},
+            processing_unit_code = #{processingUnitCode},
+            processing_unit_name = #{processingUnitName}
+            <if test="text != null and text != ''">
+                , text = #{text}
+            </if>
+            WHERE task_id = #{taskId}
+        </foreach>
+    </update>
+</mapper>
