@@ -48,12 +48,13 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         String orgCode = userInfo.getOrgCode();
         baseDataElementSearchDTO.setOrgCode(orgCode);
         List<String> statusList = baseDataElementSearchDTO.getStatusList();
-
-        List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
-        List<String> baseList = lists[0];
-        List<String> taskList = lists[1];
-        baseDataElementSearchDTO.setBaseStatusList(baseList);
-        baseDataElementSearchDTO.setTaskStatusList(taskList);
+        if (statusList != null && !statusList.isEmpty()) {
+            List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
+            List<String> baseList = lists[0];
+            List<String> taskList = lists[1];
+            baseDataElementSearchDTO.setBaseStatusList(baseList);
+            baseDataElementSearchDTO.setTaskStatusList(taskList);
+        }
         List<DataElementWithTaskVo> baseDataElementList = baseDataElementMapper.getDetermineResultListWithOrganiser(page, baseDataElementSearchDTO);
         // 校验结果
         if (CollectionUtils.isEmpty(baseDataElementList)) {
