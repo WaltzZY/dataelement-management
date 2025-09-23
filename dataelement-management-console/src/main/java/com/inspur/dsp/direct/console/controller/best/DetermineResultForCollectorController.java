@@ -2,8 +2,8 @@ package com.inspur.dsp.direct.console.controller.best;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
-import com.inspur.dsp.direct.entity.dto.BaseDataElementDTO;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
+import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.DetermineResultForCollectorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +49,7 @@ public class DetermineResultForCollectorController {
     @PostMapping("/download")
     public void download(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
         try {
-//            determineResultForCollectorService.download(baseDataElementSearchDTO, response);
+           determineResultForCollectorService.download(baseDataElementSearchDTO, response);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("数据元不存在", e);
         } catch (Exception e) {

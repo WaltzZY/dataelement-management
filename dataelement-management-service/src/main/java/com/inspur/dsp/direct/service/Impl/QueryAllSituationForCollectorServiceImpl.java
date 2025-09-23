@@ -5,13 +5,19 @@ import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
+import com.inspur.dsp.direct.entity.dto.QueryAllSituationForCollectorExportDTO;
 import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
+import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.QueryAllSituationForCollectorService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,11 +26,15 @@ import java.util.List;
  *
  * @author system
  */
+@Slf4j
 @Service
 public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituationForCollectorService {
 
     @Autowired
     private BaseDataElementMapper baseDataElementMapper;
+
+    @Autowired
+    private CommonService commonService;
 
     /**
      * 分页查询列表数据
@@ -133,47 +143,46 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
      * 下载数据
      */
     @Override
-    public void download(BaseDataElementSearchDTO baseDataElementSearchDTO) {
-//        // 查询数据
-//        List<BaseDataElement> dataList = baseDataElementMapper.getAllSituationList(baseDataElementSearchDTO);
-//
-//        // 校验结果
-//        if (CollectionUtils.isEmpty(dataList)) {
-//            throw new IllegalArgumentException("查询结果为空");
-//        }
-//
-//        // 转换为导出对象
-//        List<DataExport> exportList = new ArrayList<>();
-//        for (BaseDataElement element : dataList) {
-//            // 查询事件记录详情
-//            BaseDataElementSearchDTO searchDTO = new BaseDataElementSearchDTO();
-//            searchDTO.setDataId(element.getDataid());
-//            SourceEventRecord sourceEventRecord = sourceEventRecordMapper.getEventRecordByDataId(searchDTO);
-//
-//            // 构建导出对象
-//            DataExport dataExport = new DataExport();
-//            dataExport.setDataId(element.getDataid());
-//            dataExport.setName(element.getName());
-//            dataExport.setDefinition(element.getDefinition());
-//            dataExport.setDatatype(element.getDatatype());
-//            dataExport.setSendDate(element.getSendDate() != null ? element.getSendDate() : null);
-//
-//            // TODO: 设置采集单位数量，需要根据实际业务逻辑确定
-//            if (sourceEventRecord != null) {
-//                // dataExport.setCollectunitqty(sourceEventRecord.getCollectUnitQty());
-//            }
-//            exportList.add(dataExport);
-//        }
-//
-//        // 使用EasyExcel导出
-//        try {
-//            // TODO: 需要配置HttpServletResponse的下载头信息
-//            // EasyExcel.write(response.getOutputStream(), DataExport.class)
-//            //         .sheet("数据导出")
-//            //         .doWrite(exportList);
-//        } catch (Exception e) {
-//            throw new RuntimeException("数据导出失败", e);
-//        }
-        return;
+    public void download(BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        // 获取登录人账户
+        String orgCode = userInfo.getOrgCode();
+        baseDataElementSearchDTO.setOrgCode(orgCode);
+        List<String> statusList = baseDataElementSearchDTO.getStatusList();
+
+        List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
+        List<String> baseList = lists[0];
+        List<String> taskList = lists[1];
+        baseDataElementSearchDTO.setBaseStatusList(baseList);
+        baseDataElementSearchDTO.setTaskStatusList(taskList);
+        List<DataElementWithTaskVo> dataElementWithTaskVoList = baseDataElementMapper.getDetermineResultListWithOrganiserForExport(baseDataElementSearchDTO);
+        // 校验结果
+        if (CollectionUtils.isEmpty(dataElementWithTaskVoList)) {
+            log.error("导出错误!");
+            return;
+        }
+        List<QueryAllSituationForCollectorExportDTO> exportDTOList = new ArrayList<>();
+        for (DataElementWithTaskVo dataElementWithTaskVo : dataElementWithTaskVoList) {
+            QueryAllSituationForCollectorExportDTO exportDTO = new QueryAllSituationForCollectorExportDTO();
+            String statusChinese = StatusUtil.getStatusChinese(dataElementWithTaskVo.getStatus());
+            exportDTO.setDefinition(dataElementWithTaskVo.getDefinition());
+            exportDTO.setName(dataElementWithTaskVo.getName());
+            exportDTO.setStatus(statusChinese);
+            exportDTO.setSendDate(dataElementWithTaskVo.getSendDate());
+            exportDTO.setReceiveDate(dataElementWithTaskVo.getReceiveDate());
+            exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate());
+            exportDTO.setDataType(dataElementWithTaskVo.getDataType());
+            exportDTOList.add(exportDTO);
+        }
+
+        try {
+            commonService.exportExcelData(exportDTOList, response, "组织方-已定源数据", QueryAllSituationForCollectorExportDTO.class);
+        } catch (IOException e) {
+            log.error("导出数据[组织方-已定源数据]失败", e);
+            throw new RuntimeException("导出数据[组织方-已定源数据]失败");
+        }
+
     }
 }

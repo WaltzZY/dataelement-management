@@ -1,8 +1,6 @@
 package com.inspur.dsp.direct.console.controller.best;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
 import com.inspur.dsp.direct.service.QueryAllSituationForCollectorService;
@@ -72,6 +70,6 @@ public class QueryAllSituationForCollectorController {
      */
     @PostMapping("/download")
     public void download(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
-//        queryAllSituationForCollectorService.download(baseDataElementSearchDTO);
+        queryAllSituationForCollectorService.download(baseDataElementSearchDTO,response);
     }
 }

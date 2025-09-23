@@ -332,12 +332,104 @@
 
 
     </select>
-    <select id="getAllSituationList" resultType="com.inspur.dsp.direct.dbentity.BaseDataElement">
 
+    <select id="getDetermineResultListWithOrganiserForExport" parameterType="com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO" resultMap="getDetermineResultListWithOrganiserResultMap">
 
+        select  bde.dataid,
+        bde.name,
+        bde.definition,
+        bde.datatype,
+        bde.status,
+        bde.send_date,
+        ct.task_id,
+        ct.send_date as recieve_date,
+        ct.processing_date
+        from base_data_element bde
+        left join
+        confirmation_task ct on bde.dataid = ct.base_dataelement_dataid
+        <where>
+            <!-- 状态条件 -->
+            <if test="taskStatusList != null and taskStatusList.size() > 0 or baseStatusList != null and baseStatusList.size() > 0">
+                <choose>
+                    <when test="(taskStatusList != null and taskStatusList.size() > 0) or (baseStatusList != null and baseStatusList.size() > 0)">
+                        <foreach collection="taskStatusList" item="status" open="(" separator=" OR " close=")">
+                            <!-- 1. 待确认、待认领：使用从表status -->
+                            <if test="status == 'pending'">
+                                ct.status = 'pending'
+                            </if>
+                            <if test="status == 'pending_claimed'">
+                                ct.status = 'pending_claimed'
+                            </if>
+
+                            <!-- 2. 已确认：从表status=待核定，主表status=已确认 -->
+                            <if test="status == 'confirmed'">
+                                ct.status = 'pending_approval' AND bde.status = 'confirmed'
+                            </if>
+
+                            <!-- 3. 已拒绝：从表status=待协商，主表status=已拒绝 -->
+                            <if test="status == 'rejected'">
+                                ct.status = 'pending_negotiation' AND bde.status = 'rejected'
+                            </if>
+
+                            <!-- 4. 已认领：主表status IN (认领中,待核定,待协商)，从表status=已认领 -->
+                            <if test="status == 'claimed'">
+                                bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed'
+                            </if>
+
+                            <!-- 5. 不认领：主表status IN (认领中,待核定,待协商)，从表status=不认领 -->
+                            <if test="status == 'not_claimed'">
+                                bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed'
+                            </if>
+                        </foreach>
+
+                        <!-- 添加baseStatusList的条件 -->
+                        <if test="baseStatusList != null and baseStatusList.size() > 0">
+                            <if test="taskStatusList != null and taskStatusList.size() > 0">OR</if>
+                            <foreach collection="baseStatusList" item="status" open="(" separator=" OR " close=")">
+                                <!-- 6. 协商中：使用主表status -->
+                                <if test="status == 'negotiating'">
+                                    bde.status = 'negotiating'
+                                </if>
+
+                                <!-- 7. 已定源：使用主表status -->
+                                <if test="status == 'confirmed'">
+                                    bde.status = 'confirmed'
+                                </if>
+                            </foreach>
+                        </if>
+                    </when>
+                </choose>
+            </if>
+
+            <!-- 附加条件 -->
+            <if test="base.orgCode != null and base.orgCode != ''">
+                AND bde.source_unit_code = #{base.orgCode}
+            </if>
+            <if test="base.sendDateBegin != null and base.sendDateBegin != '' and base.sendDateEnd != null and base.sendDateEnd != ''">
+                AND ct.send_date BETWEEN #{base.sendDateBegin} AND #{base.sendDateEnd}
+            </if>
+
+            <if test="base.processDateBegin != null and base.processDateBegin != '' and base.processDateEnd != null and base.processDateEnd != ''">
+                AND ct.processing_date BETWEEN #{base.processDateBegin} AND #{base.processDateEnd}
+            </if>
+
+            <if test="base.receiveDateStart != null and base.receiveDateStart != '' and base.receiveDateEnd != null and base.receiveDateEnd != ''">
+                AND bde.send_date BETWEEN #{base.receiveDateStart} AND #{base.receiveDateEnd}
+            </if>
+
+            <if test="name != null and name != ''">
+                AND bde.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+
+            <if test="definition != null and definition != ''">
+                AND bde.definition LIKE CONCAT('%', #{definition}, '%')
+            </if>
+        </where>
 
 
     </select>
+
+
 
 
   <!--auto generated by MybatisCodeHelper on 2025-09-23-->

@@ -55,25 +55,11 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
     List<GetPendingApprovalPageVo> selectConfirmedPage(@Param("page") Page<?> page, @Param("dto") GetPendingApprovalPageDto dto, @Param("sortSql") String sortSql);
 
 
-    /**
-     * 分页查询已定源结果列表
-     *
-     * @param baseDataElementSearchDTO 查询参数
-     * @return 基准数据元列表
-     */
-    List<BaseDataElement> getDetermineResultList(BaseDataElementSearchDTO baseDataElementSearchDTO);
-
-    /**
-     * 查询整体情况列表（用于采集方）
-     *
-     * @param baseDataElementSearchDTO 查询参数
-     * @return 基准数据元列表
-     */
-    List<BaseDataElement> getAllSituationList(BaseDataElementSearchDTO baseDataElementSearchDTO, @Param("orgCode") String orgCode);
-
-
     List<DataElementWithTaskVo> getDetermineResultListWithOrganiser(Page page, @Param("base") BaseDataElementSearchDTO baseDataElementSearchDTO);
 
-    BaseDataElement selectFirstByName(@Param("name")String name);
+    List<DataElementWithTaskVo> getDetermineResultListWithOrganiserForExport(@Param("base") BaseDataElementSearchDTO baseDataElementSearchDTO);
+
+
+    BaseDataElement selectFirstByName(@Param("name") String name);
 
 }

@@ -1,9 +1,10 @@
 package com.inspur.dsp.direct.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 采集方查询整体情况服务接口
@@ -41,7 +42,8 @@ public interface QueryAllSituationForCollectorService {
      * 下载数据
      *
      * @param baseDataElementSearchDTO 查询条件
+     * @param response
      * @return 基准数据元列表
      */
-    void download(BaseDataElementSearchDTO baseDataElementSearchDTO);
+    void download(BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response);
 }
