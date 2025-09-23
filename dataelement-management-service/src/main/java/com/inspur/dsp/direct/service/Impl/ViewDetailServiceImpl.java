@@ -1,13 +1,16 @@
 package com.inspur.dsp.direct.service.Impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.*;
 import com.inspur.dsp.direct.dbentity.*;
+import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.bo.DomainSourceUnitInfo;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
 import com.inspur.dsp.direct.entity.enums.DataElementStatus;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 import com.inspur.dsp.direct.service.ViewDetailService;
+import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ViewDetailServiceImpl implements ViewDetailService {
@@ -34,6 +36,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
     @Autowired
     private SourceEventRecordMapper sourceEventRecordMapper;
+
 
     @Override
     public GetDuPontInfoVo getDuPontInfo(String dataid) {
@@ -56,6 +59,26 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
         String statusChinese = StatusUtil.getStatusChinese(baseDataElement.getStatus());
         baseDataElement.setStatusChinese(statusChinese);
+        return baseDataElement;
+    }
+
+    @Override
+    public BaseDataElement getElementDetailWithTask(String dataId) {
+
+        BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        // 获取登录人账户
+        String orgCode = userInfo.getOrgCode();
+
+        QueryWrapper<ConfirmationTask> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("processing_unit_code", orgCode);
+        queryWrapper.eq("base_dataelement_dataid", dataId);
+        ConfirmationTask confirmationTask = confirmationTaskMapper.selectOne(queryWrapper);
+        if (confirmationTask == null) {
+            baseDataElement.setTaskStatus("");
+        }
+        String statusChinese = StatusUtil.getStatusChinese(confirmationTask.getStatus());
+        baseDataElement.setTaskStatus(statusChinese);
         return baseDataElement;
     }
 
@@ -172,6 +195,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
         return flow;
     }
+
 
     private List<FlowNodeDTO> getConfirmingFlow(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);

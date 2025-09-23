@@ -18,5 +18,6 @@ public interface ViewDetailService {
 
     List<ConfirmationTask> getCollectUnitList(String dataId);
 
+    BaseDataElement getElementDetailWithTask(String dataId);
 
 }
