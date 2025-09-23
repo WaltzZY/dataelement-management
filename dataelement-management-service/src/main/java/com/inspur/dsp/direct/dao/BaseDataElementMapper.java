@@ -74,5 +74,6 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
 
     List<DataElementWithTaskVo> getDetermineResultListWithOrganiser(Page page, @Param("base") BaseDataElementSearchDTO baseDataElementSearchDTO);
 
+    BaseDataElement selectFirstByName(@Param("name")String name);
 
 }
