@@ -117,11 +117,11 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
     private List<FlowNodeDTO> getNotStartedFlow(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
-        if (Objects.isNull(baseDataElement)) {
+        if (baseDataElement == null) {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"pending_source".equals(baseDataElement.getStatus())) {
+        if (!DataElementStatus.PENDING_SOURCE.getStatus().equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -175,11 +175,11 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
     private List<FlowNodeDTO> getConfirmingFlow(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
-        if (Objects.isNull(baseDataElement)) {
+        if (baseDataElement == null) {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"confirming".equals(baseDataElement.getStatus())) {
+        if (!DataElementStatus.CONFIRMING.getStatus().equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -225,11 +225,10 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
     private List<FlowNodeDTO> getClaimingFlow(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
-        if (Objects.isNull(baseDataElement)) {
+        if (baseDataElement == null) {
             throw new RuntimeException("数据元不存在!");
         }
-
-        if (!"claimed_ing".equals(baseDataElement.getStatus())) {
+        if (!DataElementStatus.CLAIMED_ING.getStatus().equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -275,11 +274,11 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
     private List<FlowNodeDTO> getToBeVerifiedFlow(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
-        if (Objects.isNull(baseDataElement)) {
+        if (baseDataElement == null) {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"pending_approval".equals(baseDataElement.getStatus())) {
+        if (!DataElementStatus.PENDING_APPROVAL.getStatus().equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -350,11 +349,11 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
     private List<FlowNodeDTO> getToBeNegotiatedFlow(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
-        if (Objects.isNull(baseDataElement)) {
+        if (baseDataElement == null) {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"pending_negotiation".equals(baseDataElement.getStatus())) {
+        if (!DataElementStatus.PENDING_NEGOTIATION.getStatus().equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -452,26 +451,26 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
     private List<FlowNodeDTO> getNegotiatingFlow(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
-        if (Objects.isNull(baseDataElement)) {
+        if (baseDataElement == null) {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"negotiating".equals(baseDataElement.getStatus())) {
+        if (!DataElementStatus.NEGOTIATING.getStatus().equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
         List<DomainSourceUnitInfo> domainSourceUnitList = domainDataElementMapper.selectSourceUnitInfoByBaseDataid(Collections.singletonList(dataId));
-        if (domainSourceUnitList.size() < 1) {
+        if (domainSourceUnitList.isEmpty()) {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
         List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), Collections.singletonList(dataId));
-        if (confirmationTaskList.size() < 1) {
+        if (confirmationTaskList.isEmpty()) {
             throw new RuntimeException("定源任务丢失!");
         }
 
         NegotiationRecord negotiationRecord = negotiationRecordMapper.selectFirstByBaseDataelementDataid(dataId);
-        if (Objects.isNull(negotiationRecord)) {
+        if (negotiationRecord == null) {
             throw new RuntimeException("协商记录不存在!");
         }
 
