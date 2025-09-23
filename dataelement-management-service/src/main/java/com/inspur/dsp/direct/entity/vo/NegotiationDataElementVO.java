@@ -40,6 +40,11 @@ public class NegotiationDataElementVO {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date confirmDate;
 
+    /**
+     * 采集单位数量
+     */
+    private Integer collectunitqty;
+
     /** 采集单位确认或认领的情况 */
     private List<CollectUnitsAndStatusVO> collectUnitsAndStatus;
 }

@@ -49,12 +49,4 @@ public interface ConfirmationTaskMapper extends BaseMapper<ConfirmationTask> {
      */
     List<ConfirmationTask> getTaskByDataId(@Param("dto") BaseDataElementSearchDTO baseDataElementSearchDTO);
 
-    int insert(ConfirmationTask entity);
-
-    List<ConfirmationTask> selectAllByStatusAndBaseDataelementDataidIn(
-            @Param("status") String status,
-            @Param("baseDataelementDataid") String baseDataelementDataid);
-
-    int updateById(ConfirmationTask entity);
-
 }

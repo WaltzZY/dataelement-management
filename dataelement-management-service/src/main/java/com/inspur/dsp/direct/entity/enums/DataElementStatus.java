@@ -8,7 +8,9 @@ public enum DataElementStatus {
     CLAIMED_ING("claimed_ing","认领中" ),
     PENDING_APPROVAL("pending_approval","待核定" ),
     PENDING_NEGOTIATION("pending_negotiation","待协商" ),
-    NEGOTIATING("negotiating","协商中" );
+    NEGOTIATING("negotiating","协商中" ),
+    DESIGNATED_SOURCE("designated_source","已定源" ),
+    REJECTED("rejected","已拒绝" );
 
     @Getter
     private final String status;

@@ -8,7 +8,10 @@ import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 import com.inspur.dsp.direct.service.ViewDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -30,6 +33,13 @@ public class ViewDetailController {
     public BaseDataElement getElementDetail(@PathVariable("dataId") String dataId) {
         return viewDetailService.getElementDetail(dataId);
     }
+
+    @RespAdvice
+    @GetMapping("/getElementDetailWithTask/{dataId}")
+    public BaseDataElement getElementDetailWithTask(@PathVariable("dataId") String dataId) {
+        return viewDetailService.getElementDetailWithTask(dataId);
+    }
+
 
 
     @RespAdvice
