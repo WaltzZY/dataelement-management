@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author system
  */
 @RestController
-@RequestMapping("/collector/situation")
+@RequestMapping("/situation/collector")
 public class QueryAllSituationForCollectorController {
 
     @Autowired
@@ -70,6 +70,6 @@ public class QueryAllSituationForCollectorController {
      */
     @PostMapping("/download")
     public void download(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
-        queryAllSituationForCollectorService.download(baseDataElementSearchDTO,response);
+        queryAllSituationForCollectorService.download(baseDataElementSearchDTO, response);
     }
 }
