@@ -12,6 +12,8 @@ public class BaseDataElementSearchDTO {
     private String keyword = "name";
     private String value;
     private String status;
+    private String sourceUnitName;
+    private List<String> sourceUnitCodeList;
     private String orgCode;
     private String sendDate;
     private String sendDateBegin;

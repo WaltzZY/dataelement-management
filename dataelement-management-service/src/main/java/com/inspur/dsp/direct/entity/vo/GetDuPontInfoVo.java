@@ -131,4 +131,6 @@ public class GetDuPontInfoVo {
 
     private String lastModifyAccount;
     private List<DomainDataElement> childList;
+
+    private String statusChinese;
 }

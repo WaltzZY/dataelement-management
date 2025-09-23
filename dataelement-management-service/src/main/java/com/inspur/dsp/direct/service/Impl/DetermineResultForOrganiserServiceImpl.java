@@ -3,6 +3,7 @@ package com.inspur.dsp.direct.service.Impl;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.domain.UserLoginInfo;
@@ -41,13 +42,19 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
         try {
             UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
             //获取登录人账户
-            String orgCode = userInfo.getOrgCode();
+            // String orgCode = userInfo.getOrgCode();
             QueryWrapper<BaseDataElement> queryWrapper = new QueryWrapper<>();
             String sendDateBegin = baseDataElementSearchDTO.getSendDateBegin();
             String sendDateEnd = baseDataElementSearchDTO.getSendDateEnd();
             if (StringUtils.isNotBlank(sendDateBegin) && StringUtils.isNotBlank(sendDateEnd)) {
                 queryWrapper.between("send_date", sendDateBegin, sendDateEnd);
             }
+
+            List<String> sourceUnitCodeList = baseDataElementSearchDTO.getSourceUnitCodeList();
+            if (sourceUnitCodeList != null && !sourceUnitCodeList.isEmpty()) {
+                queryWrapper.in("source_unit_code", sourceUnitCodeList);
+            }
+
             String keyword = baseDataElementSearchDTO.getKeyword();
             String value = baseDataElementSearchDTO.getValue();
             if (StringUtils.isNotBlank(keyword)) {
@@ -60,6 +67,11 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
             List<BaseDataElement> records = baseDataElementPage.getRecords();
             if (CollectionUtils.isEmpty(records)) {
                 page.setRecords(Collections.emptyList());
+            }
+            for (BaseDataElement baseDataElement : records) {
+                String status = baseDataElement.getStatus();
+                String statusChinese = StatusUtil.getStatusChinese(status);
+                baseDataElement.setStatusChinese(statusChinese);
             }
             return page;
         } catch (Exception e) {

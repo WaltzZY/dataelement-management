@@ -156,5 +156,10 @@ public class BaseDataElement implements Serializable {
     @TableField(exist = false)
     private SourceEventRecord sourceEventRecord;
 
+    /**
+     * 最后修改人账号
+     */
+    @TableField(exist = false)
+    private String statusChinese;
 
 }

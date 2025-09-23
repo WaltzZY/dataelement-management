@@ -1,16 +1,21 @@
 package com.inspur.dsp.direct.service.Impl;
 
+import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.*;
 import com.inspur.dsp.direct.dbentity.*;
 import com.inspur.dsp.direct.entity.bo.DomainSourceUnitInfo;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
+import com.inspur.dsp.direct.entity.enums.DataElementStatus;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 import com.inspur.dsp.direct.service.ViewDetailService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ViewDetailServiceImpl implements ViewDetailService {
@@ -33,7 +38,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
     @Override
     public GetDuPontInfoVo getDuPontInfo(String dataid) {
         BaseDataElement baseInfo = baseDataElementMapper.selectById(dataid);
-        if (Objects.isNull(baseInfo)) {
+        if (baseInfo == null) {
             throw new IllegalArgumentException("数据元不存在");
         }
         GetDuPontInfoVo getDuPontInfoVo = new GetDuPontInfoVo();
@@ -46,18 +51,19 @@ public class ViewDetailServiceImpl implements ViewDetailService {
     @Override
     public BaseDataElement getElementDetail(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
-        if (Objects.isNull(baseDataElement)) {
+        if (baseDataElement == null) {
             throw new IllegalArgumentException("数据元不存在");
         }
+        String statusChinese = StatusUtil.getStatusChinese(baseDataElement.getStatus());
+        baseDataElement.setStatusChinese(statusChinese);
         return baseDataElement;
     }
 
 
     @Override
     public SourceEventRecord getSourceEventRecord(String dataId) {
-
         SourceEventRecord sourceEventRecord = sourceEventRecordMapper.selectFirstByDataElementIdOrderBySourceDateDesc(dataId);
-        if (Objects.nonNull(sourceEventRecord)) {
+        if (sourceEventRecord != null) {
             return sourceEventRecord;
         }
         return new SourceEventRecord();
@@ -69,7 +75,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         if (confirmationTaskList != null) {
             for (ConfirmationTask confirmationTask : confirmationTaskList) {
                 String status = confirmationTask.getStatus();
-                String statusChinese = getStatusChinese(status);
+                String statusChinese = StatusUtil.getStatusChinese(status);
                 confirmationTask.setStatusChinese(statusChinese);
             }
             return confirmationTaskList;
@@ -77,41 +83,35 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         return Collections.emptyList();
     }
 
-    public static String getStatusChinese(String status) {
-
-        HashMap<String, String> statusList = new HashMap<>();
-        statusList.put("pending_source", "待定源");
-        statusList.put("confirming", "确认中");
-        statusList.put("claimed", "认领中");
-        statusList.put("pending_approval", "待核定");
-        statusList.put("pending_negotiation", "待协商");
-        statusList.put("negotiating", "协商中");
-        statusList.put("confirmed", "已定源");
-        return statusList.get(status);
-    }
 
     @Override
     public List<FlowNodeDTO> getFlowInfo(String dataId) {
         BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
-        if (Objects.isNull(baseDataElement)) {
+        if (baseDataElement == null) {
             throw new IllegalArgumentException("数据元不存在");
         }
         String status = baseDataElement.getStatus();
-        switch (status) {
-            case "pending_source":
+        DataElementStatus dataElementStatus;
+        try {
+            dataElementStatus = DataElementStatus.fromString(status);
+        } catch (IllegalArgumentException e) {
+            throw e; // 或者根据需求处理异常
+        }
+        switch (dataElementStatus) {
+            case PENDING_SOURCE:
                 return getNotStartedFlow(dataId);
-            case "confirming":
+            case CONFIRMING:
                 return getConfirmingFlow(dataId);
-            case "claimed_ing":
+            case CLAIMED_ING:
                 return getClaimingFlow(dataId);
-            case "pending_approval":
+            case PENDING_APPROVAL:
                 return getToBeVerifiedFlow(dataId);
-            case "pending_negotiation":
+            case PENDING_NEGOTIATION:
                 return getToBeNegotiatedFlow(dataId);
-            case "negotiating":
+            case NEGOTIATING:
                 return getNegotiatingFlow(dataId);
             default:
-                throw new IllegalArgumentException("不支持的数据元状态: " + status);
+                throw new IllegalArgumentException("不支持的数据元状态: " + dataElementStatus);
         }
     }
 
@@ -314,7 +314,8 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             node2.setNodeHandleUserName(task.getProcessingUnitName());
             node2.setPassDate(task.getProcessingDate());
             node2.setNodeResult("0");
-            node2.setNodeFeedback("确认本单位可以成为数源单位");
+            // node2.setNodeFeedback("确认本单位可以成为数源单位");
+            node2.setNodeFeedback("");
             node2.setNodeShowStatus(2);
         } else {
             // 获取状态为"确认"的任务
@@ -329,7 +330,8 @@ public class ViewDetailServiceImpl implements ViewDetailService {
                 node2.setNodeHandleUserName(confirmedTask.getProcessingUnitName());
                 node2.setPassDate(confirmedTask.getProcessingDate());
                 node2.setNodeResult("2");
-                node2.setNodeFeedback("单独认领");
+                // node2.setNodeFeedback("单独认领");
+                node2.setNodeFeedback("");
                 node2.setNodeShowStatus(2);
             }
         }

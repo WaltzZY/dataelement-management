@@ -2,6 +2,7 @@ package com.inspur.dsp.direct.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.dao.SourceEventRecordMapper;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
@@ -54,6 +55,11 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         List<BaseDataElement> records = baseDataElementPage.getRecords();
         if (CollectionUtils.isEmpty(records)) {
             page.setRecords(Collections.emptyList());
+        }
+        for (BaseDataElement baseDataElement : records) {
+            String status = baseDataElement.getStatus();
+            String statusChinese = StatusUtil.getStatusChinese(status);
+            baseDataElement.setStatusChinese(statusChinese);
         }
         return page.setRecords(records);
     }
