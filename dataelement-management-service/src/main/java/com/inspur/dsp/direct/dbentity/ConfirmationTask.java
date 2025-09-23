@@ -134,4 +134,10 @@ public class ConfirmationTask implements Serializable {
     @TableField(value = "processor_name")
     @Size(max = 30, message = "处理人姓名最大长度要小于 30")
     private String processorName;
+
+    /**
+     * 处理人姓名
+     */
+    @TableField(exist = false)
+    private String statusChinese;
 }

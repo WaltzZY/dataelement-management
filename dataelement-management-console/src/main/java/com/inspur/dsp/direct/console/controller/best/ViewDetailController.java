@@ -26,21 +26,21 @@ public class ViewDetailController {
     }
 
     @RespAdvice
-    @PostMapping("/getElementDetail/{dataId}")
+    @GetMapping("/getElementDetail/{dataId}")
     public BaseDataElement getElementDetail(@PathVariable("dataId") String dataId) {
         return viewDetailService.getElementDetail(dataId);
     }
 
 
     @RespAdvice
-    @PostMapping("/getSourceEventRecord/{dataId}")
+    @GetMapping("/getSourceEventRecord/{dataId}")
     public SourceEventRecord getSourceEventRecord(@PathVariable("dataId") String dataId) {
         return viewDetailService.getSourceEventRecord(dataId);
     }
 
 
     @RespAdvice
-    @PostMapping("/getCollectUnitList/{dataId}")
+    @GetMapping("/getCollectUnitList/{dataId}")
     public List<ConfirmationTask> getCollectUnitList(@PathVariable("dataId") String dataId) {
         return viewDetailService.getCollectUnitList(dataId);
     }

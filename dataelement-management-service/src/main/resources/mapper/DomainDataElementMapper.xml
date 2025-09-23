@@ -31,7 +31,7 @@
     select dataid, base_dataelement_dataid, source_unit_code, source_unit_name
     from domain_data_element
     where base_dataelement_dataid in
-    <foreach close=")" collection="baseDataIds" item="item" open="(" separator=",">
+    <foreach collection="baseDataIds" item="item" open="(" separator="," close=")" >
         #{item}
     </foreach>
   </select>

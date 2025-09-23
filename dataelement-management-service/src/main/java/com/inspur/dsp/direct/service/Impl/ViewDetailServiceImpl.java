@@ -10,10 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class ViewDetailServiceImpl implements ViewDetailService {
@@ -70,9 +67,27 @@ public class ViewDetailServiceImpl implements ViewDetailService {
     public List<ConfirmationTask> getCollectUnitList(String dataId) {
         List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(null, dataId);
         if (confirmationTaskList != null) {
+            for (ConfirmationTask confirmationTask : confirmationTaskList) {
+                String status = confirmationTask.getStatus();
+                String statusChinese = getStatusChinese(status);
+                confirmationTask.setStatusChinese(statusChinese);
+            }
             return confirmationTaskList;
         }
         return Collections.emptyList();
+    }
+
+    public static String getStatusChinese(String status) {
+
+        HashMap<String, String> statusList = new HashMap<>();
+        statusList.put("pending_source", "待定源");
+        statusList.put("confirming", "确认中");
+        statusList.put("claimed", "认领中");
+        statusList.put("pending_approval", "待核定");
+        statusList.put("pending_negotiation", "待协商");
+        statusList.put("negotiating", "协商中");
+        statusList.put("confirmed", "已定源");
+        return statusList.get(status);
     }
 
     @Override
@@ -83,17 +98,17 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
         String status = baseDataElement.getStatus();
         switch (status) {
-            case "待定源":
+            case "pending_source":
                 return getNotStartedFlow(dataId);
-            case "确认中":
+            case "confirming":
                 return getConfirmingFlow(dataId);
-            case "认领中":
+            case "claimed_ing":
                 return getClaimingFlow(dataId);
-            case "待核定":
+            case "pending_approval":
                 return getToBeVerifiedFlow(dataId);
-            case "待协商":
+            case "pending_negotiation":
                 return getToBeNegotiatedFlow(dataId);
-            case "协商中":
+            case "negotiating":
                 return getNegotiatingFlow(dataId);
             default:
                 throw new IllegalArgumentException("不支持的数据元状态: " + status);
@@ -106,7 +121,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"待定源".equals(baseDataElement.getStatus())) {
+        if (!"pending_source".equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -164,7 +179,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"确认中".equals(baseDataElement.getStatus())) {
+        if (!"confirming".equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -173,7 +188,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元采集单位数量异常!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn("", dataId);
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), dataId);
         if (confirmationTaskList.size() != 1) {
             throw new RuntimeException("定源任务数量异常!");
         }
@@ -214,7 +229,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"认领中".equals(baseDataElement.getStatus())) {
+        if (!"claimed_ing".equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -223,7 +238,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn("", dataId);
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), dataId);
         if (confirmationTaskList.size() < 2) {
             throw new RuntimeException("定源任务丢失!");
         }
@@ -264,7 +279,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"待核定".equals(baseDataElement.getStatus())) {
+        if (!"pending_approval".equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -273,7 +288,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn("", dataId);
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), dataId);
         if (confirmationTaskList.isEmpty()) {
             throw new RuntimeException("定源任务丢失!");
         }
@@ -337,7 +352,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"待协商".equals(baseDataElement.getStatus())) {
+        if (!"pending_negotiation".equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -346,7 +361,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn("", dataId);
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), dataId);
         if (confirmationTaskList.size() < 1) {
             throw new RuntimeException("定源任务丢失!");
         }
@@ -439,7 +454,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元不存在!");
         }
 
-        if (!"协商中".equals(baseDataElement.getStatus())) {
+        if (!"negotiating".equals(baseDataElement.getStatus())) {
             throw new RuntimeException("数据元状态不符合要求!");
         }
 
@@ -448,7 +463,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn("", Collections.singletonList(dataId));
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), Collections.singletonList(dataId));
         if (confirmationTaskList.size() < 1) {
             throw new RuntimeException("定源任务丢失!");
         }
