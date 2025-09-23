@@ -47,4 +47,9 @@ public class NegotiationParmDTO {
 
     /** 排序方式 */
     private String sortOrder;
+
+    /**
+     * 导出标识,仅用作导出区别导出模版
+     */
+    private String exportFlag;
 }
