@@ -19,12 +19,14 @@ import com.inspur.dsp.direct.service.CommonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -116,6 +118,26 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public OrganizationUnit getOrgInfoByOrgCode(String orgCode) {
         return organizationUnitMapper.selectFirstByUnitCode(orgCode);
+    }
+
+    /**
+     * 批量获取部门信息-产品内部部门表
+     *
+     * @param orgCodes 部门统一社会信用代码
+     * @return 部门信息
+     */
+    @Override
+    public List<OrganizationUnit> getOrgInfoByBatchOrgCode(List<String> orgCodes) {
+        if (CollectionUtils.isEmpty(orgCodes)) {
+            log.warn("部门统一社会信用代码集合为空,退出方法[getOrgInfoByBatchOrgCode]");
+            return new ArrayList<>();
+        }
+        List<OrganizationUnit> organizationUnits = organizationUnitMapper.selectAllByUnitCodeIn(orgCodes);
+        if (CollectionUtils.isEmpty(organizationUnits)) {
+            log.warn("无部门信息,退出方法[getOrgInfoByBatchOrgCode]");
+            return new ArrayList<>();
+        }
+        return organizationUnits;
     }
 
     /**

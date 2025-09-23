@@ -37,6 +37,14 @@ public interface CommonService {
     OrganizationUnit getOrgInfoByOrgCode(String orgCode);
 
     /**
+     * 批量获取部门信息-产品内部部门表
+     * @param orgCodes 部门统一社会信用代码
+     *
+     * @return 部门信息
+     */
+    List<OrganizationUnit> getOrgInfoByBatchOrgCode(List<String> orgCodes);
+
+    /**
      * excel导入统一处理方法
      */
     /**
