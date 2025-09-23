@@ -2,17 +2,19 @@ package com.inspur.dsp.direct.console.controller.business;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.annotation.RespAdvice;
-import com.inspur.dsp.direct.dbentity.NegotiationRecord;
 import com.inspur.dsp.direct.entity.dto.BatchNegotiationDto;
 import com.inspur.dsp.direct.entity.dto.ImportNegotiationReturnDTO;
 import com.inspur.dsp.direct.entity.dto.NegotiationParmDTO;
 import com.inspur.dsp.direct.entity.dto.SingleNegotiationDto;
+import com.inspur.dsp.direct.entity.dto.SingleNegotiationResultDto;
 import com.inspur.dsp.direct.entity.vo.NegotiationDataElementVO;
+import com.inspur.dsp.direct.entity.vo.NegotiationRecordInfoVo;
 import com.inspur.dsp.direct.service.NegotiationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,8 +63,8 @@ public class NegotiationController {
      * 获取协商记录信息及其详细信息
      */
     @RespAdvice
-    @GetMapping("/getNegotiationRecordInfo")
-    public NegotiationRecord getNegotiationRecordInfo(@RequestParam("dataid") String dataid) {
+    @GetMapping("/getNegotiationRecordInfo/{dataid}")
+    public NegotiationRecordInfoVo getNegotiationRecordInfo(@PathVariable("dataid") String dataid) {
         return negotiationService.getNegotiationRecordInfo(dataid);
     }
 
@@ -71,8 +73,8 @@ public class NegotiationController {
      */
     @PostMapping("/submitSingleNegotiationResult")
     @RespAdvice
-    public void submitSingleNegotiationResult(@RequestParam("dataid") String dataid, @RequestParam("orgCode") String orgCode) {
-        negotiationService.submitSingleNegotiationResult(dataid, orgCode);
+    public void submitSingleNegotiationResult(@RequestBody @Validated SingleNegotiationResultDto dto) {
+        negotiationService.submitSingleNegotiationResult(dto);
     }
 
     /**
@@ -90,8 +92,7 @@ public class NegotiationController {
     @PostMapping("/exportNegotiationList")
     @RespAdvice
     public void exportNegotiationList(@RequestBody NegotiationParmDTO dto,
-                                    @RequestParam("exportFlag") String exportFlag,
                                     HttpServletResponse response) {
-        negotiationService.exportNegotiationList(dto, exportFlag, response);
+        negotiationService.exportNegotiationList(dto, response);
     }
 }

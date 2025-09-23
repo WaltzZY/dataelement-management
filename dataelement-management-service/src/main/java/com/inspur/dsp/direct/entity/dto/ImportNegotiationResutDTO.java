@@ -8,11 +8,18 @@ import lombok.Data;
  */
 @Data
 public class ImportNegotiationResutDTO {
-    /** 数据元名称 */
+
+    /**
+     * 序号
+     */
     @ExcelProperty(index = 0)
+    private String seqNo;
+
+    /** 数据元名称 */
+    @ExcelProperty(index = 1)
     private String dataElementName;
 
     /** 数源单位code */
-    @ExcelProperty(index = 1)
+    @ExcelProperty(index = 2)
     private String unitCode;
 }

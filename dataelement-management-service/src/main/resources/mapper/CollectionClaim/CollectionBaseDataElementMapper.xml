@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.CollectionClaim.CollectionBaseDataElementMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseDataElementResultMap" type="com.inspur.dsp.direct.dbentity.BaseDataElement">
+        <id column="dataid" property="dataid" jdbcType="VARCHAR"/>
+        <result column="data_element_id" property="dataElementId" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="definition" property="definition" jdbcType="LONGVARCHAR"/>
+        <result column="datatype" property="datatype" jdbcType="VARCHAR"/>
+        <result column="data_format" property="dataFormat" jdbcType="VARCHAR"/>
+        <result column="value_domain" property="valueDomain" jdbcType="LONGVARCHAR"/>
+        <result column="source_unit_code" property="sourceUnitCode" jdbcType="VARCHAR"/>
+        <result column="source_unit_name" property="sourceUnitName" jdbcType="VARCHAR"/>
+        <result column="publish_date" property="publishDate" jdbcType="TIMESTAMP"/>
+        <result column="send_date" property="sendDate" jdbcType="TIMESTAMP"/>
+        <result column="confirm_date" property="confirmDate" jdbcType="TIMESTAMP"/>
+        <result column="collectunitqty" property="collectunitqty" jdbcType="INTEGER"/>
+        <result column="remarks" property="remarks" jdbcType="LONGVARCHAR"/>
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="create_account" property="createAccount" jdbcType="VARCHAR"/>
+        <result column="last_modify_date" property="lastModifyDate" jdbcType="TIMESTAMP"/>
+        <result column="last_modify_account" property="lastModifyAccount" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 根据ID更新基础数据元状态 -->
+    <update id="updateById">
+        UPDATE base_data_element
+        SET status = #{status},
+        last_modify_date = NOW(),
+        last_modify_account = #{lastModifyAccount}
+        <if test="confirmDate != null">
+            , confirm_date = #{confirmDate}
+        </if>
+        WHERE dataid = #{dataid}
+    </update>
+
+    <!-- 根据ID查询基础数据元 -->
+    <select id="selectById" resultMap="BaseDataElementResultMap">
+        SELECT *
+        FROM base_data_element
+        WHERE dataid = #{dataid}
+    </select>
+</mapper>

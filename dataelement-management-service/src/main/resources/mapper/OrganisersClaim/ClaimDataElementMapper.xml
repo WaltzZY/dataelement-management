@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.OrganisersClaim.ClaimDataElementMapper">
+
+    <!-- 结果映射 ClaimDataElementVO -->
+    <resultMap id="ClaimDataElementVOMap" type="com.inspur.dsp.direct.entity.vo.ClaimDataElementVO">
+        <id column="dataid" property="dataid"/>
+        <result column="data_element_id" property="dataElementId"/>
+        <result column="status" property="status"/>
+        <result column="name" property="name"/>
+        <result column="definition" property="definition"/>
+        <result column="datatype" property="datatype"/>
+        <result column="data_format" property="dataFormat"/>
+        <result column="value_domain" property="valueDomain"/>
+        <result column="source_unit_code" property="sourceUnitCode"/>
+        <result column="source_unit_name" property="sourceUnitName"/>
+        <result column="publish_date" property="publishDate"/>
+        <result column="send_date" property="sendDate"/>
+        <result column="confirm_date" property="confirmDate"/>
+        <result column="collectunitqty" property="collectunitqty"/>
+        <result column="remarks" property="remarks"/>
+        <result column="create_date" property="createDate"/>
+        <result column="create_account" property="createAccount"/>
+        <result column="last_modify_date" property="lastModifyDate"/>
+        <result column="last_modify_account" property="lastModifyAccount"/>
+        <result column="collectunitnames" property="collectunitnames"/>
+    </resultMap>
+
+    <!-- 根据状态查询数据元列表 -->
+    <select id="selectBaseDataElementByStatus" parameterType="com.inspur.dsp.direct.entity.dto.GetDataElementDTO"
+            resultMap="ClaimDataElementVOMap">
+        SELECT
+        dataid,
+        data_element_id,
+        status,
+        name,
+        definition,
+        datatype,
+        data_format,
+        value_domain,
+        source_unit_code,
+        source_unit_name,
+        publish_date,
+        send_date,
+        confirm_date,
+        collectunitqty,
+        remarks,
+        create_date,
+        create_account,
+        last_modify_date,
+        last_modify_account
+        FROM base_data_element
+        <where>
+            <if test="dto.status != null and dto.status.size() > 0">
+                status IN
+                <foreach collection="dto.status" item="statusItem" open="(" separator="," close=")">
+                    #{statusItem}
+                </foreach>
+            </if>
+<!--            <if test="dto.status != null and dto.status != ''">-->
+<!--                 status = #{dto.status}-->
+<!--            </if>-->
+            <if test="dto.senddateBegin != null and dto.senddateEnd != null">
+                AND send_date BETWEEN #{dto.senddateBegin} AND #{dto.senddateEnd}
+            </if>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                AND (name LIKE CONCAT('%', #{dto.keyword}, '%') OR definition LIKE CONCAT('%', #{dto.keyword}, '%'))
+            </if>
+
+        </where>
+
+                <!-- 动态排序逻辑 -->
+                <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
+                    ORDER BY ${dto.sortField} ${dto.sortOrder}
+                </if>
+
+    </select>
+
+</mapper>

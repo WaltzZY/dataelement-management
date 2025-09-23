@@ -23,8 +23,10 @@ import com.inspur.dsp.direct.entity.dto.ImportNegotiationResutDTO;
 import com.inspur.dsp.direct.entity.dto.ImportNegotiationReturnDTO;
 import com.inspur.dsp.direct.entity.dto.NegotiationParmDTO;
 import com.inspur.dsp.direct.entity.dto.SingleNegotiationDto;
+import com.inspur.dsp.direct.entity.dto.SingleNegotiationResultDto;
 import com.inspur.dsp.direct.entity.vo.CollectUnitsAndStatusVO;
 import com.inspur.dsp.direct.entity.vo.NegotiationDataElementVO;
+import com.inspur.dsp.direct.entity.vo.NegotiationRecordInfoVo;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.enums.NePageSortFieldEnums;
 import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
@@ -37,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -106,6 +109,11 @@ public class NegotiationServiceImpl implements NegotiationService {
 
                 collectUnitsAndStatus.setUnitCode(task.getProcessingUnitCode());
                 collectUnitsAndStatus.setUnitName(task.getProcessingUnitName());
+                collectUnitsAndStatus.setDataElementName(vo.getName());
+                collectUnitsAndStatus.setProcessingDate(task.getProcessingDate());
+                collectUnitsAndStatus.setProcessingOpinion(task.getProcessingOpinion());
+                collectUnitsAndStatus.setTaskStatus(task.getStatus());
+                collectUnitsAndStatus.setTaskStatusDesc(ConfirmationTaskEnums.getDescByCode(task.getStatus()));
 
                 // 添加CollectUnitsAndStatusVO到List<CollectUnitsAndStatusVO>中
                 collectUnitsAndStatusList.add(collectUnitsAndStatus);
@@ -245,21 +253,29 @@ public class NegotiationServiceImpl implements NegotiationService {
     }
 
     @Override
-    public NegotiationRecord getNegotiationRecordInfo(String dataid) {
+    public NegotiationRecordInfoVo getNegotiationRecordInfo(String dataid) {
+        BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataid);
+        if (baseDataElement == null) {
+            throw new IllegalArgumentException("数据元不存在");
+        }
         // 使用dataid为参数，调用NegotiationRecordMapper.selectFirstByBaseDataelementDataid方法，获取NegotiationRecord对象
         NegotiationRecord negotiationRecord = negotiationRecordMapper.selectFirstByBaseDataelementDataid(dataid);
-        // 返回NegotiationRecord对象
-        return negotiationRecord;
+        // 返回NegotiationRecordInfoVo对象
+        NegotiationRecordInfoVo vo = NegotiationRecordInfoVo.toVo(negotiationRecord);
+        // 关联的基准数据元状态也返回
+        vo.setStatus(baseDataElement.getStatus());
+        vo.setStatusDesc(StatusEnums.getDescByCode(baseDataElement.getStatus()));
+        return vo;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void submitSingleNegotiationResult(String dataid, String orgCode) {
+    public void submitSingleNegotiationResult(SingleNegotiationResultDto dto) {
         // 1. 创建MAP(string，string) NegResultMap
         Map<String, String> negResultMap = new HashMap<>();
 
         // 2. 在MAP中添加dataid,org_code
-        negResultMap.put(dataid, orgCode);
+        negResultMap.put(dto.getDataid(), dto.getOrgCode());
 
         // 3. 调用方法7：SubmitNegotiationResult(MAP NegResultMap)
         submitNegotiationResult(negResultMap);
@@ -310,7 +326,11 @@ public class NegotiationServiceImpl implements NegotiationService {
     }
 
     @Override
-    public void exportNegotiationList(NegotiationParmDTO dto, String exportFlag, HttpServletResponse response) {
+    public void exportNegotiationList(NegotiationParmDTO dto, HttpServletResponse response) {
+        String exportFlag = dto.getExportFlag();
+        if (!StringUtils.hasText(exportFlag)) {
+            throw new CustomException("请选择导出类型");
+        }
         // 1. 使用NegDTO.sortField和NegDTO.sortOrder构建查询条件
         String sortSql = NePageSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
         // 2. 调用NegotiationMapper.GetNegotiationDataElementList方法，获取返回voslist
@@ -318,16 +338,12 @@ public class NegotiationServiceImpl implements NegotiationService {
         // 3. 调用collUnits方法，将返回的vos进行处理
         collUnits(voslist);
         // 4. 判断exportFlag，初始化不同的对象
-        switch (exportFlag) {
-            case "todonego":
-                exportToDoNego(voslist, response);
-                break;
-            case "doingnego":
-                exportDoingNego(voslist, response);
-                break;
-            case "donenego":
-                exportDoneNego(voslist, response);
-                break;
+        if (StatusEnums.PENDING_NEGOTIATION.getCode().equals(exportFlag)) {
+            exportToDoNego(voslist, response);
+        } else if (StatusEnums.NEGOTIATING.getCode().equals(exportFlag)) {
+            exportDoingNego(voslist, response);
+        } else if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(exportFlag)) {
+            exportDoneNego(voslist, response);
         }
     }
 

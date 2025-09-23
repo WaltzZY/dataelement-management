@@ -2,8 +2,16 @@ package com.inspur.dsp.direct.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.inspur.dsp.direct.common.StatusUtil;
-import com.inspur.dsp.direct.dao.*;
-import com.inspur.dsp.direct.dbentity.*;
+import com.inspur.dsp.direct.dao.BaseDataElementMapper;
+import com.inspur.dsp.direct.dao.ConfirmationTaskMapper;
+import com.inspur.dsp.direct.dao.DomainDataElementMapper;
+import com.inspur.dsp.direct.dao.NegotiationRecordMapper;
+import com.inspur.dsp.direct.dao.SourceEventRecordMapper;
+import com.inspur.dsp.direct.dbentity.BaseDataElement;
+import com.inspur.dsp.direct.dbentity.ConfirmationTask;
+import com.inspur.dsp.direct.dbentity.DomainDataElement;
+import com.inspur.dsp.direct.dbentity.NegotiationRecord;
+import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.bo.DomainSourceUnitInfo;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
@@ -11,15 +19,18 @@ import com.inspur.dsp.direct.entity.enums.DataElementStatus;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 import com.inspur.dsp.direct.service.ViewDetailService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ViewDetailServiceImpl implements ViewDetailService {
 
     @Autowired
@@ -94,7 +105,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
     @Override
     public List<ConfirmationTask> getCollectUnitList(String dataId) {
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(null, dataId);
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(null, Collections.singleton(dataId));
         if (confirmationTaskList != null) {
             for (ConfirmationTask confirmationTask : confirmationTaskList) {
                 String status = confirmationTask.getStatus();
@@ -118,6 +129,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         try {
             dataElementStatus = DataElementStatus.fromString(status);
         } catch (IllegalArgumentException e) {
+            log.error("getFlowInfo error: ", e);
             throw e; // 或者根据需求处理异常
         }
         switch (dataElementStatus) {
@@ -149,7 +161,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
 
         List<DomainSourceUnitInfo> domainSourceUnitList = domainDataElementMapper.selectSourceUnitInfoByBaseDataid(Collections.singletonList(dataId));
-        if (domainSourceUnitList.size() < 1) {
+        if (CollectionUtils.isEmpty(domainSourceUnitList)) {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
@@ -212,7 +224,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元采集单位数量异常!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), dataId);
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), Collections.singleton(dataId));
         if (confirmationTaskList.size() != 1) {
             throw new RuntimeException("定源任务数量异常!");
         }
@@ -261,7 +273,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), dataId);
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), Collections.singleton(dataId));
         if (confirmationTaskList.size() < 2) {
             throw new RuntimeException("定源任务丢失!");
         }
@@ -311,7 +323,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), dataId);
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), Collections.singleton(dataId));
         if (confirmationTaskList.isEmpty()) {
             throw new RuntimeException("定源任务丢失!");
         }
@@ -382,12 +394,12 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
 
         List<DomainSourceUnitInfo> domainSourceUnitList = domainDataElementMapper.selectSourceUnitInfoByBaseDataid(Collections.singletonList(dataId));
-        if (domainSourceUnitList.size() < 1) {
+        if (CollectionUtils.isEmpty(domainSourceUnitList)) {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), dataId);
-        if (confirmationTaskList.size() < 1) {
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), Collections.singleton(dataId));
+        if (CollectionUtils.isEmpty(confirmationTaskList)) {
             throw new RuntimeException("定源任务丢失!");
         }
 
@@ -484,12 +496,12 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
 
         List<DomainSourceUnitInfo> domainSourceUnitList = domainDataElementMapper.selectSourceUnitInfoByBaseDataid(Collections.singletonList(dataId));
-        if (domainSourceUnitList.isEmpty()) {
+        if (CollectionUtils.isEmpty(domainSourceUnitList)) {
             throw new RuntimeException("数据元采集单位丢失!");
         }
 
         List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(baseDataElement.getStatus(), Collections.singletonList(dataId));
-        if (confirmationTaskList.isEmpty()) {
+        if (CollectionUtils.isEmpty(confirmationTaskList)) {
             throw new RuntimeException("定源任务丢失!");
         }
 

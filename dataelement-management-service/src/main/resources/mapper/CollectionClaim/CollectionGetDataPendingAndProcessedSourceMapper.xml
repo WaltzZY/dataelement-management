@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.CollectionClaim.CollectionGetDataPendingAndProcessedSourceMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="GetDataPendingAndProcessedSourceVOResultMap" type="com.inspur.dsp.direct.entity.vo.GetDataPendingAndProcessedSourceVO">
+        <!-- base_data_element表字段 -->
+        <id column="dataid" property="dataid" jdbcType="VARCHAR"/>
+        <result column="data_element_id" property="data_element_id" jdbcType="VARCHAR"/>
+        <result column="bde_status" property="status" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="definition" property="definition" jdbcType="LONGVARCHAR"/>
+        <result column="datatype" property="datatype" jdbcType="VARCHAR"/>
+        <result column="data_format" property="data_format" jdbcType="VARCHAR"/>
+        <result column="value_domain" property="value_domain" jdbcType="LONGVARCHAR"/>
+        <result column="source_unit_code" property="source_unit_code" jdbcType="VARCHAR"/>
+        <result column="source_unit_name" property="source_unit_name" jdbcType="VARCHAR"/>
+        <result column="publish_date" property="publish_date" jdbcType="TIMESTAMP"/>
+        <result column="send_date" property="send_date" jdbcType="TIMESTAMP"/>
+        <result column="confirm_date" property="confirm_date" jdbcType="TIMESTAMP"/>
+        <result column="collectunitqty" property="collectunitqty" jdbcType="INTEGER"/>
+        <result column="remarks" property="remarks" jdbcType="LONGVARCHAR"/>
+        <result column="create_date" property="create_date" jdbcType="TIMESTAMP"/>
+        <result column="create_account" property="create_account" jdbcType="VARCHAR"/>
+        <result column="last_modify_date" property="last_modify_date" jdbcType="TIMESTAMP"/>
+        <result column="last_modify_account" property="last_modify_account" jdbcType="VARCHAR"/>
+
+        <!-- confirmation_task表字段 -->
+        <result column="task_id" property="task_id" jdbcType="VARCHAR"/>
+        <result column="base_dataelement_dataid" property="base_dataelement_dataid" jdbcType="VARCHAR"/>
+        <result column="tasktype" property="tasktype" jdbcType="VARCHAR"/>
+        <result column="send_unit_code" property="send_unit_code" jdbcType="VARCHAR"/>
+        <result column="send_unit_name" property="send_unit_name" jdbcType="VARCHAR"/>
+        <result column="task_send_date" property="send_date" jdbcType="TIMESTAMP"/>
+        <result column="sender_account" property="sender_account" jdbcType="VARCHAR"/>
+        <result column="sender_name" property="sender_name" jdbcType="VARCHAR"/>
+        <result column="task_status" property="taskStatus" jdbcType="VARCHAR"/>
+        <result column="processing_unit_code" property="processing_unit_code" jdbcType="VARCHAR"/>
+        <result column="processing_unit_name" property="processing_unit_name" jdbcType="VARCHAR"/>
+        <result column="processing_date" property="processing_date" jdbcType="TIMESTAMP"/>
+        <result column="processing_result" property="processing_result" jdbcType="VARCHAR"/>
+        <result column="processing_opinio" property="processing_opinio" jdbcType="VARCHAR"/>
+        <result column="processor_account" property="processor_account" jdbcType="VARCHAR"/>
+        <result column="processor_name" property="processor_name" jdbcType="VARCHAR"/>
+<!--        <result column="approval_date" property="approvalDate" jdbcType="TIMESTAMP"/>-->
+<!--        <result column="approval_account" property="approvalAccount" jdbcType="VARCHAR"/>-->
+<!--        <result column="approval_name" property="approvalName" jdbcType="VARCHAR"/>-->
+    </resultMap>
+
+    <!-- 查询待处理和已处理数据元列表 -->
+    <select id="getDataPendingAndProcessedData" resultMap="GetDataPendingAndProcessedSourceVOResultMap" parameterType="com.inspur.dsp.direct.entity.dto.GetDataPendingAndProcessedSourceDTO">
+        SELECT
+        bde.dataid,
+        bde.data_element_id,
+        bde.status as bde_status,
+        bde.name,
+        bde.definition,
+        bde.datatype,
+        bde.data_format,
+        bde.value_domain,
+        bde.source_unit_code,
+        bde.source_unit_name,
+        bde.publish_date,
+        bde.send_date,
+        bde.confirm_date,
+        bde.collectunitqty,
+<!--        bde.remarks,-->
+        bde.create_date,
+        bde.create_account,
+        bde.last_modify_date,
+        bde.last_modify_account,
+        ct.task_id,
+        ct.base_dataelement_dataid,
+<!--        ct.tasktype,-->
+<!--        ct.send_unit_code,-->
+        ct.sender_name,
+        ct.send_date as task_send_date,
+        ct.sender_account,
+<!--        ct.sender_name,-->
+        ct.status as task_status,
+        ct.processing_unit_code,
+        ct.processing_unit_name,
+        ct.processing_date,
+        ct.processing_result,
+        ct.processing_opinion,
+        ct.processor_account,
+        ct.processor_name
+<!--        ct.approval_date,-->
+<!--        ct.approval_account,-->
+<!--        ct.approval_name-->
+        FROM base_data_element bde
+        INNER JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
+        <where>
+
+<!--            TODO: 测试时 先将ct.taskType写死成confirmation_task 实际此接口是claim_task-->
+<!--            ct.taskType = 'claim_task'-->
+            ct.taskType = 'confirmation_task'
+
+<!--            TODO：测试时  先将orgCode写死-->
+<!--            AND ct.processing_unit_code = #{orgCode}-->
+            AND ct.processing_unit_code = '11100000000014445H'
+            <if test="dto.status != null and dto.status.size() > 0">
+                AND ct.status IN
+                <foreach collection="dto.status" item="statusItem" open="(" separator="," close=")">
+                    #{statusItem}
+                </foreach>
+            </if>
+
+            <!-- 接收时间范围 -->
+            <if test="dto.recievestartTime != null">
+                AND ct.send_date >= #{dto.recievestartTime}
+            </if>
+            <if test="dto.recieveendTime != null">
+                AND ct.send_date &lt;= #{dto.recieveendTime}
+            </if>
+
+            <!-- 处理时间范围 -->
+            <if test="dto.processstartTime != null">
+                AND ct.processing_date >= #{dto.processstartTime}
+            </if>
+            <if test="dto.proccessendTime != null">
+                AND ct.processing_date &lt;= #{dto.proccessendTime}
+            </if>
+
+            <!-- 关键字模糊查询 -->
+            <if test="dto.keyword != null and dto.keyword != ''">
+                AND (bde.name LIKE CONCAT('%', #{dto.keyword}, '%')
+                OR bde.definition LIKE CONCAT('%', #{dto.keyword}, '%'))
+            </if>
+        </where>
+
+        <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
+            ORDER BY ${dto.sortField} ${dto.sortOrder}
+        </if>
+    </select>
+</mapper>

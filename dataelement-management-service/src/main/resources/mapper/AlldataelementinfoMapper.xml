@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.AlldataelementinfoMapper">
+
+    <!-- 数据元列表查询 -->
+    <select id="getAllDataElementPage" resultType="com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo">
+        SELECT
+        dataid,
+        name,
+        definition,
+        send_date AS sendDate,
+        collectunitqty,
+        source_unit_code AS sourceUnitCode,
+        source_unit_name AS sourceUnitName,
+        status
+        FROM base_data_element
+        WHERE 1=1
+
+        <!-- 数源单位社会信用代码精确匹配（多选） -->
+        <if test="queryDto.sourceUnitCode != null and queryDto.sourceUnitCode.size() > 0">
+            AND source_unit_code IN
+            <foreach collection="queryDto.sourceUnitCode" item="unitCode" open="(" close=")" separator=",">
+                #{unitCode}
+            </foreach>
+        </if>
+
+        <!-- 数据元状态精确匹配（多选） -->
+        <if test="queryDto.statusList != null and queryDto.statusList.size() > 0">
+            AND status IN
+            <foreach collection="queryDto.statusList" item="status" open="(" close=")" separator=",">
+                #{status}
+            </foreach>
+        </if>
+
+        <!-- 发起时间范围查询 -->
+        <if test="queryDto.sendDateBegin != null">
+            AND send_date >= #{queryDto.sendDateBegin}
+        </if>
+        <if test="queryDto.sendDateEnd != null">
+            AND send_date &lt;= #{queryDto.sendDateEnd}
+        </if>
+
+        <!-- 定源时间范围查询 -->
+        <if test="queryDto.confirmDateBegin != null">
+            AND confirm_date >= #{queryDto.confirmDateBegin}
+        </if>
+        <if test="queryDto.confirmDateEnd != null">
+            AND confirm_date &lt;= #{queryDto.confirmDateEnd}
+        </if>
+
+        <!-- 关键字在数据元名称、定义和数源单位名称中模糊匹配 -->
+        <if test="queryDto.keyword != null and queryDto.keyword != ''">
+            AND (name LIKE CONCAT('%', #{queryDto.keyword}, '%')
+            OR definition LIKE CONCAT('%', #{queryDto.keyword}, '%')
+            OR source_unit_name LIKE CONCAT('%', #{queryDto.keyword}, '%'))
+        </if>
+
+        <!-- 按发起时间倒序排列 -->
+        ORDER BY send_date DESC
+    </select>
+
+</mapper>
