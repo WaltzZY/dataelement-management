@@ -1,6 +1,5 @@
 package com.inspur.dsp.direct.service.Impl;
 
-import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dao.AlldataelementinfoMapper;
@@ -30,8 +29,14 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+
+// 在AlldataelementinfoServiceImpl.java文件顶部添加以下导入语句：
+
+import com.inspur.dsp.direct.entity.dto.DataElementPageExportDto;
+import java.util.ArrayList;
 
 /**
  * 数据元信息相关业务实现类
@@ -48,9 +53,6 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
     @Autowired
     private BaseDataElementMapper baseDataElementMapper;
-
-    @Autowired
-    private OrganizationUnitMapper organizationUnitMapper;
 
     @Autowired
     private SourceEventRecordMapper sourceEventRecordMapper;
@@ -325,4 +327,59 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             throw new RuntimeException("手动定源操作失败：" + e.getMessage());
         }
     }
+
+    /**
+     * 导出数据元列表
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    @Override
+    public void exportDataElementList(DataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("开始导出数据元列表，查询条件：{}", queryDto);
+
+        //直接调用Mapper查询，不使用分页
+        List<DataElementPageInfoVo> dataList = alldataelementinfoMapper.getAllDataElementPage(null, queryDto);
+
+
+        if (CollectionUtils.isEmpty(dataList)) {
+            throw new IllegalArgumentException("没有可导出的数据!");
+        }
+
+        log.info("查询到{}条数据需要导出", dataList.size());
+
+        // 设置状态描述（因为直接调用Mapper，需要手动设置）
+        dataList.forEach(vo -> {
+            vo.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
+        });
+
+        // 转换为导出DTO列表
+        List<DataElementPageExportDto> exportList = new ArrayList<>();
+        int serialNumber = 1;
+
+        for (DataElementPageInfoVo vo : dataList) {
+            DataElementPageExportDto exportDto = new DataElementPageExportDto();
+            exportDto.setSerialNumber(String.valueOf(serialNumber++));
+            exportDto.setName(vo.getName());
+            exportDto.setDefinition(vo.getDefinition());
+            exportDto.setStatusDesc(vo.getStatusDesc());
+            exportDto.setSourceUnitName(vo.getSourceUnitName());
+            exportDto.setCollectDeptName(vo.getCollectDeptName());
+            exportDto.setSendDate(vo.getSendDate());
+            exportDto.setConfirmDate(vo.getConfirmDate());
+            exportDto.setDataid(vo.getDataid());
+
+            exportList.add(exportDto);
+        }
+
+        // 调用通用导出服务
+        try {
+            commonService.exportExcelData(exportList, response, "数据元列表", DataElementPageExportDto.class);
+            log.info("数据元列表导出完成，共导出{}条记录", exportList.size());
+        } catch (IOException e) {
+            log.error("导出数据元列表失败", e);
+            throw new RuntimeException("导出数据元列表失败: " + e.getMessage(), e);
+        }
+    }
+
+
 }

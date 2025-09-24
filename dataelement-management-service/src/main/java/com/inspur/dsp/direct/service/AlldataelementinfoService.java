@@ -7,6 +7,8 @@ import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
 import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 数据元信息相关业务接口
  *
@@ -44,4 +46,7 @@ public interface AlldataelementinfoService {
      * @throws RuntimeException 当数据元不存在、数源单位不存在或数据库操作异常时抛出
      */
     void manualConfirmUnit(ManualConfirmUnitDto confirmDto);
+
+
+    void exportDataElementList(DataElementPageQueryDto queryDto, HttpServletResponse response);
 }
