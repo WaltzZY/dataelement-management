@@ -33,6 +33,7 @@ public interface CollectionGetDataPendingAndProcessedSourceMapper {
      * @param dto 查询条件
      * @return 数据列表
      */
-     List<GetDataPendingAndProcessedSourceVO> getDataPendingAndProcessedData(@Param("page") Page<GetDataPendingAndProcessedSourceVO> page, @Param("dto") GetDataPendingAndProcessedSourceDTO dto, @Param("orgCode") String orgCode);
+     List<GetDataPendingAndProcessedSourceVO> getDataPendingAndProcessedData(@Param("page") Page<GetDataPendingAndProcessedSourceVO> page
+             , @Param("dto") GetDataPendingAndProcessedSourceDTO dto, @Param("orgCode") String orgCode, @Param("orderBySql") String orderBySql);
 
 }

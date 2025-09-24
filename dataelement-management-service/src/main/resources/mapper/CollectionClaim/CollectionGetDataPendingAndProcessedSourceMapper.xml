@@ -17,6 +17,7 @@
         <result column="source_unit_name" property="source_unit_name" jdbcType="VARCHAR"/>
         <result column="publish_date" property="publish_date" jdbcType="TIMESTAMP"/>
         <result column="send_date" property="send_date" jdbcType="TIMESTAMP"/>
+        <result column="send_date" property="receiveTime" jdbcType="TIMESTAMP"/>
         <result column="confirm_date" property="confirm_date" jdbcType="TIMESTAMP"/>
         <result column="collectunitqty" property="collectunitqty" jdbcType="INTEGER"/>
         <result column="remarks" property="remarks" jdbcType="LONGVARCHAR"/>
@@ -37,7 +38,7 @@
         <result column="task_status" property="taskStatus" jdbcType="VARCHAR"/>
         <result column="processing_unit_code" property="processing_unit_code" jdbcType="VARCHAR"/>
         <result column="processing_unit_name" property="processing_unit_name" jdbcType="VARCHAR"/>
-        <result column="processing_date" property="processing_date" jdbcType="TIMESTAMP"/>
+        <result column="processing_date" property="processingDate" jdbcType="TIMESTAMP"/>
         <result column="processing_result" property="processing_result" jdbcType="VARCHAR"/>
         <result column="processing_opinio" property="processing_opinio" jdbcType="VARCHAR"/>
         <result column="processor_account" property="processor_account" jdbcType="VARCHAR"/>
@@ -91,21 +92,14 @@
         FROM base_data_element bde
         INNER JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
-
-<!--            TODO: 测试时 先将ct.taskType写死成confirmation_task 实际此接口是claim_task-->
-<!--            ct.taskType = 'claim_task'-->
-            ct.taskType = 'confirmation_task'
-
-<!--            TODO：测试时  先将orgCode写死-->
-<!--            AND ct.processing_unit_code = #{orgCode}-->
-            AND ct.processing_unit_code = '11100000000014445H'
+            ct.taskType = 'claim_task'
+            AND ct.processing_unit_code = #{orgCode}
             <if test="dto.status != null and dto.status.size() > 0">
-                AND ct.status IN
-                <foreach collection="dto.status" item="statusItem" open="(" separator="," close=")">
-                    #{statusItem}
+                and ct.status in
+                <foreach collection="dto.status" item="item" open="(" close=")" separator=",">
+                    #{item}
                 </foreach>
             </if>
-
             <!-- 接收时间范围 -->
             <if test="dto.recievestartTime != null">
                 AND ct.send_date >= #{dto.recievestartTime}
@@ -121,16 +115,14 @@
             <if test="dto.proccessendTime != null">
                 AND ct.processing_date &lt;= #{dto.proccessendTime}
             </if>
-
             <!-- 关键字模糊查询 -->
             <if test="dto.keyword != null and dto.keyword != ''">
                 AND (bde.name LIKE CONCAT('%', #{dto.keyword}, '%')
                 OR bde.definition LIKE CONCAT('%', #{dto.keyword}, '%'))
             </if>
         </where>
-
         <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
-            ORDER BY ${dto.sortField} ${dto.sortOrder}
+            ORDER BY ${orderBySql}
         </if>
     </select>
 </mapper>

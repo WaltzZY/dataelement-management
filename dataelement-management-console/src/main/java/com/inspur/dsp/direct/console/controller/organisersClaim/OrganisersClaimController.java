@@ -8,9 +8,11 @@ import com.inspur.dsp.direct.entity.vo.ClaimDataElementVO;
 import com.inspur.dsp.direct.service.OrganisersClaimService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -29,7 +31,7 @@ public class OrganisersClaimController {
      * @param dto 查询条件（状态、开始时间、结束时间、关键字）
      * @return 数据元列表
      */
-    @GetMapping("/getDataElement")
+    @PostMapping("/getDataElement")
     @RespAdvice
     public Page<ClaimDataElementVO> getDataElement(@RequestBody GetDataElementDTO dto) {
         return organisersClaimService.getDataElement(dto);
@@ -42,7 +44,6 @@ public class OrganisersClaimController {
      */
     @PostMapping("/organisers-initateclaim")
     @RespAdvice
-    @Transactional
     public void startBatchClaim(@RequestBody List<String> ids) {
         organisersClaimService.startBatchClaim(ids);
     }

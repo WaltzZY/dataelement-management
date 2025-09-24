@@ -6,6 +6,7 @@ import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.GetProcessedDataElementDTO;
 import com.inspur.dsp.direct.entity.excel.ProcessedExcel;
 import com.inspur.dsp.direct.entity.vo.GetProcessedDataElementVO;
+import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.ProcessedService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -45,6 +46,9 @@ public class ProcessedServiceImpl implements ProcessedService {
 
         Page<GetProcessedDataElementVO> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         Page<GetProcessedDataElementVO> processedDataElement = getDataPendingAndProcessedSourceMapper.getProcessedDataElement(page, dto, orgCode);
+        for (GetProcessedDataElementVO vo : processedDataElement.getRecords()) {
+            vo.setStatusDesc(ConfirmationTaskEnums.getDescByCode(vo.getStatus()));
+        }
         return processedDataElement;
     }
 
@@ -62,7 +66,7 @@ public class ProcessedServiceImpl implements ProcessedService {
                         .name(vo.getName())
                         .definition(vo.getDefinition())
                         .type(vo.getDatatype())
-                        .status(vo.getStatus())
+                        .status(ConfirmationTaskEnums.getDescByCode(vo.getStatus()))
                         .sendDate(vo.getSendDate())
                         .processDate(vo.getProcessingDate())
                         .build();
