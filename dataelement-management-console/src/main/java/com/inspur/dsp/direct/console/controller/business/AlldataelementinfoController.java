@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
@@ -39,6 +40,18 @@ public class AlldataelementinfoController {
         Page<DataElementPageInfoVo> result = alldataelementinfoService.getAllDataElementPage(queryDto);
         log.info("数据元列表查询结束，返回{}条记录", result.getRecords().size());
         return result;
+    }
+
+    /**
+     * 导出数据元列表
+     * @param queryDto 查询条件DTO（与getAllDataElementPage使用相同的查询条件）
+     * @param response HttpServletResponse对象
+     */
+    @PostMapping("/exportDataElementList")
+    public void exportDataElementList(@RequestBody DataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("数据元列表导出开始，查询条件：{}", queryDto);
+        alldataelementinfoService.exportDataElementList(queryDto, response);
+        log.info("数据元列表导出结束");
     }
 
     /**
