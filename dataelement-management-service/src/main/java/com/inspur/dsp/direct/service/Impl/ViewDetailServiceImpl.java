@@ -101,8 +101,8 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         if (confirmationTaskList != null) {
             for (ConfirmationTask confirmationTask : confirmationTaskList) {
                 String status = confirmationTask.getStatus();
-                // String statusChinese = StatusUtil.getStatusChinese(status);
-                confirmationTask.setStatusChinese(status);
+                String statusChinese = StatusUtil.getStatusChinese(status);
+                confirmationTask.setStatusChinese(statusChinese);
             }
             return confirmationTaskList;
         }
