@@ -5,6 +5,10 @@ package com.inspur.dsp.direct.constant;
  */
 public class Constants {
     /**
+     * 斜杠
+     */
+    public static final String SLASH = "/";
+    /**
      * 逗号
      */
     public static final String COMMA = ",";

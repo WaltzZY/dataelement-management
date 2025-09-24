@@ -49,6 +49,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -312,13 +313,8 @@ public class NegotiationServiceImpl implements NegotiationService {
 
         // 4. 循环vdto
         for (ImportNegotiationResutDTO dto : vdto) {
-            // 以dto.dataElementName为参数，调用baseDataElementMapper的selectByName方法，获取数据元BaseDataElement对象bde
-            BaseDataElement bde = baseDataElementMapper.selectFirstByName(dto.getDataElementName());
-
-            // 在negResultMap中添加{bde.dataid,dto.unitCode}
-            if (bde != null) {
-                negResultMap.put(bde.getDataid(), dto.getUnitCode());
-            }
+            // key为名称,才能校验出不存在这个数据元
+            negResultMap.put(dto.getDataElementName(), dto.getUnitCode());
         }
 
         // 5. 以negResultMap为参数，调用SubmitNegotiationResult方法
@@ -357,6 +353,7 @@ public class NegotiationServiceImpl implements NegotiationService {
 
         // 2. 循环NegResultMap
         for (Map.Entry<String, String> entry : negResultMap.entrySet()) {
+            // dataid 可能是id(单条定源), 可能是 name(批量模版导入),
             String dataid = entry.getKey();
             String orgCode = entry.getValue();
 
@@ -366,9 +363,24 @@ public class NegotiationServiceImpl implements NegotiationService {
 
                 // 调用baseDataElementMapper中的mybatisPlus的默认方法selectbyId()，查询基准数据元信息BaseDataElement
                 BaseDataElement baseinfo = baseDataElementMapper.selectById(dataid);
+                if (Objects.isNull(baseinfo)) {
+                    // 获取数据元名称为传入map的key的基准数据元信息
+                    baseinfo = baseDataElementMapper.selectFirstByName(dataid);
+                }
+
+                if (Objects.isNull(baseinfo)) {
+                    throw new CustomException("数据元不存在!");
+                }
+
+                if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(baseinfo.getStatus())) {
+                    throw new CustomException("该数据元已定源!");
+                }
 
                 // 调用组织机构信息，deptinfo = OrgService.GetOrgInfo(org_code)
                 OrganizationUnit unit = commonService.getOrgInfoByOrgCode(orgCode);
+                if (Objects.isNull(unit)) {
+                    throw new CustomException("组织机构不存在!");
+                }
 
                 // 创建一个SourceEventRecord对象
                 SourceEventRecord sourceEventRecord = new SourceEventRecord();
@@ -421,14 +433,6 @@ public class NegotiationServiceImpl implements NegotiationService {
 
         // 返回异常记录
         return result;
-    }
-
-    // 私有辅助方法
-    private String buildSortSql(String sortField, String sortOrder) {
-        if (sortField != null && sortOrder != null) {
-            return "ORDER BY " + sortField + " " + sortOrder;
-        }
-        return "";
     }
 
     private void exportToDoNego(List<NegotiationDataElementVO> voslist, HttpServletResponse response) {

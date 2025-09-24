@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.console.controller.best;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.service.DetermineResultForCollectorService;
@@ -31,6 +32,7 @@ public class DetermineResultForCollectorController {
      * @return 基准数据元列表
      */
     @PostMapping("/list")
+    @RespAdvice
     public Page<BaseDataElement> getDetermineResultList(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO) {
         try {
             return determineResultForCollectorService.getDetermineResultList(baseDataElementSearchDTO);

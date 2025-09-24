@@ -158,7 +158,7 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         List<String> taskList = lists[1];
         baseDataElementSearchDTO.setBaseStatusList(baseList);
         baseDataElementSearchDTO.setTaskStatusList(taskList);
-        List<DataElementWithTaskVo> dataElementWithTaskVoList = baseDataElementMapper.getDetermineResultListWithOrganiserForExport(baseDataElementSearchDTO);
+        List<DataElementWithTaskVo> dataElementWithTaskVoList = baseDataElementMapper.getDetermineResultListWithOrganiser(null, baseDataElementSearchDTO);
         // 校验结果
         if (CollectionUtils.isEmpty(dataElementWithTaskVoList)) {
             log.error("导出错误!");

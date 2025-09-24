@@ -1,18 +1,14 @@
 package com.inspur.dsp.direct.service.Impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
-import com.inspur.dsp.direct.dbentity.BaseDataElement;
-import com.inspur.dsp.direct.domain.UserLoginInfo;
-import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.dto.DetermineResultForOrganiserExportDTO;
+import com.inspur.dsp.direct.entity.dto.GetDetermineResultListDTO;
+import com.inspur.dsp.direct.entity.vo.GetDetermineResultVo;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.DetermineResultForOrganiserService;
-import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -40,88 +36,36 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
     private CommonService commonService;
 
     @Override
-    public Page<BaseDataElement> getDetermineResultList(BaseDataElementSearchDTO baseDataElementSearchDTO) {
-        try {
-            UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-            // 获取登录人账户
-            // String orgCode = userInfo.getOrgCode();
-            QueryWrapper<BaseDataElement> queryWrapper = new QueryWrapper<>();
-            String sendDateBegin = baseDataElementSearchDTO.getSendDateBegin();
-            String sendDateEnd = baseDataElementSearchDTO.getSendDateEnd();
-            if (StringUtils.isNotBlank(sendDateBegin) && StringUtils.isNotBlank(sendDateEnd)) {
-                queryWrapper.between("send_date", sendDateBegin, sendDateEnd);
-            }
-
-            List<String> sourceUnitCodeList = baseDataElementSearchDTO.getSourceUnitCodeList();
-            if (sourceUnitCodeList != null && !sourceUnitCodeList.isEmpty()) {
-                queryWrapper.in("source_unit_code", sourceUnitCodeList);
-            }
-
-            String keyword = baseDataElementSearchDTO.getKeyword();
-            String value = baseDataElementSearchDTO.getValue();
-            if (StringUtils.isNotBlank(keyword)) {
-                queryWrapper.like(keyword, value);
-            }
-            // queryWrapper.eq("source_unit_code", orgCode);
-            queryWrapper.eq("status", "designated_source");
-            Page<BaseDataElement> page = new Page<>(baseDataElementSearchDTO.getPageNum(), baseDataElementSearchDTO.getPageSize());
-            Page<BaseDataElement> baseDataElementPage = baseDataElementMapper.selectPage(page, queryWrapper);
-            List<BaseDataElement> records = baseDataElementPage.getRecords();
-            if (CollectionUtils.isEmpty(records)) {
-                page.setRecords(Collections.emptyList());
-            }
-            for (BaseDataElement baseDataElement : records) {
-                String status = baseDataElement.getStatus();
-                String statusChinese = StatusUtil.getStatusChinese(status);
-                baseDataElement.setStatusChinese(statusChinese);
-            }
-            return page;
-        } catch (Exception e) {
-            throw new RuntimeException("查询已定源结果列表失败", e);
+    public Page<GetDetermineResultVo> getDetermineResultList(GetDetermineResultListDTO dto) {
+        Page page = new Page<>(dto.getPageNum(), dto.getPageSize());
+        List<GetDetermineResultVo> vos = baseDataElementMapper.getDetermineResultList(page, dto);
+        if (CollectionUtils.isEmpty(vos)) {
+            return page.setRecords(Collections.emptyList());
         }
+        for (GetDetermineResultVo vo : vos) {
+            String status = vo.getStatus();
+            vo.setStatusChinese(StatusUtil.getStatusChinese(status));
+        }
+        return page.setRecords(vos);
     }
 
 
     @Override
-    public void download(BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
+    public void download(GetDetermineResultListDTO dto, HttpServletResponse response) {
         try {
-            // 获取登录人账户
-            // String orgCode = userInfo.getOrgCode();
-            QueryWrapper<BaseDataElement> queryWrapper = new QueryWrapper<>();
-            String sendDateBegin = baseDataElementSearchDTO.getSendDateBegin();
-            String sendDateEnd = baseDataElementSearchDTO.getSendDateEnd();
-            if (StringUtils.isNotBlank(sendDateBegin) && StringUtils.isNotBlank(sendDateEnd)) {
-                queryWrapper.between("send_date", sendDateBegin, sendDateEnd);
-            }
-
-            List<String> sourceUnitCodeList = baseDataElementSearchDTO.getSourceUnitCodeList();
-            if (sourceUnitCodeList != null && !sourceUnitCodeList.isEmpty()) {
-                queryWrapper.in("source_unit_code", sourceUnitCodeList);
-            }
-
-            String keyword = baseDataElementSearchDTO.getKeyword();
-            String value = baseDataElementSearchDTO.getValue();
-            if (StringUtils.isNotBlank(keyword)) {
-                queryWrapper.like(keyword, value);
-            }
-            // queryWrapper.eq("source_unit_code", orgCode);
-            queryWrapper.eq("status", "designated_source");
-            List<BaseDataElement> baseDataElements = baseDataElementMapper.selectList(queryWrapper);
-            if (CollectionUtils.isEmpty(baseDataElements)) {
-                return;
-            }
+            List<GetDetermineResultVo> baseDataElements = baseDataElementMapper.getDetermineResultList(null, dto);
             List<DetermineResultForOrganiserExportDTO> exportDTOList = new ArrayList<>();
-            for (BaseDataElement baseDataElement : baseDataElements) {
+            for (GetDetermineResultVo baseDataElement : baseDataElements) {
                 String statusChinese = StatusUtil.getStatusChinese(baseDataElement.getStatus());
-                DetermineResultForOrganiserExportDTO dto = new DetermineResultForOrganiserExportDTO();
-                dto.setName(baseDataElement.getName());
-                dto.setStatus(statusChinese);
-                dto.setDefinition(baseDataElement.getDefinition());
-                dto.setCollectunitqty(baseDataElement.getCollectunitqty());
-                dto.setPublicDate(baseDataElement.getPublishDate());
-                dto.setSendDate(baseDataElement.getSendDate());
-                dto.setSourceUnitName(baseDataElement.getSourceUnitName());
-                exportDTOList.add(dto);
+                DetermineResultForOrganiserExportDTO exportDTO = new DetermineResultForOrganiserExportDTO();
+                exportDTO.setName(baseDataElement.getName());
+                exportDTO.setStatus(StatusUtil.getStatusChinese(baseDataElement.getStatus()));
+                exportDTO.setDefinition(baseDataElement.getDefinition());
+                exportDTO.setCollectunitqty(baseDataElement.getCollectunitqty());
+                exportDTO.setPublicDate(baseDataElement.getPublishDate());
+                exportDTO.setSendDate(baseDataElement.getSendDate());
+                exportDTO.setSourceUnitName(baseDataElement.getSourceUnitName());
+                exportDTOList.add(exportDTO);
             }
             try {
                 commonService.exportExcelData(exportDTOList, response, "组织方-已定源数据", DetermineResultForOrganiserExportDTO.class);

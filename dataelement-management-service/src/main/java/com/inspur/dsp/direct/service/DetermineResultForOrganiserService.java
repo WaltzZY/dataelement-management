@@ -1,8 +1,8 @@
 package com.inspur.dsp.direct.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.inspur.dsp.direct.dbentity.BaseDataElement;
-import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
+import com.inspur.dsp.direct.entity.dto.GetDetermineResultListDTO;
+import com.inspur.dsp.direct.entity.vo.GetDetermineResultVo;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,16 +17,16 @@ public interface DetermineResultForOrganiserService {
     /**
      * 分页查询已定源结果列表数据
      *
-     * @param baseDataElementSearchDTO 查询参数
+     * @param dto 查询参数
      * @return 基准数据元列表
      */
-    Page<BaseDataElement> getDetermineResultList(BaseDataElementSearchDTO baseDataElementSearchDTO);
+    Page<GetDetermineResultVo> getDetermineResultList(GetDetermineResultListDTO dto);
 
     /**
      * 导出已定源结果数据
      *
-     * @param baseDataElementSearchDTO 查询参数
+     * @param dto 查询参数
      * @param response
      */
-    void download(BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response);
+    void download(GetDetermineResultListDTO dto, HttpServletResponse response);
 }

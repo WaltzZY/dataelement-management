@@ -1,8 +1,10 @@
 package com.inspur.dsp.direct.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dbentity.OrganizationUnit;
 import com.inspur.dsp.direct.entity.dto.GetCollectionDeptTreeDto;
+import com.inspur.dsp.direct.entity.dto.GetDeptSearchDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -28,4 +30,11 @@ public interface OrganizationUnitMapper extends BaseMapper<OrganizationUnit> {
      */
     List<OrganizationUnit> selectAllByUnitCodeIn(@Param("unitCodeCollection")Collection<String> unitCodeCollection);
 
+    /**
+     * 获取部门搜索结果
+     * @param page
+     * @param dto
+     * @return
+     */
+    List<OrganizationUnit> getCollectionDeptSearch(Page page, @Param("dto") GetDeptSearchDto dto);
 }

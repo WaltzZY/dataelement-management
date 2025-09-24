@@ -1,6 +1,8 @@
 package com.inspur.dsp.direct.service.Impl;
 
 import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.inspur.dsp.direct.constant.Constants;
 import com.inspur.dsp.direct.dao.OrganizationUnitMapper;
 import com.inspur.dsp.direct.dbentity.OrganizationUnit;
 import com.inspur.dsp.direct.entity.dto.GetCollectionDeptTreeDto;
@@ -9,17 +11,12 @@ import com.inspur.dsp.direct.entity.vo.CollectionDeptTreeVo;
 import com.inspur.dsp.direct.entity.vo.DeptSearchVo;
 import com.inspur.dsp.direct.entity.vo.GetDeptSearchVo;
 import com.inspur.dsp.direct.entity.vo.GetOrganInfoVo;
-import com.inspur.dsp.direct.enums.OrganRegionEnums;
-import com.inspur.dsp.direct.httpService.BSPService;
-import com.inspur.dsp.direct.httpentity.dto.GetOrganByNameLikeDto;
-import com.inspur.dsp.direct.httpentity.vo.GetOrganByNameLikeVo;
-import com.inspur.dsp.direct.httpentity.vo.OrganInfoVo;
-import com.inspur.dsp.direct.httpentity.vo.RegionOrganTreeVo;
 import com.inspur.dsp.direct.service.CommonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +26,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +34,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommonServiceImpl implements CommonService {
 
-    private final BSPService bspService;
     private final OrganizationUnitMapper organizationUnitMapper;
 
     /**
@@ -46,20 +43,28 @@ public class CommonServiceImpl implements CommonService {
      */
     @Override
     public List<CollectionDeptTreeVo> getCollectionDeptTree(GetCollectionDeptTreeDto dto) {
+        String parentCode = dto.getParentCode();
+        // 如果parentCode为空,则只查询顶层部门,顶层部门父级为NULL
+        if (!StringUtils.hasText(parentCode)) {
+            dto.setParentCode(null);
+        }
         // 查询部门区划树内部表
         List<OrganizationUnit> organizationUnits = organizationUnitMapper.getCollectionDeptTree(dto);
-
-
-        // 调用bsp接口,查询部门树数据
-        List<RegionOrganTreeVo> regionOrganTree = bspService.getRegionOrganTree(dto.getParentCode());
-        return regionOrganTree.stream().map(regionOrganTreeVo -> {
-            CollectionDeptTreeVo collectionDeptTreeVo = new CollectionDeptTreeVo();
-            collectionDeptTreeVo.setCode(regionOrganTreeVo.getCode());
-            collectionDeptTreeVo.setId(regionOrganTreeVo.getId());
-            collectionDeptTreeVo.setName(regionOrganTreeVo.getName());
-            collectionDeptTreeVo.setType(regionOrganTreeVo.getType());
-            return collectionDeptTreeVo;
-        }).collect(Collectors.toList());
+        List<CollectionDeptTreeVo> vos = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(organizationUnits)) {
+            vos = organizationUnits.stream()
+                    .filter(Objects::nonNull)
+                    .map(unit -> {
+                                CollectionDeptTreeVo collectionDeptTreeVo = new CollectionDeptTreeVo();
+                                collectionDeptTreeVo.setCode(unit.getUnitCode());
+                                collectionDeptTreeVo.setId(unit.getDataid());
+                                collectionDeptTreeVo.setName(unit.getUnitName());
+                                collectionDeptTreeVo.setType(unit.getNodeType());
+                                return collectionDeptTreeVo;
+                            }
+                    ).collect(Collectors.toList());
+        }
+        return vos;
     }
 
     /**
@@ -69,23 +74,46 @@ public class CommonServiceImpl implements CommonService {
      */
     @Override
     public GetDeptSearchVo getCollectionDeptSearch(GetDeptSearchDto dto) {
-        GetOrganByNameLikeVo organByNameLike = bspService
-                .getOrganByNameLike(new GetOrganByNameLikeDto(dto.getPageNum(), dto.getPageSize(), dto.getOrganName()));
-        Long total = organByNameLike.getTotal();
-        if (total == 0L) {
+        Page page = new Page(dto.getPageNum(), dto.getPageSize());
+        List<OrganizationUnit> collectionDeptSearch = organizationUnitMapper.getCollectionDeptSearch(page, dto);
+        page.setRecords(collectionDeptSearch);
+        if (CollectionUtils.isEmpty(collectionDeptSearch)) {
             return new GetDeptSearchVo(0L, Collections.emptyList());
         }
-        List<OrganInfoVo> data = organByNameLike.getData();
-        List<DeptSearchVo> rows = data.stream().map(vo -> {
+        List<DeptSearchVo> rows = collectionDeptSearch.stream().map(unit -> {
             DeptSearchVo deptSearchVo = new DeptSearchVo();
-            deptSearchVo.setCode(vo.getCode());
-            deptSearchVo.setId(vo.getId());
-            deptSearchVo.setName(vo.getName());
-            deptSearchVo.setNamePath(vo.getOrganPath());
-            deptSearchVo.setType(OrganRegionEnums.ORGAN.getCode());
+            deptSearchVo.setCode(unit.getUnitCode());
+            deptSearchVo.setId(unit.getDataid());
+            deptSearchVo.setName(unit.getUnitName());
+            deptSearchVo.setType(unit.getNodeType());
+            // 调用循环查询,获取部门全路径
+            deptSearchVo.setNamePath(buildOrganizationUnitPath(unit));
             return deptSearchVo;
         }).collect(Collectors.toList());
-        return new GetDeptSearchVo(total, rows);
+        return new GetDeptSearchVo(page.getTotal(), rows);
+    }
+
+    /**
+     * 构建组织单位的全路径
+     * @param unit 组织单位
+     * @return 完整路径名称
+     */
+    private String buildOrganizationUnitPath(OrganizationUnit unit) {
+        StringBuilder path = new StringBuilder(unit.getUnitName());
+        String parentId = unit.getParentNodeId();
+
+        // 循环查询父级部门，直到根节点
+        while (parentId != null) {
+            OrganizationUnit parentUnit = organizationUnitMapper.selectById(parentId);
+            if (parentUnit == null) {
+                break;
+            }
+            // 在路径前面添加父级部门名称
+            path.insert(0, parentUnit.getUnitName() + Constants.SLASH);
+            // 更新parentId为父级部门的parentId
+            parentId = parentUnit.getParentNodeId();
+        }
+        return path.toString();
     }
 
     /**
@@ -95,15 +123,15 @@ public class CommonServiceImpl implements CommonService {
      */
     @Override
     public GetOrganInfoVo getOrganInfo(String organCode) {
-        OrganInfoVo organInfo = bspService.getOrganInfo(organCode);
-        if (organInfo != null) {
+        OrganizationUnit organizationUnit = organizationUnitMapper.selectFirstByUnitCode(organCode);
+        if (organizationUnit != null) {
             GetOrganInfoVo getOrganInfoVo = new GetOrganInfoVo();
-            getOrganInfoVo.setId(organInfo.getId());
-            getOrganInfoVo.setCode(organInfo.getCode());
-            getOrganInfoVo.setName(organInfo.getName());
-            getOrganInfoVo.setLeader("系统联系人");
-            getOrganInfoVo.setLeaderPhone("13050005000");
-            getOrganInfoVo.setNamePath(organInfo.getOrganPath());
+            getOrganInfoVo.setId(organizationUnit.getDataid());
+            getOrganInfoVo.setCode(organizationUnit.getUnitCode());
+            getOrganInfoVo.setName(organizationUnit.getUnitName());
+            getOrganInfoVo.setLeader(organizationUnit.getContactName());
+            getOrganInfoVo.setLeaderPhone(organizationUnit.getContactPhone());
+            getOrganInfoVo.setNamePath(buildOrganizationUnitPath(organizationUnit));
             return getOrganInfoVo;
         }
         throw new RuntimeException("未查询到部门信息");

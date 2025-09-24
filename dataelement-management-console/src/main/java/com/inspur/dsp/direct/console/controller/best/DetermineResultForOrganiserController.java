@@ -1,8 +1,9 @@
 package com.inspur.dsp.direct.console.controller.best;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.inspur.dsp.direct.dbentity.BaseDataElement;
-import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
+import com.inspur.dsp.direct.annotation.RespAdvice;
+import com.inspur.dsp.direct.entity.dto.GetDetermineResultListDTO;
+import com.inspur.dsp.direct.entity.vo.GetDetermineResultVo;
 import com.inspur.dsp.direct.service.DetermineResultForOrganiserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,29 +31,24 @@ public class DetermineResultForOrganiserController {
      * 分页查询已定源结果列表数据
      * 使用范围：012
      *
-     * @param baseDataElementSearchDTO 查询参数
+     * @param  dto 查询参数
      * @return 基准数据元列表
      */
     @PostMapping("/list")
-    public Page<BaseDataElement> getDetermineResultList(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO) {
-        try {
-            return determineResultForOrganiserService.getDetermineResultList(baseDataElementSearchDTO);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("数据元不存在", e);
-        } catch (Exception e) {
-            throw new RuntimeException("业务异常", e);
-        }
+    @RespAdvice
+    public Page<GetDetermineResultVo> getDetermineResultList(@RequestBody GetDetermineResultListDTO dto) {
+        return determineResultForOrganiserService.getDetermineResultList(dto);
     }
 
     /**
      * 导出已定源结果数据
      *
-     * @param baseDataElementSearchDTO 查询参数
+     * @param dto 查询参数
      */
     @PostMapping("/download")
-    public void download(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
+    public void download(@RequestBody GetDetermineResultListDTO dto, HttpServletResponse response) {
         try {
-           determineResultForOrganiserService.download(baseDataElementSearchDTO,response);
+           determineResultForOrganiserService.download(dto,response);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("数据元不存在", e);
         } catch (Exception e) {

@@ -228,11 +228,10 @@
         <result column="dataid" property="dataid" />
         <result column="name" property="name" />
         <result column="definition" property="definition" />
-        <result column="sendDate" property="sendDate" />
         <result column="datatype" property="dataType" />
         <result column="send_date" property="sendDate" />
-        <result column="sourceUnitCode" property="sourceUnitCode" />
-        <result column="sourceUnitName" property="sourceUnitName" />
+        <result column="source_unit_code" property="sourceUnitCode" />
+        <result column="source_unit_name" property="sourceUnitName" />
         <result column="status" property="status" />
         <result column="processing_date" property="processingDate" />
     </resultMap>
@@ -245,6 +244,8 @@
                 bde.datatype,
                 bde.status,
                 bde.send_date,
+                bde.source_unit_code,
+                bde.source_unit_name,
                 ct.task_id,
                 ct.send_date as recieve_date,
                 ct.processing_date
@@ -253,10 +254,10 @@
             confirmation_task ct on bde.dataid = ct.base_dataelement_dataid
         <where>
             <!-- 状态条件 -->
-            <if test="taskStatusList != null and taskStatusList.size() > 0 or baseStatusList != null and baseStatusList.size() > 0">
+            <if test="base.taskStatusList != null and base.taskStatusList.size() > 0 or base.baseStatusList != null and base.baseStatusList.size() > 0">
                 <choose>
-                    <when test="(taskStatusList != null and taskStatusList.size() > 0) or (baseStatusList != null and baseStatusList.size() > 0)">
-                        <foreach collection="taskStatusList" item="status" open="(" separator=" OR " close=")">
+                    <when test="(base.taskStatusList != null and base.taskStatusList.size() > 0) or (base.baseStatusList != null and base.baseStatusList.size() > 0)">
+                        <foreach collection="base.taskStatusList" item="status" open="(" separator=" OR " close=")">
                             <!-- 1. 待确认、待认领：使用从表status -->
                             <if test="status == 'pending'">
                                 ct.status = 'pending'
@@ -287,16 +288,16 @@
                         </foreach>
 
                         <!-- 添加baseStatusList的条件 -->
-                        <if test="baseStatusList != null and baseStatusList.size() > 0">
-                            <if test="taskStatusList != null and taskStatusList.size() > 0">OR</if>
-                            <foreach collection="baseStatusList" item="status" open="(" separator=" OR " close=")">
+                        <if test="base.baseStatusList != null and base.baseStatusList.size() > 0">
+                            <if test="base.taskStatusList != null and base.taskStatusList.size() > 0">OR</if>
+                            <foreach collection="base.baseStatusList" item="status" open="(" separator=" OR " close=")">
                                 <!-- 6. 协商中：使用主表status -->
-                                <if test="status == 'negotiating'">
+                                <if test="base.status == 'negotiating'">
                                     bde.status = 'negotiating'
                                 </if>
 
                                 <!-- 7. 已定源：使用主表status -->
-                                <if test="status == 'confirmed'">
+                                <if test="base.status == 'confirmed'">
                                     bde.status = 'confirmed'
                                 </if>
                             </foreach>
@@ -317,16 +318,12 @@
                 AND ct.processing_date BETWEEN #{base.processDateBegin} AND #{base.processDateEnd}
             </if>
 
-            <if test="base.receiveDateStart != null and base.receiveDateStart != '' and base.receiveDateEnd != null and base.receiveDateEnd != ''">
-                AND bde.send_date BETWEEN #{base.receiveDateStart} AND #{base.receiveDateEnd}
+            <if test="base.receiveDateBegin != null != null and base.receiveDateBegin != '' and base.receiveDateEnd != null and base.receiveDateEnd != ''">
+                AND bde.send_date BETWEEN #{base.receiveDateBegin} AND #{base.receiveDateEnd}
             </if>
 
-            <if test="name != null and name != ''">
-                AND bde.name LIKE CONCAT('%', #{name}, '%')
-            </if>
-
-            <if test="definition != null and definition != ''">
-                AND bde.definition LIKE CONCAT('%', #{definition}, '%')
+            <if test="base.keyword != null and base.keyword != ''">
+                AND (bde.name LIKE CONCAT('%', #{base.keyword}, '%') or bde.definition LIKE CONCAT('%', #{base.keyword}, '%'))
             </if>
         </where>
 
@@ -334,7 +331,6 @@
     </select>
 
     <select id="getDetermineResultListWithOrganiserForExport" parameterType="com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO" resultMap="getDetermineResultListWithOrganiserResultMap">
-
         select  bde.dataid,
         bde.name,
         bde.definition,
@@ -439,4 +435,34 @@
         from base_data_element
         where `name`=#{name,jdbcType=VARCHAR} limit 1
     </select>
+
+  <select id="getDetermineResultList" resultType="com.inspur.dsp.direct.entity.vo.GetDetermineResultVo">
+      select
+      <include refid="Base_Column_List"/>
+      from base_data_element
+      <where>
+          `status` = 'designated_source'
+          <if test="dto.keyword != null and dto.keyword != ''">
+              and (name like concat('%', #{dto.keyword}, '%') or definition like concat('%', #{dto.keyword}, '%'))
+          </if>
+          <if test="dto.sendDateBegin != null and dto.sendDateBegin != ''">
+              and send_date >= #{dto.sendDateBegin}
+          </if>
+          <if test="dto.sendDateEnd != null and dto.sendDateEnd != ''">
+              and send_date <![CDATA[<=]]> #{dto.sendDateEnd}
+          </if>
+          <if test="dto.confirmDateBegin != null and dto.confirmDateBegin != ''">
+              and confirm_date >= #{dto.confirmDateBegin}
+          </if>
+          <if test="dto.confirmDateEnd != null and dto.confirmDateEnd != ''">
+              and confirm_date <![CDATA[<=]]> #{dto.confirmDateEnd}
+          </if>
+          <if test="dto.sourceUnitCodeList != null and dto.sourceUnitCodeList.size() != 0">
+              and source_unit_code in
+              <foreach item="item" collection="dto.sourceUnitCodeList" index="index" separator="," open="(" close=")">
+                  #{item}
+              </foreach>
+          </if>
+      </where>
+  </select>
 </mapper>

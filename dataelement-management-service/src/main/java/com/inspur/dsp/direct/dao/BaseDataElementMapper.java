@@ -6,10 +6,12 @@ import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.dto.CollectDataElementPageDto;
 import com.inspur.dsp.direct.entity.dto.GetDataElementPageDto;
+import com.inspur.dsp.direct.entity.dto.GetDetermineResultListDTO;
 import com.inspur.dsp.direct.entity.dto.GetPendingApprovalPageDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
 import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
 import com.inspur.dsp.direct.entity.vo.GetCollectDataVo;
+import com.inspur.dsp.direct.entity.vo.GetDetermineResultVo;
 import com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -62,4 +64,12 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
 
     BaseDataElement selectFirstByName(@Param("name") String name);
 
+    /**
+     * 获取已定源数据元列表
+     *
+     * @param page
+     * @param dto
+     * @return
+     */
+    List<GetDetermineResultVo> getDetermineResultList(Page page, @Param("dto") GetDetermineResultListDTO dto);
 }

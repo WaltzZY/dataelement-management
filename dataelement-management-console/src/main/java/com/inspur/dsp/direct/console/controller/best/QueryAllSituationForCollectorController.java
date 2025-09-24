@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.console.controller.best;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
 import com.inspur.dsp.direct.service.QueryAllSituationForCollectorService;
@@ -34,6 +35,7 @@ public class QueryAllSituationForCollectorController {
      * @return 基准数据元列表
      */
     @PostMapping("/getAllSituationList")
+    @RespAdvice
     public Page<DataElementWithTaskVo> getAllSituationList(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO) {
         return queryAllSituationForCollectorService.getAllSituationList(baseDataElementSearchDTO);
     }
