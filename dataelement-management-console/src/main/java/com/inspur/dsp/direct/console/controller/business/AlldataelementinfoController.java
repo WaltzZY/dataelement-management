@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.console.controller.business;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
 import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
@@ -35,6 +36,7 @@ public class AlldataelementinfoController {
      * @return 数据元列表（通过@RespAdvice包装为统一响应格式）
      */
     @PostMapping("/getAllDataElementPage")
+    @RespAdvice
     public Page<DataElementPageInfoVo> getAllDataElementPage(@RequestBody DataElementPageQueryDto queryDto) {
         log.info("数据元列表查询开始，查询条件：{}", queryDto);
         Page<DataElementPageInfoVo> result = alldataelementinfoService.getAllDataElementPage(queryDto);
@@ -48,6 +50,7 @@ public class AlldataelementinfoController {
      * @param response HttpServletResponse对象
      */
     @PostMapping("/exportDataElementList")
+    @RespAdvice
     public void exportDataElementList(@RequestBody DataElementPageQueryDto queryDto, HttpServletResponse response) {
         log.info("数据元列表导出开始，查询条件：{}", queryDto);
         alldataelementinfoService.exportDataElementList(queryDto, response);
@@ -60,6 +63,7 @@ public class AlldataelementinfoController {
      * @return 上传处理结果
      */
     @PostMapping("/uploadconfirmunitfile")
+    @RespAdvice
     public UploadConfirmResultVo uploadconfirmunitfile(@RequestParam("file") MultipartFile file) {
         log.info("上传定源文件开始，文件名：{}, 文件大小：{} bytes", file.getOriginalFilename(), file.getSize());
         UploadConfirmResultVo result = alldataelementinfoService.uploadconfirmunitfile(file);
@@ -76,6 +80,7 @@ public class AlldataelementinfoController {
      * @return 手动定源操作结果（通过@RespAdvice包装为统一响应格式）
      */
     @PostMapping("/manualConfirmUnit")
+    @RespAdvice
     public void manualConfirmUnit(@RequestBody @Valid ManualConfirmUnitDto confirmDto) {
         log.info("手动定源开始，请求参数：{}", confirmDto);
         alldataelementinfoService.manualConfirmUnit(confirmDto);

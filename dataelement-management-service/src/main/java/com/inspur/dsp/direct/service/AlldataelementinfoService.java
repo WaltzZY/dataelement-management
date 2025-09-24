@@ -47,6 +47,10 @@ public interface AlldataelementinfoService {
      */
     void manualConfirmUnit(ManualConfirmUnitDto confirmDto);
 
-
+    /**
+    * 导出数据元列表
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
     void exportDataElementList(DataElementPageQueryDto queryDto, HttpServletResponse response);
 }
