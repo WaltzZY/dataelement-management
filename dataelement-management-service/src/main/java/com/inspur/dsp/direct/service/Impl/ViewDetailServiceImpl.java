@@ -95,32 +95,32 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         return new SourceEventRecord();
     }
 
-    // @Override
-    // public List<ConfirmationTask> getCollectUnitList(String dataId) {
-    //     List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(null, Collections.singleton(dataId));
-    //     if (confirmationTaskList != null) {
-    //         for (ConfirmationTask confirmationTask : confirmationTaskList) {
-    //             String status = confirmationTask.getStatus();
-    //             String statusChinese = StatusUtil.getStatusChinese(status);
-    //             confirmationTask.setStatusChinese(statusChinese);
-    //         }
-    //         return confirmationTaskList;
-    //     }
-    //     return Collections.emptyList();
-    // }
-
     @Override
-    public List<DomainDataElement> getCollectUnitList(String dataId) {
-
-        QueryWrapper<DomainDataElement> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("base_dataelement_dataid", dataId);
-        List<DomainDataElement> domainDataElements = domainDataElementMapper.selectList(queryWrapper);
-
-        if (domainDataElements != null) {
-            return domainDataElements;
+    public List<ConfirmationTask> getCollectUnitList(String dataId) {
+        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(null, Collections.singleton(dataId));
+        if (confirmationTaskList != null) {
+            for (ConfirmationTask confirmationTask : confirmationTaskList) {
+                String status = confirmationTask.getStatus();
+                String statusChinese = StatusUtil.getStatusChinese(status);
+                confirmationTask.setStatusChinese(statusChinese);
+            }
+            return confirmationTaskList;
         }
         return Collections.emptyList();
     }
+
+    // @Override
+    // public List<DomainDataElement> getCollectUnitList(String dataId) {
+    //
+    //     QueryWrapper<DomainDataElement> queryWrapper = new QueryWrapper<>();
+    //     queryWrapper.eq("base_dataelement_dataid", dataId);
+    //     List<DomainDataElement> domainDataElements = domainDataElementMapper.selectList(queryWrapper);
+    //
+    //     if (domainDataElements != null) {
+    //         return domainDataElements;
+    //     }
+    //     return Collections.emptyList();
+    // }
 
 
     @Override

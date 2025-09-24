@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.service;
 
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
+import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.dbentity.DomainDataElement;
 import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
@@ -17,7 +18,8 @@ public interface ViewDetailService {
 
     List<FlowNodeDTO> getFlowInfo(String dataId);
 
-    List<DomainDataElement> getCollectUnitList(String dataId);
+    List<ConfirmationTask> getCollectUnitList(String dataId);
+    // List<DomainDataElement> getCollectUnitList(String dataId);
 
     BaseDataElement getElementDetailWithTask(String dataId);
 
