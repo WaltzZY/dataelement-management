@@ -40,18 +40,18 @@ public class UploadFileTest {
 
             // 打印结果
             System.out.println("上传结果：");
-            System.out.println("总记录数：" + result.getTotalCount());
-            System.out.println("成功记录数：" + result.getSuccessCount());
-            System.out.println("失败记录数：" + result.getFailureCount());
+            System.out.println("总记录数：" + result.getTotal());
+            System.out.println("成功记录数：" + result.getSucessQty());
+            System.out.println("失败记录数：" + result.getFailQty());
 
-            if (result.getFailureCount() > 0) {
+            if (result.getFailQty() > 0) {
                 System.out.println("\n失败记录详情：");
-                for (FailureDetailVo failure : result.getFailureDetails()) {
+                for (FailureDetailVo failure : result.getFailDetails()) {
                     System.out.println("----------------------------------------");
                     System.out.println("序号：" + failure.getSerialNumber());
-                    System.out.println("数据元名称：" + failure.getElementName());
-                    System.out.println("数源单位代码：" + failure.getUnitCode());
-                    System.out.println("失败原因：" + failure.getFailureReason());
+                    System.out.println("数据元名称：" + failure.getName());
+                    System.out.println("数源单位代码：" + failure.getUnit_code());
+                    System.out.println("失败原因：" + failure.getFailReason());
                 }
             }
 
@@ -127,17 +127,17 @@ public class UploadFileTest {
 
             // 打印结果
             System.out.println("上传结果：");
-            System.out.println("总记录数：" + result.getTotalCount());
-            System.out.println("成功记录数：" + result.getSuccessCount());
-            System.out.println("失败记录数：" + result.getFailureCount());
+            System.out.println("总记录数：" + result.getTotal());
+            System.out.println("成功记录数：" + result.getSucessQty());
+            System.out.println("失败记录数：" + result.getFailQty());
 
             System.out.println("\n失败记录详情：");
-            for (FailureDetailVo failure : result.getFailureDetails()) {
+            for (FailureDetailVo failure : result.getFailDetails()) {
                 System.out.println("----------------------------------------");
                 System.out.println("序号：" + failure.getSerialNumber());
-                System.out.println("数据元名称：" + failure.getElementName());
-                System.out.println("数源单位代码：" + failure.getUnitCode());
-                System.out.println("失败原因：" + failure.getFailureReason());
+                System.out.println("数据元名称：" + failure.getName());
+                System.out.println("数源单位代码：" + failure.getUnit_code());
+                System.out.println("失败原因：" + failure.getFailReason());
             }
 
         } catch (Exception e) {

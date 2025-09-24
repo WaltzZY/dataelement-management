@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 上传文件结果VO
@@ -25,17 +24,17 @@ public class UploadConfirmResultVo {
     /**
      * 总记录数
      */
-    private Integer totalCount;
+    private Integer total;
 
     /**
      * 成功记录数
      */
-    private Integer successCount;
+    private Integer sucessQty;
 
     /**
      * 失败记录数
      */
-    private Integer failureCount;
+    private Integer failQty;
 
 
     /**
@@ -46,5 +45,5 @@ public class UploadConfirmResultVo {
      * - unitCode: 数源单位统一社会信用代码
      * - failureReason: 失败原因
      */
-    private List<FailureDetailVo> failureDetails;
+    private List<FailureDetailVo> failDetails;
 }

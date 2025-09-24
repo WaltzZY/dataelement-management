@@ -12,7 +12,9 @@
         collectunitqty,
         source_unit_code AS sourceUnitCode,
         source_unit_name AS sourceUnitName,
-        status
+        status,
+        collectunitqty,
+        confirm_date
         FROM base_data_element
         WHERE 1=1
 

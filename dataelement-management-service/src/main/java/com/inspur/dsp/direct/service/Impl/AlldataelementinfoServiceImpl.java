@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dao.AlldataelementinfoMapper;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
-import com.inspur.dsp.direct.dao.OrganizationUnitMapper;
 import com.inspur.dsp.direct.dao.SourceEventRecordMapper;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.dbentity.OrganizationUnit;
@@ -108,9 +107,9 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
                 failureCount++;
                 FailureDetailVo failureDetail = FailureDetailVo.builder()
                         .serialNumber(row.getSerialNumber())
-                        .elementName(row.getElementName())
-                        .unitCode(row.getUnitCode())
-                        .failureReason("系统异常: " + e.getMessage())
+                        .name(row.getElementName())
+                        .unit_code(row.getUnitCode())
+                        .failReason("系统异常: " + e.getMessage())
                         .build();
                 failureDetails.add(failureDetail);
             }
@@ -120,10 +119,10 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
                 totalCount, successCount, failureCount);
 
         return UploadConfirmResultVo.builder()
-                .totalCount(totalCount)
-                .successCount(successCount)
-                .failureCount(failureCount)
-                .failureDetails(failureDetails)
+                .total(totalCount)
+                .sucessQty(successCount)
+                .failQty(failureCount)
+                .failDetails(failureDetails)
                 .build();
     }
 
@@ -146,7 +145,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     }
 
     /**
-     * 处理单行数据
+     * 处理单行数据 TODO 后续是否要修改成，所有情况都校验一遍，返回所有校验失败的结果。
      */
     private ProcessResult processRow(ExcelRowDto row, int rowNumber) {
         log.debug("处理第{}行数据: {}", rowNumber, row);
@@ -295,9 +294,9 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         public static ProcessResult failure(ExcelRowDto row, String reason) {
             FailureDetailVo detail = FailureDetailVo.builder()
                     .serialNumber(row.getSerialNumber())
-                    .elementName(row.getElementName())
-                    .unitCode(row.getUnitCode())
-                    .failureReason(reason)
+                    .name(row.getElementName())
+                    .unit_code(row.getUnitCode())
+                    .failReason(reason)
                     .build();
             return new ProcessResult(false, detail);
         }

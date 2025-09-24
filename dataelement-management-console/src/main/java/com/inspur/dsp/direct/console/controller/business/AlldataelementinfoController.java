@@ -68,7 +68,7 @@ public class AlldataelementinfoController {
         log.info("上传定源文件开始，文件名：{}, 文件大小：{} bytes", file.getOriginalFilename(), file.getSize());
         UploadConfirmResultVo result = alldataelementinfoService.uploadconfirmunitfile(file);
         log.info("上传定源文件结束，总记录数：{}, 成功：{}, 失败：{}",
-                result.getTotalCount(), result.getSuccessCount(), result.getFailureCount());
+                result.getTotal(), result.getSucessQty(), result.getFailQty());
         return result;
     }
 

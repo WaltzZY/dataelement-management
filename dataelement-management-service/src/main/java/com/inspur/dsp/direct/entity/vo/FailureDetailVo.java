@@ -26,20 +26,20 @@ public class FailureDetailVo {
     /**
      * 数据元名称
      */
-    private String elementName;
+    private String name;
 
     /**
      * 数源单位统一社会信用代码
      */
-    private String unitCode;
+    private String unit_code;
 
     /**
      * 数源单位名称
      */
-    private String unitName;
+    private String unit_name;
 
     /**
      * 失败原因
      */
-    private String failureReason;
+    private String failReason;
 }

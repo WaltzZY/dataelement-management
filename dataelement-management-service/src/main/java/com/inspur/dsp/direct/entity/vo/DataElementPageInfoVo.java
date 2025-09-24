@@ -49,4 +49,6 @@ public class DataElementPageInfoVo {
      * 状态说明
      */
     private String statusDesc;
+    /** 采集单位数量 */
+    private Integer collectunitqty;
 }
