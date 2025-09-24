@@ -368,18 +368,24 @@ public class NegotiationServiceImpl implements NegotiationService {
                     baseinfo = baseDataElementMapper.selectFirstByName(dataid);
                 }
 
+                StringBuilder errorSb = new StringBuilder();
+
                 if (Objects.isNull(baseinfo)) {
-                    throw new CustomException("数据元不存在!");
+                    errorSb.append("数据元不存在!");
                 }
 
-                if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(baseinfo.getStatus())) {
-                    throw new CustomException("该数据元已定源!");
+                if (Objects.nonNull(baseinfo) && StatusEnums.DESIGNATED_SOURCE.getCode().equals(baseinfo.getStatus())) {
+                    errorSb.append("|").append("该数据元已定源!");
                 }
 
                 // 调用组织机构信息，deptinfo = OrgService.GetOrgInfo(org_code)
                 OrganizationUnit unit = commonService.getOrgInfoByOrgCode(orgCode);
                 if (Objects.isNull(unit)) {
-                    throw new CustomException("组织机构不存在!");
+                    errorSb.append("|").append("组织机构不存在!");
+                }
+
+                if (StringUtils.hasText(errorSb.toString())) {
+                    throw new CustomException(errorSb.toString());
                 }
 
                 // 创建一个SourceEventRecord对象
