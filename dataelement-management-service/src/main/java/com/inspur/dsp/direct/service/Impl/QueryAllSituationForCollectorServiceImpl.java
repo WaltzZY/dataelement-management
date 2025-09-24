@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -152,13 +153,14 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         String orgCode = userInfo.getOrgCode();
         baseDataElementSearchDTO.setOrgCode(orgCode);
         List<String> statusList = baseDataElementSearchDTO.getStatusList();
-
-        List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
-        List<String> baseList = lists[0];
-        List<String> taskList = lists[1];
-        baseDataElementSearchDTO.setBaseStatusList(baseList);
-        baseDataElementSearchDTO.setTaskStatusList(taskList);
-        List<DataElementWithTaskVo> dataElementWithTaskVoList = baseDataElementMapper.getDetermineResultListWithOrganiser(null, baseDataElementSearchDTO);
+        if (statusList != null && !statusList.isEmpty()) {
+            List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
+            List<String> baseList = lists[0];
+            List<String> taskList = lists[1];
+            baseDataElementSearchDTO.setBaseStatusList(baseList);
+            baseDataElementSearchDTO.setTaskStatusList(taskList);
+        }
+        List<DataElementWithTaskVo> dataElementWithTaskVoList = baseDataElementMapper.getDetermineResultListWithOrganiser(baseDataElementSearchDTO);
         // 校验结果
         if (CollectionUtils.isEmpty(dataElementWithTaskVoList)) {
             log.error("导出错误!");
@@ -171,9 +173,10 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             exportDTO.setDefinition(dataElementWithTaskVo.getDefinition());
             exportDTO.setName(dataElementWithTaskVo.getName());
             exportDTO.setStatus(statusChinese);
-            exportDTO.setSendDate(dataElementWithTaskVo.getSendDate());
-            exportDTO.setReceiveDate(dataElementWithTaskVo.getReceiveDate());
-            exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate());
+            Date date = new Date(0);
+            exportDTO.setSendDate(dataElementWithTaskVo.getSendDate() == null ? date : dataElementWithTaskVo.getSendDate());
+            exportDTO.setReceiveDate(dataElementWithTaskVo.getReceiveDate() == null ? date : dataElementWithTaskVo.getReceiveDate());
+            exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate() == null ? date : dataElementWithTaskVo.getProcessingDate());
             exportDTO.setDataType(dataElementWithTaskVo.getDataType());
             exportDTOList.add(exportDTO);
         }
