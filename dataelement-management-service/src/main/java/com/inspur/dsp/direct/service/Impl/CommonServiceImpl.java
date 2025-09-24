@@ -43,6 +43,7 @@ public class CommonServiceImpl implements CommonService {
      */
     @Override
     public List<CollectionDeptTreeVo> getCollectionDeptTree(GetCollectionDeptTreeDto dto) {
+        log.info("[getCollectionDeptTree]参数: dto={}", dto);
         String parentCode = dto.getParentCode();
         // 如果parentCode为空,则只查询顶层部门,顶层部门父级为NULL
         if (!StringUtils.hasText(parentCode)) {
