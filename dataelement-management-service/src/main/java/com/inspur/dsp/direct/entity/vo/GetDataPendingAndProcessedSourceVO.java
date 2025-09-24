@@ -1,8 +1,10 @@
 package com.inspur.dsp.direct.entity.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 public class GetDataPendingAndProcessedSourceVO {
@@ -37,12 +39,18 @@ public class GetDataPendingAndProcessedSourceVO {
     private String source_unit_name;
 
     /** 数据元发布日期 */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime publish_date;
 
     /** 发起定源时间 */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime send_date;
 
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date receiveTime;
+
     /** 确定数源单位时间 */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime confirm_date;
 
     /** 采集单位数量 */
@@ -52,12 +60,14 @@ public class GetDataPendingAndProcessedSourceVO {
     private String remarks;
 
     /** 创建日期 */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime create_date;
 
     /** 创建人账号 */
     private String create_account;
 
     /** 最后修改日期 */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime last_modify_date;
 
     /** 最后修改人账号 */
@@ -101,7 +111,8 @@ public class GetDataPendingAndProcessedSourceVO {
     private String processing_unit_name;
 
     /** 处理日期 */
-    private LocalDateTime processing_date;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime processingDate;
 
     /** 处理结果 */
     private String processing_result;

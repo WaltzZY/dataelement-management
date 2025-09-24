@@ -31,7 +31,7 @@ public class ProcessedController {
      * @param dto 查询条件（状态、开始时间、结束时间、关键字）
      * @return 已处理数据元列表
      */
-    @GetMapping("/getProcessedDataElement")
+    @PostMapping("/getProcessedDataElement")
     @RespAdvice
     public Page<GetProcessedDataElementVO> getProcessedDataElement(@RequestBody GetProcessedDataElementDTO dto) {
         return processedService.getProcessedDataElement(dto);

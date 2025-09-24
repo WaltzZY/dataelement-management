@@ -24,49 +24,4 @@
 <!--        <result column="approval_name" property="approvalName"/>-->
     </resultMap>
 
-    <!-- 更新确认任务 -->
-    <insert id="insertById" parameterType="com.inspur.dsp.direct.dbentity.ConfirmationTask">
-        INSERT INTO confirmation_task (
-        task_id,
-        base_dataelement_dataid,
-<!--        tasktype,-->
-<!--        send_unit_code,-->
-<!--        send_unit_name,-->
-        send_date,
-        sender_account,
-        sender_name,
-        status,
-        processing_unit_code,
-        processing_unit_name,
-        processing_date,
-        processing_result,
-        processing_opinion,
-        processor_account,
-        processor_name
-<!--        approval_date,-->
-<!--        approval_account,-->
-<!--        approval_name-->
-        ) VALUES (
-        #{taskId},
-        #{baseDataelementDataid},
-<!--        #{tasktype},-->
-<!--        #{sendUnitCode},-->
-<!--        #{sendUnitName},-->
-        #{sendDate},
-        #{senderAccount},
-        #{senderName},
-        #{status},
-        #{processingUnitCode},
-        #{processingUnitName},
-        #{processingDate},
-        #{processingResult},
-        #{processingOpinion},
-        #{processorAccount},
-        #{processorName}
-<!--        #{approvalDate},-->
-<!--        #{approvalAccount},-->
-<!--        #{approvalName}-->
-        )
-    </insert>
-
 </mapper>

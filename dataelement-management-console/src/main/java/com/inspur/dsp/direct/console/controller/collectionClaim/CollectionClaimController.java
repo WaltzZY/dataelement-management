@@ -30,7 +30,7 @@ public class CollectionClaimController {
      * @param dto 查询条件DTO
      * @return 数据元列表
      */
-    @GetMapping("/GetDataPendingSource")
+    @PostMapping("/GetDataPendingSource")
     @RespAdvice
     public Page<GetDataPendingAndProcessedSourceVO> getDataPendingAndProcessedSource(
             @RequestBody GetDataPendingAndProcessedSourceDTO dto) {
@@ -42,7 +42,7 @@ public class CollectionClaimController {
      * @param dto 认领或拒绝DTO
      * @return 操作结果
      */
-    @GetMapping("/claim-reject")
+    @PostMapping("/claim-reject")
     @RespAdvice
     @Transactional
 

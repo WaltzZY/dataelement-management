@@ -11,15 +11,9 @@ import java.util.Map;
 public class ClaimOrRejectDTO {
 
     /**
-     * 数据元id与任务id映射
+     * Map<任务id, 数据元id>
      */
     private Map<String, String> idTaskId;
-
-//    /** 认领或不认领的数据元id */
-//    private List<String> id;
-//
-//    /** 任务id */
-//    private List<String> task_id;
 
     /** 认领或不认领 */
     private String operation;

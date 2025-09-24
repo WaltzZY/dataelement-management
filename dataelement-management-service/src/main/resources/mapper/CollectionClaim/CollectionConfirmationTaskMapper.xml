@@ -42,8 +42,6 @@
         processing_date = #{processingDate},
         processor_account = #{processorAccount},
         processor_name = #{processorName},
-        processing_unit_code = #{processingUnitCode},
-        processing_unit_name = #{processingUnitName},
         processing_opinion = #{processingOpinion}
 <!--        <if test="text != null and text != ''">-->
 <!--            , text = #{text}-->
