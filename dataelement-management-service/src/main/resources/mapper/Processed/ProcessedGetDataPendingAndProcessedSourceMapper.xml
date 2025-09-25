@@ -136,9 +136,8 @@
         FROM base_data_element bde
          JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
-<!--            TODO：测试时 orgCode先写死-->
-<!--            ct.processing_unit_code = #{orgCode}-->
-            ct.processing_unit_code = '11100000000014445H'
+            ct.processing_unit_code = #{orgCode}
+<!--            ct.processing_unit_code = '11100000000014445H'-->
             <if test="dto.status != null and dto.status.size() > 0">
                 AND ct.status IN
                 <foreach collection="dto.status" item="item" open="(" separator="," close=")">
