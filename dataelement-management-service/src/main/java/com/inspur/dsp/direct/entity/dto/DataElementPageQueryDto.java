@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 数据元列表查询条件DTO
- * 按照修改后的要求，只包含7个字段
+ * 按照修改后的要求，包含排序字段
  *
  * @author Claude Code
  * @since 2025-09-22
@@ -59,4 +59,21 @@ public class DataElementPageQueryDto {
      * 定源时间查询截止时间
      */
     private Date confirmDateEnd;
+
+    /**
+     * 排序字段
+     * 支持的值：
+     * - collectunitqty: 采集单位数量
+     * - status: 状态
+     * - sourceUnitName: 数源单位
+     * - sendDate: 发起时间
+     * - confirmDate: 定源时间
+     */
+    private String sortField;
+
+    /**
+     * 排序方向
+     * asc: 升序, desc: 降序
+     */
+    private String sortOrder;
 }

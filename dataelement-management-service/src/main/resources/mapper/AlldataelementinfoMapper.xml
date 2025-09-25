@@ -13,8 +13,7 @@
         source_unit_code AS sourceUnitCode,
         source_unit_name AS sourceUnitName,
         status,
-        collectunitqty,
-        confirm_date
+        confirm_date AS confirmDate
         FROM base_data_element
         WHERE 1=1
 
@@ -50,15 +49,56 @@
             AND confirm_date &lt;= #{queryDto.confirmDateEnd}
         </if>
 
-        <!-- 关键字在数据元名称、定义和数源单位名称中模糊匹配 -->
+        <!-- 关键字在数据元名称、定义和数源单位名称中模糊匹配，并去除前后空格 -->
         <if test="queryDto.keyword != null and queryDto.keyword != ''">
-            AND (name LIKE CONCAT('%', #{queryDto.keyword}, '%')
-            OR definition LIKE CONCAT('%', #{queryDto.keyword}, '%')
-            OR source_unit_name LIKE CONCAT('%', #{queryDto.keyword}, '%'))
+            AND (name LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%')
+            OR definition LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%')
+            OR source_unit_name LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%'))
         </if>
 
-        <!-- 按发起时间倒序排列 -->
-        ORDER BY send_date DESC
+        <!-- 动态排序逻辑 -->
+        <if test="queryDto.sortField != null and queryDto.sortField != '' and queryDto.sortOrder != null and queryDto.sortOrder != ''">
+            ORDER BY
+            <choose>
+                <!-- 采集单位数量按数字排序 -->
+                <when test="queryDto.sortField == 'collectunitqty'">
+                    collectunitqty ${queryDto.sortOrder}
+                </when>
+                <!-- 状态按字母排序 -->
+                <when test="queryDto.sortField == 'status'">
+                    status ${queryDto.sortOrder}
+                </when>
+                <!-- 数源单位按字母排序，null值始终放在后面 -->
+                <when test="queryDto.sortField == 'sourceUnitName'">
+                    <choose>
+                        <when test="queryDto.sortOrder == 'asc'">
+                            CASE WHEN source_unit_name IS NULL THEN 1 ELSE 0 END ASC,
+                            source_unit_name ASC
+                        </when>
+                        <otherwise>
+                            CASE WHEN source_unit_name IS NULL THEN 1 ELSE 0 END ASC,
+                            source_unit_name DESC
+                        </otherwise>
+                    </choose>
+                </when>
+                <!-- 发起时间按时间排序 -->
+                <when test="queryDto.sortField == 'sendDate'">
+                    send_date ${queryDto.sortOrder}
+                </when>
+                <!-- 定源时间按时间排序 -->
+                <when test="queryDto.sortField == 'confirmDate'">
+                    confirm_date ${queryDto.sortOrder}
+                </when>
+                <!-- 默认按发起时间倒序 -->
+                <otherwise>
+                    send_date DESC
+                </otherwise>
+            </choose>
+        </if>
+        <!-- 没有指定排序字段时，默认按发起时间倒序 -->
+        <if test="queryDto.sortField == null or queryDto.sortField == '' or queryDto.sortOrder == null or queryDto.sortOrder == ''">
+            ORDER BY send_date DESC
+        </if>
     </select>
 
 </mapper>
