@@ -12,10 +12,11 @@ public enum DataElementStatus {
     DESIGNATED_SOURCE("designated_source","已定源" ),
     REJECTED("rejected","已拒绝" ),
     PENDING_CLAIMED("pending_claimed","待认领" ),
-    CLAIMED("claimed","认领" ),
+    CLAIMED("claimed","已认领" ),
     NOT_CLAIMED("not_claimed","不认领" ),
     PENDING("pending","待确认" ),
-    CONFIRMED("confirmed","确认" );
+    CONFIRMED("confirmed","已确认" );
+
 
     @Getter
     private final String status;

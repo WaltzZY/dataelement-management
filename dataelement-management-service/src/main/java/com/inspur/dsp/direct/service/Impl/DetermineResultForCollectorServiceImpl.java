@@ -62,6 +62,14 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
             queryWrapper.between("send_date", sendDateBegin, sendDateEnd);
         }
 
+        String keywords = baseDataElementSearchDTO.getKeyword();
+        if (StringUtils.isNotBlank(keywords)) {
+            queryWrapper.and(i -> i
+                    .like(StringUtils.isNotBlank(keywords), "name", keywords)
+                    .or()
+                    .like(StringUtils.isNotBlank(keywords), "definition", keywords)
+            );
+        }
         Page<BaseDataElement> baseDataElementPage = baseDataElementMapper.selectPage(page, queryWrapper);
         List<BaseDataElement> records = baseDataElementPage.getRecords();
         if (CollectionUtils.isEmpty(records)) {
@@ -97,6 +105,14 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         String sendDateEnd = baseDataElementSearchDTO.getSendDateEnd();
         if (StringUtils.isNotBlank(sendDateBegin) && StringUtils.isNotBlank(sendDateEnd)) {
             queryWrapper.between("send_date", sendDateBegin, sendDateEnd);
+        }
+        String keywords = baseDataElementSearchDTO.getKeyword();
+        if (StringUtils.isNotBlank(keywords)) {
+            queryWrapper.and(i -> i
+                    .like(StringUtils.isNotBlank(keywords), "name", keywords)
+                    .or()
+                    .like(StringUtils.isNotBlank(keywords), "definition", keywords)
+            );
         }
 
         List<BaseDataElement> baseDataElements = baseDataElementMapper.selectList(queryWrapper);

@@ -8,11 +8,7 @@ import com.inspur.dsp.direct.entity.dto.CollectDataElementPageDto;
 import com.inspur.dsp.direct.entity.dto.GetDataElementPageDto;
 import com.inspur.dsp.direct.entity.dto.GetDetermineResultListDTO;
 import com.inspur.dsp.direct.entity.dto.GetPendingApprovalPageDto;
-import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
-import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
-import com.inspur.dsp.direct.entity.vo.GetCollectDataVo;
-import com.inspur.dsp.direct.entity.vo.GetDetermineResultVo;
-import com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo;
+import com.inspur.dsp.direct.entity.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -34,7 +30,6 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
     /**
      * 获取确认方数据元详情
      *
-     * @return
      */
     List<GetCollectDataVo> getCollectData(Page page, @Param("dto") CollectDataElementPageDto dto, @Param("sortSql") String sortSql, @Param("organCode") String organCode);
 
@@ -56,20 +51,17 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
      */
     List<GetPendingApprovalPageVo> selectConfirmedPage(@Param("page") Page<?> page, @Param("dto") GetPendingApprovalPageDto dto, @Param("sortSql") String sortSql);
 
-
     List<DataElementWithTaskVo> getDetermineResultListWithOrganiser(Page page, @Param("base") BaseDataElementSearchDTO baseDataElementSearchDTO);
 
     List<DataElementWithTaskVo> getDetermineResultListWithOrganiser(@Param("base") BaseDataElementSearchDTO baseDataElementSearchDTO);
-
 
     BaseDataElement selectFirstByName(@Param("name") String name);
 
     /**
      * 获取已定源数据元列表
-     *
-     * @param page
-     * @param dto
-     * @return
      */
     List<GetDetermineResultVo> getDetermineResultList(Page page, @Param("dto") GetDetermineResultListDTO dto);
+
+    List<GetCollectUnitVo> getCollectUnitList(@Param("dataId") String dataId);
+
 }

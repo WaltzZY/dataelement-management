@@ -8,7 +8,9 @@ import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.bo.DomainSourceUnitInfo;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
 import com.inspur.dsp.direct.entity.enums.DataElementStatus;
+import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
+import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.service.ViewDetailService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -96,15 +98,23 @@ public class ViewDetailServiceImpl implements ViewDetailService {
     }
 
     @Override
-    public List<ConfirmationTask> getCollectUnitList(String dataId) {
-        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(null, Collections.singleton(dataId));
-        if (confirmationTaskList != null) {
-            for (ConfirmationTask confirmationTask : confirmationTaskList) {
-                String status = confirmationTask.getStatus();
-                String statusChinese = StatusUtil.getStatusChinese(status);
-                confirmationTask.setStatusChinese(statusChinese);
+    public List<GetCollectUnitVo> getCollectUnitList(String dataId) {
+
+        List<GetCollectUnitVo> collectUnitList = baseDataElementMapper.getCollectUnitList(dataId);
+        if (collectUnitList != null) {
+            for (GetCollectUnitVo collectUnitVo : collectUnitList) {
+                String status = collectUnitVo.getStatus();
+                if (status != null) {
+                    if (ConfirmationTaskEnums.PENDING.getCode().equals(status) || ConfirmationTaskEnums.PENDING_CLAIMED.getCode().equals(status)) {
+                        collectUnitVo.setProcessingDate(collectUnitVo.getSendDate());
+                    }
+                    DataElementStatus dataElementStatus = DataElementStatus.fromString(status);
+                    collectUnitVo.setStatusChinese(dataElementStatus.getRemark());
+                } else {
+                    collectUnitVo.setStatusChinese("");
+                }
             }
-            return confirmationTaskList;
+            return collectUnitList;
         }
         return Collections.emptyList();
     }
@@ -176,7 +186,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方-业务员");   // TODO:
+        node1.setNodeHandleUserName("组织方-业务员");
         node1.setNodeShowStatus(1);
         flow.add(node1);
 
@@ -235,12 +245,11 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
 
         List<FlowNodeDTO> flow = new ArrayList<>();
-
         // 第一个节点（从确认任务中提取）
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方业务员");
+        node1.setNodeHandleUserName("组织方-业务员");
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
         flow.add(node1);
@@ -289,7 +298,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方业务员");
+        node1.setNodeHandleUserName("组织方-业务员");
         // 获取最晚的发送时间
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
@@ -339,7 +348,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方业务员");
+        node1.setNodeHandleUserName("组织方-业务员");
         // 获取最晚的发送时间
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
@@ -363,7 +372,6 @@ public class ViewDetailServiceImpl implements ViewDetailService {
                     .filter(task -> "claimed".equals(task.getStatus()))
                     .findFirst()
                     .orElse(null);
-
             if (confirmedTask != null) {
                 node2.setSeqNo(1);
                 node2.setNodeName("采集单位认领");
@@ -414,7 +422,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方业务员");
+        node1.setNodeHandleUserName("组织方-业务员");
         // 获取最晚的发送时间
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
@@ -521,7 +529,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方业务员");
+        node1.setNodeHandleUserName("组织方-业务员");
         // 获取最晚的发送时间
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);

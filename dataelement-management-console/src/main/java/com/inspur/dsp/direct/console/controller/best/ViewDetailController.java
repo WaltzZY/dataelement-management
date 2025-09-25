@@ -2,9 +2,9 @@ package com.inspur.dsp.direct.console.controller.best;
 
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
-import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
+import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 import com.inspur.dsp.direct.service.ViewDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +54,9 @@ public class ViewDetailController {
     //     return viewDetailService.getCollectUnitList(dataId);
     // }
 
-
     @RespAdvice
     @GetMapping("/getCollectUnitList/{dataId}")
-    public List<ConfirmationTask> getCollectUnitList(@PathVariable("dataId") String dataId) {
+    public List<GetCollectUnitVo> getCollectUnitList(@PathVariable("dataId") String dataId) {
         return viewDetailService.getCollectUnitList(dataId);
     }
 

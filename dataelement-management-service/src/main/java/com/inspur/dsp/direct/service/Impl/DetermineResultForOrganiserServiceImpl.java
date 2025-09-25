@@ -37,7 +37,7 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
 
     @Override
     public Page<GetDetermineResultVo> getDetermineResultList(GetDetermineResultListDTO dto) {
-        Page page = new Page<>(dto.getPageNum(), dto.getPageSize());
+        Page<GetDetermineResultVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         List<GetDetermineResultVo> vos = baseDataElementMapper.getDetermineResultList(page, dto);
         if (CollectionUtils.isEmpty(vos)) {
             return page.setRecords(Collections.emptyList());
@@ -56,7 +56,6 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
             List<GetDetermineResultVo> baseDataElements = baseDataElementMapper.getDetermineResultList(null, dto);
             List<DetermineResultForOrganiserExportDTO> exportDTOList = new ArrayList<>();
             for (GetDetermineResultVo baseDataElement : baseDataElements) {
-                String statusChinese = StatusUtil.getStatusChinese(baseDataElement.getStatus());
                 DetermineResultForOrganiserExportDTO exportDTO = new DetermineResultForOrganiserExportDTO();
                 exportDTO.setName(baseDataElement.getName());
                 exportDTO.setStatus(StatusUtil.getStatusChinese(baseDataElement.getStatus()));
