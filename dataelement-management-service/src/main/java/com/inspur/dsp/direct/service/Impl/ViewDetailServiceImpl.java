@@ -87,6 +87,18 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         return baseDataElement;
     }
 
+    @Override
+    public ConfirmationTask getConfirmationTask(String dataId) {
+
+        QueryWrapper<ConfirmationTask> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("base_dataelement_dataid", dataId);
+        queryWrapper.orderByDesc("send_date");
+        List<ConfirmationTask> confirmationTasks = confirmationTaskMapper.selectList(queryWrapper);
+        if (!confirmationTasks.isEmpty()) {
+            return confirmationTasks.get(0);
+        }
+        return new ConfirmationTask();
+    }
 
     @Override
     public SourceEventRecord getSourceEventRecord(String dataId) {
@@ -457,7 +469,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
                 StringBuilder userNames = new StringBuilder();
                 for (ConfirmationTask task : confirmationTaskList) {
                     if ("claimed".equals(task.getStatus())) {
-                        userNames.append(task.getProcessingUnitName());
+                        userNames.append(task.getProcessingUnitName()).append(",");
                     }
                 }
                 if (userNames.length() > 0) {
@@ -470,9 +482,13 @@ public class ViewDetailServiceImpl implements ViewDetailService {
                 // 所有单位都拒绝
                 StringBuilder userNames = new StringBuilder();
                 for (ConfirmationTask task : confirmationTaskList) {
-                    userNames.append(task.getProcessingUnitName());
+                    userNames.append(task.getProcessingUnitName()).append(",");
                 }
-                node2.setNodeHandleUserName(userNames.toString());
+                if (userNames.length() > 0) {
+                    node2.setNodeHandleUserName(userNames.deleteCharAt(userNames.length() - 1).toString());
+                } else {
+                    node2.setNodeHandleUserName(userNames.toString());
+                }
                 node2.setNodeResult("4");
             }
             node2.setNodeShowStatus(2);

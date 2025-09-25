@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.service;
 
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
+import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
 import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
@@ -21,5 +22,8 @@ public interface ViewDetailService {
     // List<DomainDataElement> getCollectUnitList(String dataId);
 
     BaseDataElement getElementDetailWithTask(String dataId);
+
+    ConfirmationTask getConfirmationTask(String dataId);
+
 
 }

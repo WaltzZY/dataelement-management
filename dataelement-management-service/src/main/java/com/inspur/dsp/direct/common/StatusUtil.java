@@ -28,6 +28,8 @@ public class StatusUtil {
                 switch (status) {
                     case "pending":
                     case "pending_claimed":
+                    case "pending_source":
+                    case "confirming":
                         // 使用从表的status进行查询
                         subConditions.add(status);
                         break;

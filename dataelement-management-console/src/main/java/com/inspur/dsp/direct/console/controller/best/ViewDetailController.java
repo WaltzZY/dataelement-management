@@ -2,6 +2,7 @@ package com.inspur.dsp.direct.console.controller.best;
 
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
+import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
 import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
@@ -39,6 +40,14 @@ public class ViewDetailController {
     public BaseDataElement getElementDetailWithTask(@PathVariable("dataId") String dataId) {
         return viewDetailService.getElementDetailWithTask(dataId);
     }
+
+
+    @RespAdvice
+    @GetMapping("/getConfirmationTask/{dataId}")
+    public ConfirmationTask getTask(@PathVariable("dataId") String dataId) {
+        return viewDetailService.getConfirmationTask(dataId);
+    }
+
 
 
     @RespAdvice
