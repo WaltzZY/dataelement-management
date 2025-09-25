@@ -41,12 +41,18 @@ public class ViewDetailController {
     }
 
 
-
     @RespAdvice
     @GetMapping("/getSourceEventRecord/{dataId}")
     public SourceEventRecord getSourceEventRecord(@PathVariable("dataId") String dataId) {
         return viewDetailService.getSourceEventRecord(dataId);
     }
+
+
+    // @RespAdvice
+    // @GetMapping("/getCollectUnitList/{dataId}")
+    // public List<DomainDataElement> getCollectUnitList(@PathVariable("dataId") String dataId) {
+    //     return viewDetailService.getCollectUnitList(dataId);
+    // }
 
 
     @RespAdvice
