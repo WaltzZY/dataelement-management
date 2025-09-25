@@ -3,31 +3,32 @@ package com.inspur.dsp.direct.enums;
 import lombok.Getter;
 
 /**
- * getDataPendingAndProcessedSource 方法排序枚举
+ * getDataElement 方法排序枚举
  */
 @Getter
-public enum PapsSortFieldEnums {
+public enum DeSortFieldEnums {
 
-    // 数据类型
-    DATATYPE("datatype", "bde.datatype"),
-    // 状态  status
-    STATUS("status", "ct.status"),
-    // 接收时间  recieveTime
-    RECIEVE_TIME("recieveTime", "ct.send_date"),
-    // 处理时间
-    PROCESSING_DATE("processingDate", "ct.processing_date"),
+    // 采集单位数量
+    COLLECTUNITQTY("collectUnitqty", "collectunitqty"),
+
+    // 状态
+    STATUS("status", "status"),
+
+    // 发起时间
+    SENDDATE("sendDate", "send_date"),
+
 
     ;
     private final String field;
     private final String orderBySql;
 
-    PapsSortFieldEnums(String field, String orderBySql) {
+    DeSortFieldEnums(String field, String orderBySql) {
         this.field = field;
         this.orderBySql = orderBySql;
     }
 
     public static String getSortFieldSql(String sortField) {
-        for (PapsSortFieldEnums value : values()) {
+        for (DeSortFieldEnums value : values()) {
             if (value.field.equals(sortField)) {
                 return value.orderBySql;
             }

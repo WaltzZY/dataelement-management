@@ -7,6 +7,7 @@ import com.inspur.dsp.direct.entity.dto.GetProcessedDataElementDTO;
 import com.inspur.dsp.direct.entity.excel.ProcessedExcel;
 import com.inspur.dsp.direct.entity.vo.GetProcessedDataElementVO;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
+import com.inspur.dsp.direct.enums.PapsSortFieldEnums;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.ProcessedService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -44,8 +45,10 @@ public class ProcessedServiceImpl implements ProcessedService {
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         String orgCode = userInfo.getOrgCode();
 
+        String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
+
         Page<GetProcessedDataElementVO> page = new Page<>(dto.getPageNum(), dto.getPageSize());
-        Page<GetProcessedDataElementVO> processedDataElement = getDataPendingAndProcessedSourceMapper.getProcessedDataElement(page, dto, orgCode);
+        Page<GetProcessedDataElementVO> processedDataElement = getDataPendingAndProcessedSourceMapper.getProcessedDataElement(page, dto, orgCode,orderBySql);
         for (GetProcessedDataElementVO vo : processedDataElement.getRecords()) {
             vo.setStatusDesc(ConfirmationTaskEnums.getDescByCode(vo.getStatus()));
         }
@@ -59,7 +62,9 @@ public class ProcessedServiceImpl implements ProcessedService {
             UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
             String orgCode = userInfo.getOrgCode();
 
-            List<GetProcessedDataElementVO> processedDataElement = getDataPendingAndProcessedSourceMapper.getProcessedDataElement( dto, orgCode);
+            String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
+
+            List<GetProcessedDataElementVO> processedDataElement = getDataPendingAndProcessedSourceMapper.getProcessedDataElement( dto, orgCode,orderBySql);
 
             List<ProcessedExcel> processedExcelList = processedDataElement.stream().map(vo -> {
                 return ProcessedExcel.builder()

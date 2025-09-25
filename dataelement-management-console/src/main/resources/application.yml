@@ -39,7 +39,8 @@ spring:
   bsp:
     root-organ-code: 200427114503
 #    url: http://10.110.26.178:8443/bsp
-    url: http://127.0.0.1:8101/bsp
+#    url: http://127.0.0.1:8101/bsp
+    url: http://192.168.3.233:8101/bsp
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver

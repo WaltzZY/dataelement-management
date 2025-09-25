@@ -71,7 +71,7 @@
 
                 <!-- 动态排序逻辑 -->
                 <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
-                    ORDER BY ${dto.sortField} ${dto.sortOrder}
+                    ORDER BY ${orderBySql}
                 </if>
 
     </select>

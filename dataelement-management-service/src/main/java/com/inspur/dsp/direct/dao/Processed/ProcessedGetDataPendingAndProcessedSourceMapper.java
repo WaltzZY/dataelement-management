@@ -19,9 +19,9 @@ public interface ProcessedGetDataPendingAndProcessedSourceMapper {
      * @param dto 查询条件
      * @return 已处理数据元列表
      */
-    Page<GetProcessedDataElementVO> getProcessedDataElement(Page<GetProcessedDataElementVO> page, @Param("dto") GetProcessedDataElementDTO dto, @Param("orgCode") String orgCode);
+    Page<GetProcessedDataElementVO> getProcessedDataElement(Page<GetProcessedDataElementVO> page, @Param("dto") GetProcessedDataElementDTO dto, @Param("orgCode") String orgCode, @Param("orderBySql") String orderBySql);
 
-    List<GetProcessedDataElementVO> getProcessedDataElement(@Param("dto") GetProcessedDataElementDTO dto, @Param("orgCode") String orgCode);
+    List<GetProcessedDataElementVO> getProcessedDataElement(@Param("dto") GetProcessedDataElementDTO dto, @Param("orgCode") String orgCode, @Param("orderBySql") String orderBySql);
 
 
 }

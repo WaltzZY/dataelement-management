@@ -16,7 +16,7 @@ public interface ClaimDataElementMapper {
      * @param dto 查询条件
      * @return 数据元列表
      */
-    List<ClaimDataElementVO> selectBaseDataElementByStatus(Page<ClaimDataElementVO> page, GetDataElementDTO dto);
+    List<ClaimDataElementVO> selectBaseDataElementByStatus(Page<ClaimDataElementVO> page, GetDataElementDTO dto,@Param("orderBySql") String orderBySql);
 
     List<ClaimDataElementVO> selectBaseDataElementByStatus(@Param("dto") GetDataElementDTO dto);
 }

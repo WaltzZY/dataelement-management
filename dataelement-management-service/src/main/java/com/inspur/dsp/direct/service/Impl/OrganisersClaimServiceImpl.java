@@ -15,6 +15,7 @@ import com.inspur.dsp.direct.entity.excel.OrganisersClaimPendingExcel;
 import com.inspur.dsp.direct.entity.excel.OrganisersClaimingExcel;
 import com.inspur.dsp.direct.entity.vo.ClaimDataElementVO;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
+import com.inspur.dsp.direct.enums.PapsSortFieldEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.OrganisersClaimService;
@@ -55,9 +56,9 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
 
         Page<ClaimDataElementVO> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
-        // TODO：仿照VerifiedDsServiceImpl 防止sql注入
+        String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
         // 使用ClaimDataElementMapper.selectBaseDataElementByStatus获取数据列表
-        List<ClaimDataElementVO> list = claimDataElementMapper.selectBaseDataElementByStatus(page, dto);
+        List<ClaimDataElementVO> list = claimDataElementMapper.selectBaseDataElementByStatus(page, dto,orderBySql);
         page.setRecords(list);
         // 循环遍历List<ClaimDataElementVO>
         for (ClaimDataElementVO vo : page.getRecords()) {
@@ -121,11 +122,15 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
     public void exportData(GetDataElementDTO dto, HttpServletResponse response) {
 
         try {
+
+            String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
+
+
             if (dto.getStatus() != null && dto.getStatus().contains("pending_source")) {
 
 
                 // 查询待定源数据元列表
-                List<ClaimDataElementVO> list_pendingSource = claimDataElementMapper.selectBaseDataElementByStatus(null, dto);
+                List<ClaimDataElementVO> list_pendingSource = claimDataElementMapper.selectBaseDataElementByStatus(null, dto,orderBySql);
 
                 // 循环遍历List<ClaimDataElementVO>
                 for (ClaimDataElementVO vo : list_pendingSource) {
@@ -148,7 +153,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
             } else if (dto.getStatus() != null && dto.getStatus().contains("claimed_ing")) {
 
                 // 查询待定源数据元列表
-                List<ClaimDataElementVO> claimDataElementVOS = claimDataElementMapper.selectBaseDataElementByStatus(dto);
+                List<ClaimDataElementVO> claimDataElementVOS = claimDataElementMapper.selectBaseDataElementByStatus(null, dto,orderBySql);
 
                 // 循环遍历List<ClaimDataElementVO>
                 for (ClaimDataElementVO vo : claimDataElementVOS) {
