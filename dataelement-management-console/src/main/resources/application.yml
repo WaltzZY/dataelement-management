@@ -7,8 +7,8 @@ server:
     tracking-modes: cookie
 spring:
   application:
-    id: DSP-EFFICIENTTHING
-    name: DSP-EFFICIENTTHING
+    id: DSP-DATAELEMENT
+    name: DSP-DATAELEMENT
     admin: true
     # rc文件服务内网地址
     inner_rcservice: http://10.110.26.178:8443/rcservice

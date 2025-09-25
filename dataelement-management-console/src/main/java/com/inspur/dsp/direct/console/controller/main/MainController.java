@@ -1,16 +1,23 @@
 package com.inspur.dsp.direct.console.controller.main;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import cn.hutool.extra.servlet.ServletUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.code.kaptcha.impl.DefaultKaptcha;
+import com.inspur.dsp.common.utils.constant.ServiceConstant;
+import com.inspur.dsp.common.web.controller.BaseController;
+import com.inspur.dsp.direct.httpService.BSPService;
+import com.inspur.dsp.direct.util.AESEncrypter;
+import com.inspur.dsp.direct.util.CTools;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.crypto.BadPaddingException;
@@ -22,22 +29,17 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import cn.hutool.extra.servlet.ServletUtil;
-import com.inspur.dsp.common.utils.constant.ServiceConstant;
-import com.inspur.dsp.common.web.controller.BaseController;
-import com.inspur.dsp.direct.httpService.BSPService;
-import com.inspur.dsp.direct.util.AESEncrypter;
-import com.inspur.dsp.direct.util.CTools;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.google.code.kaptcha.impl.DefaultKaptcha;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 网站首页资源(开发者控制器)
@@ -159,8 +161,8 @@ public class MainController extends BaseController {
         if (ServiceConstant.SYSTEM_SUCCESS.equals(state)) {
             HttpSession session = request.getSession(true);
             //处理用户菜单结构
-            JSONArray array = jsonUser.getJSONArray("menus");
-            if (array == null || array.size() == 0) {
+            JSONArray menusArray = jsonUser.getJSONArray("menus");
+            if (menusArray == null || menusArray.size() == 0) {
                 //设置登录失败标志位
                 returnData.put("msg", jsonUser.getString("error"));
                 returnData.put("code", "4003");
@@ -193,6 +195,7 @@ public class MainController extends BaseController {
             returnData.put("code", "200");
             returnData.put("msg", jsonUser.getString("error"));
             returnData.put("currentUser", user);
+            returnData.put("menus", menusArray);
             log.info("method login end success");
             return returnData;
         } else {

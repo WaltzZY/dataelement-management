@@ -194,6 +194,7 @@ public class NegotiationServiceImpl implements NegotiationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void submitSingleNegotiation(SingleNegotiationDto dto) {
         List<String> unitcodes = dto.getUnitcodes();
         String dataid = dto.getDataid();
