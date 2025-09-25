@@ -145,41 +145,57 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     }
 
     /**
-     * 处理单行数据 TODO 后续是否要修改成，所有情况都校验一遍，返回所有校验失败的结果。
+     * 处理单行数据 - 校验所有条件并收集所有错误信息
      */
     private ProcessResult processRow(ExcelRowDto row, int rowNumber) {
         log.debug("处理第{}行数据: {}", rowNumber, row);
 
-        // 数据校验
+        List<String> errorMessages = new ArrayList<>();
+
+        // 1. 数据元名称校验
         if (!StringUtils.hasText(row.getElementName())) {
-            return ProcessResult.failure(row, "数据元名称不能为空");
+            errorMessages.add("数据元名称不能为空");
         }
 
+        // 2. 数源单位代码校验
         if (!StringUtils.hasText(row.getUnitCode())) {
-            return ProcessResult.failure(row, "数源单位统一社会信用代码不能为空");
+            errorMessages.add("数源单位统一社会信用代码不能为空");
         }
 
-        // 验证部门是否存在 - 使用commonService方法
-        OrganizationUnit organizationUnit = commonService.getOrgInfoByOrgCode(row.getUnitCode());
-        if (organizationUnit == null) {
-            return ProcessResult.failure(row, "数源单位不存在");
+        // 3. 验证部门是否存在
+        OrganizationUnit organizationUnit = null;
+        if (StringUtils.hasText(row.getUnitCode())) {
+            organizationUnit = commonService.getOrgInfoByOrgCode(row.getUnitCode());
+            if (organizationUnit == null) {
+                errorMessages.add("数源单位不存在");
+            }
         }
 
-        // 根据名称查询数据元
-        LambdaQueryWrapper<BaseDataElement> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(BaseDataElement::getName, row.getElementName());
-        BaseDataElement element = baseDataElementMapper.selectOne(wrapper);
+        // 4. 根据名称查询数据元
+        BaseDataElement element = null;
+        if (StringUtils.hasText(row.getElementName())) {
+            LambdaQueryWrapper<BaseDataElement> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(BaseDataElement::getName, row.getElementName());
+            element = baseDataElementMapper.selectOne(wrapper);
 
-        if (element == null) {
-            return ProcessResult.failure(row, "数据元不存在");
+            if (element == null) {
+                errorMessages.add("数据元不存在");
+            } else {
+                // 5. 检查数据元状态（只有在数据元存在时才检查）
+                if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(element.getStatus())) {
+                    errorMessages.add("数据元已定源");
+                }
+            }
         }
 
-        // 检查数据元状态
-        if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(element.getStatus())) {
-            return ProcessResult.failure(row, "数据元已定源");
+        // 如果有任何错误，返回失败结果
+        if (!errorMessages.isEmpty()) {
+            String combinedErrorMessage = String.join("；", errorMessages);
+            log.debug("第{}行数据校验失败: {}", rowNumber, combinedErrorMessage);
+            return ProcessResult.failure(row, combinedErrorMessage);
         }
 
-        // 调用统一的更新数据源状态方法
+        // 所有校验通过，执行更新操作
         updateDataElementStatus(element.getDataid(), row.getUnitCode(), RecordSourceTypeEnums.IMPORT_SOURCE.getCode());
 
         log.debug("成功处理第{}行数据，数据元ID: {}", rowNumber, element.getDataid());
