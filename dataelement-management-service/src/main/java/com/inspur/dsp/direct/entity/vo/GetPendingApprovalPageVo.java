@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.entity.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -64,6 +65,7 @@ public class GetPendingApprovalPageVo {
     /**
      * 定源时间
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date confirmDate;
 
     /**
@@ -74,5 +76,6 @@ public class GetPendingApprovalPageVo {
     /**
      * 发起时间
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date sendDate;
 }

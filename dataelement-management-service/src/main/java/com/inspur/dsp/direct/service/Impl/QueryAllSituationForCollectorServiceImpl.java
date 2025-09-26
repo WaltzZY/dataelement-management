@@ -48,23 +48,44 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         // 获取登录人账户
         String orgCode = userInfo.getOrgCode();
         baseDataElementSearchDTO.setOrgCode(orgCode);
-        List<String> statusList = baseDataElementSearchDTO.getStatusList();
-        if (statusList != null && !statusList.isEmpty()) {
-            List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
-            List<String> baseList = lists[0];
-            List<String> taskList = lists[1];
-            baseDataElementSearchDTO.setBaseStatusList(baseList);
-            baseDataElementSearchDTO.setTaskStatusList(taskList);
-        }
+        // List<String> statusList = baseDataElementSearchDTO.getStatusList();
+        // if (statusList != null && !statusList.isEmpty()) {
+        //     List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
+        //     List<String> baseList = lists[0];
+        //     List<String> taskList = lists[1];
+        //     baseDataElementSearchDTO.setBaseStatusList(baseList);
+        //     baseDataElementSearchDTO.setTaskStatusList(taskList);
+        // }
         List<DataElementWithTaskVo> baseDataElementList = baseDataElementMapper.getDetermineResultListWithOrganiser(page, baseDataElementSearchDTO);
         // 校验结果
         if (CollectionUtils.isEmpty(baseDataElementList)) {
             page.setRecords(Collections.emptyList());
         }
         for (DataElementWithTaskVo dataElementWithTaskVo : baseDataElementList) {
-            String status = dataElementWithTaskVo.getStatus();
-            String statusChinese = StatusUtil.getStatusChinese(status);
-            dataElementWithTaskVo.setStatusChinese(statusChinese);
+            String ctStatus = dataElementWithTaskVo.getCtStatus();
+            String bdeStatus = dataElementWithTaskVo.getBdeStatus();
+            String displayStatus = "";
+            if ("pending".equals(ctStatus)) {
+                displayStatus = ctStatus;
+            } else if ("pending_claimed".equals(ctStatus)) {
+                displayStatus = ctStatus;
+            } else if ("confirmed".equals(ctStatus) && "pending_approval".equals(bdeStatus)) {
+                displayStatus = "confirmed";
+            } else if ("rejected".equals(ctStatus) && "pending_negotiation".equals(bdeStatus)) {
+                displayStatus = "rejected";
+            } else if ("claimed".equals(ctStatus) && ("claimed_ing".equals(bdeStatus) || "pending_approval".equals(bdeStatus) || "pending_negotiation".equals(bdeStatus))) {
+                displayStatus = "claimed";
+            } else if ("not_claimed".equals(ctStatus) && ("claimed_ing".equals(bdeStatus) || "pending_approval".equals(bdeStatus) || "pending_negotiation".equals(bdeStatus))) {
+                displayStatus = "not_claimed";
+            } else if ("negotiating".equals(ctStatus)) {
+                displayStatus = ctStatus;
+            } else if ("designated_source".equals(ctStatus)) {
+                displayStatus = ctStatus;
+            } else {
+                displayStatus = "nothing";
+            }
+            String statusChinese = StatusUtil.getStatusChinese(displayStatus);
+            dataElementWithTaskVo.setDisplaystatus(statusChinese);
         }
         return page.setRecords(baseDataElementList);
     }
@@ -152,14 +173,14 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         // 获取登录人账户
         String orgCode = userInfo.getOrgCode();
         baseDataElementSearchDTO.setOrgCode(orgCode);
-        List<String> statusList = baseDataElementSearchDTO.getStatusList();
-        if (statusList != null && !statusList.isEmpty()) {
-            List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
-            List<String> baseList = lists[0];
-            List<String> taskList = lists[1];
-            baseDataElementSearchDTO.setBaseStatusList(baseList);
-            baseDataElementSearchDTO.setTaskStatusList(taskList);
-        }
+        // List<String> statusList = baseDataElementSearchDTO.getStatusList();
+        // if (statusList != null && !statusList.isEmpty()) {
+        //     List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
+        //     List<String> baseList = lists[0];
+        //     List<String> taskList = lists[1];
+        //     baseDataElementSearchDTO.setBaseStatusList(baseList);
+        //     baseDataElementSearchDTO.setTaskStatusList(taskList);
+        // }
         List<DataElementWithTaskVo> dataElementWithTaskVoList = baseDataElementMapper.getDetermineResultListWithOrganiser(baseDataElementSearchDTO);
         // 校验结果
         if (CollectionUtils.isEmpty(dataElementWithTaskVoList)) {

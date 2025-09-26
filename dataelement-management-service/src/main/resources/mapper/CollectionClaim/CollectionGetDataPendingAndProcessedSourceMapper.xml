@@ -101,19 +101,19 @@
                 </foreach>
             </if>
             <!-- 接收时间范围 -->
-            <if test="dto.recievestartTime != null">
-                AND ct.send_date >= #{dto.recievestartTime}
+            <if test="dto.sendDateBegin != null">
+                AND ct.send_date >= #{dto.sendDateBegin}
             </if>
-            <if test="dto.recieveendTime != null">
-                AND ct.send_date &lt;= #{dto.recieveendTime}
+            <if test="dto.sendDateEnd != null">
+                AND ct.send_date &lt;= #{dto.sendDateEnd}
             </if>
 
             <!-- 处理时间范围 -->
-            <if test="dto.processstartTime != null">
-                AND ct.processing_date >= #{dto.processstartTime}
+            <if test="dto.processDateBegin != null">
+                AND ct.processing_date >= #{dto.processDateBegin}
             </if>
-            <if test="dto.proccessendTime != null">
-                AND ct.processing_date &lt;= #{dto.proccessendTime}
+            <if test="dto.processDateEnd != null">
+                AND ct.processing_date &lt;= #{dto.processDateEnd}
             </if>
             <!-- 关键字模糊查询 -->
             <if test="dto.keyword != null and dto.keyword != ''">

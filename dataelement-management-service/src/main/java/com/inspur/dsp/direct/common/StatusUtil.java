@@ -35,13 +35,13 @@ public class StatusUtil {
                         break;
                     case "confirmed":
                         // 从表的过滤字段值为"待核定"，主表的过滤字段值为"已确认"
-                        subConditions.add("pending_approval");
-                        mainConditions.add("confirmed");
+                        mainConditions.add("pending_approval");
+                        subConditions.add("confirmed");
                         break;
                     case "rejected":
                         // 从表的过滤字段值为"待协商"，主表的过滤字段值为"已拒绝"
-                        subConditions.add("pending_negotiation");
-                        mainConditions.add("rejected");
+                        mainConditions.add("pending_negotiation");
+                        subConditions.add("rejected");
                         break;
 
                     case "claimed":

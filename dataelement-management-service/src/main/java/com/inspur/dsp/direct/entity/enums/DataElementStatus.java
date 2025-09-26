@@ -15,7 +15,8 @@ public enum DataElementStatus {
     CLAIMED("claimed","已认领" ),
     NOT_CLAIMED("not_claimed","不认领" ),
     PENDING("pending","待确认" ),
-    CONFIRMED("confirmed","已确认" );
+    CONFIRMED("confirmed","已确认" ),
+    NOTHING("nothing","无" );
 
 
     @Getter
@@ -34,6 +35,6 @@ public enum DataElementStatus {
                 return s;
             }
         }
-        throw new IllegalArgumentException("不支持的数据元状态: " + status);
+        return DataElementStatus.NOTHING;
     }
 }

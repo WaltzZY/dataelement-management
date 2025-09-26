@@ -57,6 +57,15 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
         Page<ClaimDataElementVO> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
         String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
+
+        // 查询senddateBegin零点到senddateEnd第二天零点的数据​
+        if (dto.getSendDateBegin() != null){
+            dto.setSendDateBegin(dto.getSendDateBegin().toLocalDate().atStartOfDay());
+        }
+        if (dto.getSendDateEnd() != null){
+            dto.setSendDateEnd(dto.getSendDateEnd().toLocalDate().plusDays(1).atStartOfDay());
+        }
+
         // 使用ClaimDataElementMapper.selectBaseDataElementByStatus获取数据列表
         List<ClaimDataElementVO> list = claimDataElementMapper.selectBaseDataElementByStatus(page, dto,orderBySql);
         page.setRecords(list);

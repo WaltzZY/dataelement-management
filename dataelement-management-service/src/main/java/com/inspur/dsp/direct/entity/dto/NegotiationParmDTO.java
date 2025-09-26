@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.entity.dto;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.inspur.dsp.direct.util.DateUtils;
 import lombok.Data;
 
 import java.util.Date;
@@ -52,4 +53,20 @@ public class NegotiationParmDTO {
      * 导出标识,仅用作导出区别导出模版
      */
     private String exportFlag;
+
+    public void setSendDateBegin(Date sendDateBegin) {
+        this.sendDateBegin = DateUtils.getStartOfDay(sendDateBegin);
+    }
+
+    public void setSendDateEnd(Date sendDateEnd) {
+        this.sendDateEnd = DateUtils.getEndOfDay(sendDateEnd);
+    }
+
+    public void setConfirmDateBegin(Date confirmDateBegin) {
+        this.confirmDateBegin = DateUtils.getStartOfDay(confirmDateBegin);
+    }
+
+    public void setConfirmDateEnd(Date confirmDateEnd) {
+        this.confirmDateEnd = DateUtils.getEndOfDay(confirmDateEnd);
+    }
 }

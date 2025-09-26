@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.entity.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -105,6 +106,7 @@ public class GetDetermineResultVo implements Serializable {
      * 发起定源时间
      */
     @TableField(value = "send_date")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date sendDate;
 
     /**
@@ -129,6 +131,7 @@ public class GetDetermineResultVo implements Serializable {
      * 创建日期
      */
     @TableField(value = "create_date")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createDate;
 
     /**
@@ -142,6 +145,7 @@ public class GetDetermineResultVo implements Serializable {
      * 最后修改日期
      */
     @TableField(value = "last_modify_date")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date lastModifyDate;
 
     /**

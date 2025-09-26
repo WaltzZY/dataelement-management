@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.entity.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.inspur.dsp.direct.util.DateUtils;
 import lombok.Data;
 
 import java.util.Date;
@@ -16,12 +17,12 @@ public class GetDataElementPageDto {
     /**
      * 发起时间结束
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", locale = "zh", shape = JsonFormat.Shape.STRING)
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date sendDateEnd;
     /**
      * 发起时间开始
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", locale = "zh", shape = JsonFormat.Shape.STRING)
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date sendDateBegin;
     /**
      * 页码
@@ -39,12 +40,12 @@ public class GetDataElementPageDto {
      * 定源时间结束
      */
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", locale = "zh", shape = JsonFormat.Shape.STRING)
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date confirmDateEnd;
     /**
      * 定源时间开始
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", locale = "zh", shape = JsonFormat.Shape.STRING)
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date confirmDateBegin;
     /**
      * 数据元状态集合
@@ -58,4 +59,21 @@ public class GetDataElementPageDto {
      * 排序方式
      */
     private String sortOrder;
+
+    public void setSendDateBegin(Date sendDateBegin) {
+        this.sendDateBegin = DateUtils.getStartOfDay(sendDateBegin);
+    }
+
+    public void setSendDateEnd(Date sendDateEnd) {
+        this.sendDateEnd = DateUtils.getEndOfDay(sendDateEnd);
+    }
+
+    public void setConfirmDateBegin(Date confirmDateBegin) {
+        this.confirmDateBegin = DateUtils.getStartOfDay(confirmDateBegin);
+    }
+
+    public void setConfirmDateEnd(Date confirmDateEnd) {
+        this.confirmDateEnd = DateUtils.getEndOfDay(confirmDateEnd);
+    }
+
 }

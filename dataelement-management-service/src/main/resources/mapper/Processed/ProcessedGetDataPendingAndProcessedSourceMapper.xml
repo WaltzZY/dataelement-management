@@ -146,11 +146,11 @@
             </if>
 
 <!--            TODO : 注意：看用不用所有时间传参都要再校验是否为空字符串-->
-            <if test="dto.recievestartTime != null and dto.recieveendTime != null">
-                AND ct.send_date BETWEEN #{dto.recievestartTime} AND #{dto.recieveendTime}
+            <if test="dto.sendDateBegin != null and dto.sendDateEnd != null">
+                AND ct.send_date BETWEEN #{dto.sendDateBegin} AND #{dto.sendDateEnd}
             </if>
-            <if test="dto.processstartTime != null and dto.proccessendTime != null">
-                AND ct.processing_date BETWEEN #{dto.processstartTime} AND #{dto.proccessendTime}
+            <if test="dto.processDateBegin != null and dto.processDateEnd != null">
+                AND ct.processing_date BETWEEN #{dto.processDateBegin} AND #{dto.processDateEnd}
             </if>
             <if test="dto.keyword != null and dto.keyword != ''">
                 AND (bde.name LIKE CONCAT('%', #{dto.keyword}, '%') OR bde.definition LIKE CONCAT('%', #{dto.keyword}, '%'))
