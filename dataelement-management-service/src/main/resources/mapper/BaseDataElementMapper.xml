@@ -352,8 +352,8 @@
         bde.source_unit_code,
         bde.source_unit_name,
         ct.task_id,
-        ct.send_date AS recieve_date,
-        ct.processing_date
+        DATE_FORMAT(ct.send_date, '%Y-%m-%d %H:%i:%s') AS recieve_date,
+        DATE_FORMAT(ct.processing_date, '%Y-%m-%d %H:%i:%s') AS processing_date
         FROM base_data_element bde LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
             <!-- 添加保底条件 -->
@@ -381,22 +381,23 @@
                 AND ct.processing_unit_code = #{base.orgCode}
             </if>
             <if test="base.sendDateBegin != null and base.sendDateBegin != '' and base.sendDateEnd != null and base.sendDateEnd != ''">
-                AND ct.send_date BETWEEN FROM_UNIXTIME(#{base.sendDateBegin} / 1000,'%Y-%m-%d') AND
-                FROM_UNIXTIME(#{base.sendDateEnd} / 1000, '%Y-%m-%d')
+                AND ct.send_date BETWEEN DATE(FROM_UNIXTIME(#{base.sendDateBegin} / 1000)) AND DATE(FROM_UNIXTIME(#{base.sendDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
             <if test="base.processDateBegin != null and base.processDateBegin != '' and base.processDateEnd != null and base.processDateEnd != ''">
-                AND ct.processing_date BETWEEN FROM_UNIXTIME(#{base.processDateBegin} / 1000,'%Y-%m-%d') AND
-                FROM_UNIXTIME(#{base.processDateEnd} / 1000, '%Y-%m-%d')
+                AND ct.processing_date BETWEEN DATE(FROM_UNIXTIME(#{base.processDateBegin} / 1000)) AND DATE(FROM_UNIXTIME(#{base.processDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
             <if test="base.receiveDateBegin != null and base.receiveDateBegin != '' and base.receiveDateEnd != null and base.receiveDateEnd != ''">
-                AND bde.confirm_date BETWEEN FROM_UNIXTIME(#{base.receiveDateBegin} / 1000,'%Y-%m-%d') AND
-                FROM_UNIXTIME(#{base.receiveDateEnd} / 1000, '%Y-%m-%d')
+                AND bde.confirm_date BETWEEN DATE(FROM_UNIXTIME(#{base.receiveDateBegin} / 1000)) AND
+                DATE(FROM_UNIXTIME(#{base.receiveDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
             <if test="base.keyword != null and base.keyword != ''">
                 AND (bde.name LIKE CONCAT('%', #{base.keyword}, '%') OR bde.definition LIKE CONCAT('%', #{base.keyword},
                 '%'))
             </if>
         </where>
+        <if test="base.sortSql != null and base.sortSql != ''">
+            order by ${base.sortSql}
+        </if>
         ) AS test
     </select>
 
@@ -417,25 +418,22 @@
             <if test="dto.keyword != null and dto.keyword != ''">
                 and (name like concat('%', #{dto.keyword}, '%') or definition like concat('%', #{dto.keyword}, '%'))
             </if>
-            <if test="dto.sendDateBegin != null">
-                and send_date >= #{dto.sendDateBegin}
+            <if test="dto.sendDateBegin != null and dto.sendDateBegin != '' and dto.sendDateEnd != null and dto.sendDateEnd != ''">
+                AND send_date BETWEEN DATE(FROM_UNIXTIME(#{dto.sendDateBegin} / 1000)) AND DATE(FROM_UNIXTIME(#{dto.sendDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
-            <if test="dto.sendDateEnd != null">
-                and send_date <![CDATA[<=]]> #{dto.sendDateEnd}
+            <if test="dto.confirmDateBegin != null and dto.confirmDateBegin != '' and dto.confirmDateEnd != null and dto.confirmDateEnd != ''">
+                AND confirm_date BETWEEN DATE(FROM_UNIXTIME(#{dto.confirmDateEnd} / 1000)) AND DATE(FROM_UNIXTIME(#{dto.confirmDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
-            <if test="dto.confirmDateBegin != null">
-                and confirm_date >= #{dto.confirmDateBegin}
-            </if>
-            <if test="dto.confirmDateEnd != null">
-                and confirm_date <![CDATA[<=]]> #{dto.confirmDateEnd}
-            </if>
-            <if test="dto.sourceUnitCodeList != null and dto.sourceUnitCodeList.size() != 0">
+            <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() != 0">
                 and source_unit_code in
-                <foreach item="item" collection="dto.sourceUnitCodeList" index="index" separator="," open="(" close=")">
+                <foreach item="item" collection="dto.collectUnitCodeList" index="index" separator="," open="(" close=")">
                     #{item}
                 </foreach>
             </if>
         </where>
+        <if test="dto.sortSql != null and dto.sortSql != ''">
+            order by ${dto.sortSql}
+        </if>
     </select>
 
     <resultMap id="getCollectUnitListResultMap" type="com.inspur.dsp.direct.entity.vo.GetCollectUnitVo">

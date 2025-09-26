@@ -6,6 +6,7 @@ import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.entity.dto.DetermineResultForOrganiserExportDTO;
 import com.inspur.dsp.direct.entity.dto.GetDetermineResultListDTO;
 import com.inspur.dsp.direct.entity.vo.GetDetermineResultVo;
+import com.inspur.dsp.direct.enums.NePageSortFieldEnums;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.DetermineResultForOrganiserService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,8 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
 
     @Override
     public Page<GetDetermineResultVo> getDetermineResultList(GetDetermineResultListDTO dto) {
+        String sortSql = NePageSortFieldEnums.getOrderByField(dto.getSortField(), dto.getSortOrder());
+        dto.setSortSql(sortSql);
         Page<GetDetermineResultVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         List<GetDetermineResultVo> vos = baseDataElementMapper.getDetermineResultList(page, dto);
         if (CollectionUtils.isEmpty(vos)) {

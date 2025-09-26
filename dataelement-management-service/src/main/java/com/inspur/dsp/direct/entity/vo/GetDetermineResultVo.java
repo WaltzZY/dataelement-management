@@ -112,6 +112,7 @@ public class GetDetermineResultVo implements Serializable {
     /**
      * 确定数源单位时间
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @TableField(value = "confirm_date")
     private Date confirmDate;
 

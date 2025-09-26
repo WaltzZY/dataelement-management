@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.dbentity;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -99,6 +100,7 @@ public class BaseDataElement implements Serializable {
      * 数据元发布日期
      *
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "publish_date")
     private Date publishDate;
@@ -106,6 +108,7 @@ public class BaseDataElement implements Serializable {
     /**
      * 发起定源时间
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "send_date")
     private Date sendDate;
@@ -113,7 +116,11 @@ public class BaseDataElement implements Serializable {
     /**
      * 确定数源单位时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(
+            pattern = "yyyy-MM-dd HH:mm:ss",
+            timezone = "GMT+8"
+    )
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @TableField(value = "confirm_date")
     private Date confirmDate;
 
@@ -132,6 +139,7 @@ public class BaseDataElement implements Serializable {
     /**
      * 创建日期
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_date")
     private Date createDate;
@@ -146,12 +154,14 @@ public class BaseDataElement implements Serializable {
     /**
      * 最后修改日期
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @TableField(value = "last_modify_date")
     private Date lastModifyDate;
 
     /**
      * 最后修改人账号
      */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @TableField(value = "last_modify_account")
     @Size(max = 30, message = "最后修改人账号最大长度要小于 30")
     private String lastModifyAccount;

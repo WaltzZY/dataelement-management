@@ -8,6 +8,7 @@ import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.dto.QueryAllSituationForCollectorExportDTO;
 import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
+import com.inspur.dsp.direct.enums.NePageSortFieldEnums;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.QueryAllSituationForCollectorService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -43,6 +44,8 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
      */
     @Override
     public Page<DataElementWithTaskVo> getAllSituationList(BaseDataElementSearchDTO baseDataElementSearchDTO) {
+        String sortSql = NePageSortFieldEnums.getOrderByField(baseDataElementSearchDTO.getSortField(), baseDataElementSearchDTO.getSortOrder());
+        baseDataElementSearchDTO.setSortSql(sortSql);
         log.warn("getAllSituationList函数接收到的参数为: {}", JSONObject.toJSONString(baseDataElementSearchDTO));
         Page<DataElementWithTaskVo> page = new Page<>(baseDataElementSearchDTO.getPageNum(), baseDataElementSearchDTO.getPageSize());
         // 获取当前登录用户信息
@@ -50,14 +53,6 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         // 获取登录人账户
         String orgCode = userInfo.getOrgCode();
         baseDataElementSearchDTO.setOrgCode(orgCode);
-        // List<String> statusList = baseDataElementSearchDTO.getStatusList();
-        // if (statusList != null && !statusList.isEmpty()) {
-        //     List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
-        //     List<String> baseList = lists[0];
-        //     List<String> taskList = lists[1];
-        //     baseDataElementSearchDTO.setBaseStatusList(baseList);
-        //     baseDataElementSearchDTO.setTaskStatusList(taskList);
-        // }
         List<DataElementWithTaskVo> baseDataElementList = baseDataElementMapper.getDetermineResultListWithOrganiser(page, baseDataElementSearchDTO);
         // 校验结果
         if (CollectionUtils.isEmpty(baseDataElementList)) {
@@ -98,7 +93,8 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
      */
     @Override
     public void download(BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
-
+        String sortSql = NePageSortFieldEnums.getOrderByField(baseDataElementSearchDTO.getSortField(), baseDataElementSearchDTO.getSortOrder());
+        baseDataElementSearchDTO.setSortSql(sortSql);
         // 获取当前登录用户信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         // 获取登录人账户

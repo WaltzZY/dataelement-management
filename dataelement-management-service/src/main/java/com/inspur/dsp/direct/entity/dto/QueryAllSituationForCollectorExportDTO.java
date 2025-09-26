@@ -27,10 +27,10 @@ public class QueryAllSituationForCollectorExportDTO implements Serializable {
     @ExcelProperty(index = 3, value = "状态")
     private String status;
     @ExcelProperty(index = 4, value = "接收时间")
-    private Date receiveDate;
+    private String receiveDate;
     @ExcelProperty(index = 5, value = "处理时间")
-    private Date processDate;
+    private String processDate;
     @ExcelProperty(index = 6, value = "定源时间")
-    private Date sendDate;
+    private String sendDate;
 
 }
