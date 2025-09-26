@@ -38,7 +38,7 @@
             AND send_date >= #{queryDto.sendDateBegin}
         </if>
         <if test="queryDto.sendDateEnd != null">
-            AND send_date &lt;= #{queryDto.sendDateEnd}
+            AND send_date &lt; DATE_ADD(#{queryDto.sendDateEnd}, INTERVAL 1 DAY)
         </if>
 
         <!-- 定源时间范围查询 -->
@@ -46,7 +46,7 @@
             AND confirm_date >= #{queryDto.confirmDateBegin}
         </if>
         <if test="queryDto.confirmDateEnd != null">
-            AND confirm_date &lt;= #{queryDto.confirmDateEnd}
+            AND confirm_date &lt; DATE_ADD(#{queryDto.confirmDateEnd}, INTERVAL 1 DAY)
         </if>
 
         <!-- 关键字在数据元名称、定义和数源单位名称中模糊匹配，并去除前后空格 -->
