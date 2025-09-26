@@ -15,6 +15,7 @@ import com.inspur.dsp.direct.entity.excel.OrganisersClaimPendingExcel;
 import com.inspur.dsp.direct.entity.excel.OrganisersClaimingExcel;
 import com.inspur.dsp.direct.entity.vo.ClaimDataElementVO;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
+import com.inspur.dsp.direct.enums.DeSortFieldEnums;
 import com.inspur.dsp.direct.enums.PapsSortFieldEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.service.CommonService;
@@ -56,7 +57,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
 
         Page<ClaimDataElementVO> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
-        String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
+        String orderBySql = DeSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
 
         // 查询senddateBegin零点到senddateEnd第二天零点的数据​
         if (dto.getSendDateBegin() != null){

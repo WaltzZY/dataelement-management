@@ -11,9 +11,11 @@ public enum PdeSortFieldEnums {
     // 数据类型  collectUnitCode
     DATATYPE("datatype", "bde.datatype"),
     // 状态  status
-    STATUS("status", "ct.status"),
-    // 接收时间  recieveTime
-    RECIEVE_TIME("recieveTime", "ct.send_date"),
+    STATUS("status", "bde.status"),
+//    // 接收时间  recieveTime
+//    RECIEVE_TIME("recieveTime", "ct.send_date"),
+    // 发起时间
+    SEND_DATE("sendDate", "ct.send_date"),
     // 处理时间
     PROCESSING_DATE("processingDate", "ct.processing_date"),
 

@@ -15,7 +15,7 @@ public enum DeSortFieldEnums {
     STATUS("status", "status"),
 
     // 发起时间
-    SENDDATE("sendDate", "send_date"),
+    SEND_DATE("sendDate", "send_date"),
 
 
     ;
