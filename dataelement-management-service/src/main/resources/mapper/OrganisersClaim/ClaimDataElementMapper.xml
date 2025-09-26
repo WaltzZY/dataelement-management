@@ -60,13 +60,13 @@
 <!--            <if test="dto.status != null and dto.status != ''">-->
 <!--                 status = #{dto.status}-->
 <!--            </if>-->
-            <if test="dto.senddateBegin != null and dto.senddateEnd != null">
-                AND send_date BETWEEN #{dto.senddateBegin} AND #{dto.senddateEnd}
+            <if test="dto.sendDateBegin != null and dto.sendDateEnd != null">
+                AND send_date BETWEEN #{dto.sendDateBegin} AND #{dto.sendDateEnd}
             </if>
             <if test="dto.keyword != null and dto.keyword != ''">
                 AND (name LIKE CONCAT('%', #{dto.keyword}, '%') OR definition LIKE CONCAT('%', #{dto.keyword}, '%'))
             </if>
-
+            AND collectunitqty > 1
         </where>
 
                 <!-- 动态排序逻辑 -->

@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.entity.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ public class ClaimDataElementVO {
 //    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime publishDate;
 
-//    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime sendDate;
 
 //    @JSONField(format = "yyyy-MM-dd HH:mm:ss")

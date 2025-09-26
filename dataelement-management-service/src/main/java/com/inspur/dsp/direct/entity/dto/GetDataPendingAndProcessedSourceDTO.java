@@ -19,16 +19,20 @@ public class GetDataPendingAndProcessedSourceDTO {
     private List<String> status;
 
     /** 接收时间的起始时间 */
-    private LocalDateTime recievestartTime;
+    private LocalDateTime sendDateBegin;
+//    private LocalDateTime recievestartTime;
 
     /** 接收时间的结束时间 */
-    private LocalDateTime recieveendTime;
+    private LocalDateTime sendDateEnd;
+//    private LocalDateTime recieveendTime;
 
     /** 处理时间的起始时间 */
-    private LocalDateTime processstartTime;
+    private LocalDateTime processDateBegin;
+//    private LocalDateTime processstartTime;
 
     /** 处理时间的结束时间 */
-    private LocalDateTime proccessendTime;
+    private LocalDateTime processDateEnd;
+//    private LocalDateTime proccessendTime;
 
     /** 查询关键字（模糊匹配） */
     private String keyword;

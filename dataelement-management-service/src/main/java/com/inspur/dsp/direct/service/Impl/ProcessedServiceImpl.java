@@ -48,6 +48,20 @@ public class ProcessedServiceImpl implements ProcessedService {
         String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
 
         Page<GetProcessedDataElementVO> page = new Page<>(dto.getPageNum(), dto.getPageSize());
+
+        if (dto.getSendDateBegin() != null) {
+            dto.setSendDateBegin(dto.getSendDateBegin().toLocalDate().atStartOfDay());
+        }
+        if (dto.getSendDateEnd() != null) {
+            dto.setSendDateEnd(dto.getSendDateEnd().toLocalDate().plusDays(1).atStartOfDay());
+        }
+        if (dto.getProcessDateBegin() != null) {
+            dto.setProcessDateBegin(dto.getProcessDateBegin().toLocalDate().atStartOfDay());
+        }
+        if (dto.getProcessDateEnd() != null) {
+            dto.setProcessDateEnd(dto.getProcessDateEnd().toLocalDate().plusDays(1).atStartOfDay());
+        }
+
         Page<GetProcessedDataElementVO> processedDataElement = getDataPendingAndProcessedSourceMapper.getProcessedDataElement(page, dto, orgCode,orderBySql);
         for (GetProcessedDataElementVO vo : processedDataElement.getRecords()) {
             vo.setStatusDesc(ConfirmationTaskEnums.getDescByCode(vo.getStatus()));

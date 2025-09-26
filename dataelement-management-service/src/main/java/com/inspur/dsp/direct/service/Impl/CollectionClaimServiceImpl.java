@@ -54,6 +54,20 @@ public class CollectionClaimServiceImpl implements CollectionClaimService {
         String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
 
         Page<GetDataPendingAndProcessedSourceVO> page = new Page<>(dto.getPageNum(), dto.getPageSize());
+
+        if (dto.getSendDateBegin() != null) {
+            dto.setSendDateBegin(dto.getSendDateBegin().toLocalDate().atStartOfDay());
+        }
+        if (dto.getSendDateEnd() != null) {
+            dto.setSendDateEnd(dto.getSendDateEnd().toLocalDate().plusDays(1).atStartOfDay());
+        }
+        if (dto.getProcessDateBegin() != null) {
+            dto.setProcessDateBegin(dto.getProcessDateBegin().toLocalDate().atStartOfDay());
+        }
+        if (dto.getProcessDateEnd() != null) {
+            dto.setProcessDateEnd(dto.getProcessDateEnd().toLocalDate().plusDays(1).atStartOfDay());
+        }
+
         List<GetDataPendingAndProcessedSourceVO> dataList = getDataPendingAndProcessedSourceMapper.getDataPendingAndProcessedData(page,dto,orgCode, orderBySql);
 
         for (GetDataPendingAndProcessedSourceVO vo : dataList) {
