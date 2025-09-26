@@ -20,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -59,7 +60,9 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         String sendDateBegin = baseDataElementSearchDTO.getSendDateBegin();
         String sendDateEnd = baseDataElementSearchDTO.getSendDateEnd();
         if (StringUtils.isNotBlank(sendDateBegin) && StringUtils.isNotBlank(sendDateEnd)) {
-            queryWrapper.between("send_date", sendDateBegin, sendDateEnd);
+            String sendBegin = new SimpleDateFormat("yyyy-MM-dd").format(sendDateBegin);
+            String sendEnd = new SimpleDateFormat("yyyy-MM-dd").format(sendDateEnd);
+            queryWrapper.between("send_date", sendBegin, sendEnd);
         }
 
         String keywords = baseDataElementSearchDTO.getKeyword();

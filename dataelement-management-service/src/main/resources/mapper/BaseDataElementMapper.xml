@@ -235,42 +235,43 @@
         <result column="send_date" property="sendDate"/>
         <result column="source_unit_code" property="sourceUnitCode"/>
         <result column="source_unit_name" property="sourceUnitName"/>
-        <result column="status" property="status"/>
+        <result column="bde_status" property="bdeStatus"/>
+        <result column="ct_status" property="ctStatus"/>
         <result column="processing_date" property="processingDate"/>
     </resultMap>
 
 
-    <select id="getDetermineResultListWithOrganiser" parameterType="com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO" resultMap="getDetermineResultListWithOrganiserResultMap">
+    <select id="getDetermineResultListWithOrganiserTest" parameterType="com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO" resultMap="getDetermineResultListWithOrganiserResultMap">
         SELECT * FROM (
         SELECT
         bde.dataid,
         bde.name,
         bde.definition,
         bde.datatype,
-        bde.status,
+        bde.status as bde_status,
+        ct.status as ct_status,
         bde.send_date,
         bde.source_unit_code,
         bde.source_unit_name,
         ct.task_id,
         ct.send_date AS recieve_date,
         ct.processing_date
-        FROM base_data_element bde
-        LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
+        FROM base_data_element bde LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
             <choose>
                 <when test="(base.taskStatusList != null and base.taskStatusList.size() > 0) and (base.baseStatusList != null and base.baseStatusList.size() > 0)">
                     <if test="base.taskStatusList.size() > 0">
                         <foreach collection="base.taskStatusList" item="status" open="(" separator=" OR " close=")">
                             <choose>
-                                <when test="status == 'pending'">ct.status = 'pending'</when>
-                                <when test="status == 'pending_source'">ct.status = 'pending_source'</when>
-                                <when test="status == 'confirming'">ct.status = 'confirming'</when>
-                                <when test="status == 'pending_claimed'">ct.status = 'pending_claimed'</when>
-                                <when test="status == 'confirmed'">ct.status = 'pending_approval' AND bde.status = 'confirmed'</when>
-                                <when test="status == 'rejected'">ct.status = 'pending_negotiation' AND bde.status = 'rejected'</when>
-                                <when test="status == 'claimed'">bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed'</when>
-                                <when test="status == 'not_claimed'">bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed'</when>
-                               <!-- <otherwise>1=0</otherwise>-->
+                                <when test="status == 'pending'">(ct.status = 'pending')</when>
+                                <when test="status == 'pending_source'">(ct.status = 'pending_source')</when>
+                                <when test="status == 'confirming'">(ct.status = 'confirming')</when>
+                                <when test="status == 'pending_claimed'">(ct.status = 'pending_claimed')</when>
+                                <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status = 'confirmed')</when>
+                                <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
+                                <when test="status == 'claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
+                                <when test="status == 'not_claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
+                                <!--<otherwise></otherwise>-->
                             </choose>
                         </foreach>
                     </if>
@@ -280,34 +281,39 @@
                     <if test="base.baseStatusList.size() > 0">
                         <foreach collection="base.baseStatusList" item="status" open="(" separator=" OR " close=")">
                             <choose>
-                                <when test="status == 'negotiating'">bde.status = 'negotiating'</when>
-                                <when test="status == 'confirmed'">bde.status = 'confirmed'</when>
-                                <!--<otherwise>1=0</otherwise>-->
+                                <when test="status == 'pending_approval'">(bde.status = 'pending_approval')</when>
+                                <when test="status == 'pending_negotiation'">(bde.status = 'pending_negotiation')</when>
+                                <when test="status == 'confirmed'">(bde.status = 'confirmed')</when>
+                                <when test="status == 'designated_source'">(bde.status = 'designated_source')</when>
+                                <when test="status == 'negotiating'">(bde.status = 'negotiating')</when>
+                                <otherwise>1=1</otherwise>
                             </choose>
                         </foreach>
                     </if>
-                    <if test="base.taskStatusList.size() == 0 and base.baseStatusList.size() == 0">1=0</if>
+                    <!--<if test="base.taskStatusList.size() == 0 and base.baseStatusList.size() == 0">1=0</if>-->
                 </when>
                 <when test="base.taskStatusList != null and base.taskStatusList.size() > 0">
                     <foreach collection="base.taskStatusList" item="status" open="(" separator=" OR " close=")">
                         <choose>
-                            <when test="status == 'pending'">ct.status = 'pending'</when>
-                            <when test="status == 'pending_claimed'">ct.status = 'pending_claimed'</when>
-                            <when test="status == 'pending_source'">ct.status = 'pending_source'</when>
-                            <when test="status == 'confirming'">ct.status = 'confirming'</when>
-                            <when test="status == 'confirmed'">ct.status = 'pending_approval' AND bde.status = 'confirmed'</when>
-                            <when test="status == 'rejected'">ct.status = 'pending_negotiation' AND bde.status = 'rejected'</when>
-                            <when test="status == 'claimed'">bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed'</when>
-                            <when test="status == 'not_claimed'">bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed'</when>
-                            <!--<otherwise>1=0</otherwise>-->
+                            <when test="status == 'pending'">(ct.status = 'pending')</when>
+                            <when test="status == 'pending_source'">(ct.status = 'pending_source')</when>
+                            <when test="status == 'confirming'">(ct.status = 'confirming')</when>
+                            <when test="status == 'pending_claimed'">(ct.status = 'pending_claimed')</when>
+                            <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status = 'confirmed')</when>
+                            <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
+                            <when test="status == 'claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
+                            <when test="status == 'not_claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
                         </choose>
                     </foreach>
                 </when>
                 <when test="base.baseStatusList != null and base.baseStatusList.size() > 0">
                     <foreach collection="base.baseStatusList" item="status" open="(" separator=" OR " close=")">
                         <choose>
-                            <when test="status == 'negotiating'">bde.status = 'negotiating'</when>
-                            <when test="status == 'confirmed'">bde.status = 'confirmed'</when>
+                            <when test="status == 'pending_approval'">(bde.status = 'pending_approval')</when>
+                            <when test="status == 'pending_negotiation'">(bde.status = 'pending_negotiation')</when>
+                            <when test="status == 'confirmed'">(bde.status = 'confirmed')</when>
+                            <when test="status == 'designated_source'">(bde.status = 'designated_source')</when>
+                            <when test="status == 'negotiating'">(bde.status = 'negotiating')</when>
                             <!--<otherwise>1=0</otherwise>-->
                         </choose>
                     </foreach>
@@ -318,19 +324,81 @@
                 AND ct.processing_unit_code = #{base.orgCode}
             </if>
             <if test="base.sendDateBegin != null and base.sendDateBegin != '' and base.sendDateEnd != null and base.sendDateEnd != ''">
-                AND ct.send_date BETWEEN #{base.sendDateBegin} AND #{base.sendDateEnd}
+                AND ct.send_date BETWEEN FROM_UNIXTIME(#{base.sendDateBegin} / 1000,'%Y-%m-%d') AND FROM_UNIXTIME(#{base.sendDateEnd} / 1000, '%Y-%m-%d')
             </if>
             <if test="base.processDateBegin != null and base.processDateBegin != '' and base.processDateEnd != null and base.processDateEnd != ''">
-                AND ct.processing_date BETWEEN #{base.processDateBegin} AND #{base.processDateEnd}
+                AND ct.processing_date BETWEEN FROM_UNIXTIME(#{base.processDateBegin} / 1000,'%Y-%m-%d') AND FROM_UNIXTIME(#{base.processDateEnd} / 1000, '%Y-%m-%d')
             </if>
             <if test="base.receiveDateBegin != null and base.receiveDateBegin != '' and base.receiveDateEnd != null and base.receiveDateEnd != ''">
-                AND bde.confirm_date BETWEEN #{base.receiveDateBegin} AND #{base.receiveDateEnd}
+                AND bde.confirm_date BETWEEN FROM_UNIXTIME(#{base.receiveDateBegin} / 1000,'%Y-%m-%d') AND FROM_UNIXTIME(#{base.receiveDateEnd} / 1000, '%Y-%m-%d')
             </if>
             <if test="base.keyword != null and base.keyword != ''">
                 AND (bde.name LIKE CONCAT('%', #{base.keyword}, '%') OR bde.definition LIKE CONCAT('%', #{base.keyword}, '%'))
             </if>
         </where>
-        ) AS TOTAL
+        ) AS test
+    </select>
+
+    <select id="getDetermineResultListWithOrganiser" parameterType="com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO" resultMap="getDetermineResultListWithOrganiserResultMap">
+        SELECT * FROM (
+        SELECT
+        bde.dataid,
+        bde.name,
+        bde.definition,
+        bde.datatype,
+        bde.status as bde_status,
+        ct.status as ct_status,
+        bde.send_date,
+        bde.source_unit_code,
+        bde.source_unit_name,
+        ct.task_id,
+        ct.send_date AS recieve_date,
+        ct.processing_date
+        FROM base_data_element bde LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
+        <where>
+            <if test="base.statusList.size() > 0">
+                <foreach collection="base.statusList" item="status" open="(" separator=" OR " close=")">
+                    <choose>
+                        <when test="status == 'pending'">(ct.status = 'pending')</when>
+                        <when test="status == 'pending_claimed'">(ct.status = 'pending_claimed')</when>
+                        <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status =
+                            'confirmed')
+                        </when>
+                        <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status =
+                            'rejected')
+                        </when>
+                        <when test="status == 'claimed'">(bde.status IN
+                            ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')
+                        </when>
+                        <when test="status == 'not_claimed'">(bde.status IN
+                            ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')
+                        </when>
+                        <when test="status == 'negotiating'">(bde.status = 'negotiating')</when>
+                        <when test="status == 'designated_source'">(bde.status = 'designated_source')</when>
+                    </choose>
+                </foreach>
+            </if>
+            <if test="base.orgCode != null and base.orgCode != ''">
+                AND ct.processing_unit_code = #{base.orgCode}
+            </if>
+            <if test="base.sendDateBegin != null and base.sendDateBegin != '' and base.sendDateEnd != null and base.sendDateEnd != ''">
+                AND ct.send_date BETWEEN FROM_UNIXTIME(#{base.sendDateBegin} / 1000,'%Y-%m-%d') AND
+                FROM_UNIXTIME(#{base.sendDateEnd} / 1000, '%Y-%m-%d')
+            </if>
+            <if test="base.processDateBegin != null and base.processDateBegin != '' and base.processDateEnd != null and base.processDateEnd != ''">
+                AND ct.processing_date BETWEEN FROM_UNIXTIME(#{base.processDateBegin} / 1000,'%Y-%m-%d') AND
+                FROM_UNIXTIME(#{base.processDateEnd} / 1000, '%Y-%m-%d')
+            </if>
+            <if test="base.receiveDateBegin != null and base.receiveDateBegin != '' and base.receiveDateEnd != null and base.receiveDateEnd != ''">
+                AND bde.confirm_date BETWEEN FROM_UNIXTIME(#{base.receiveDateBegin} / 1000,'%Y-%m-%d') AND
+                FROM_UNIXTIME(#{base.receiveDateEnd} / 1000, '%Y-%m-%d')
+            </if>
+            <if test="base.keyword != null and base.keyword != ''">
+                AND (bde.name LIKE CONCAT('%', #{base.keyword}, '%') OR bde.definition LIKE CONCAT('%', #{base.keyword},
+                '%'))
+            </if>
+        </where>
+        ) AS test
     </select>
 
     <!--auto generated by MybatisCodeHelper on 2025-09-23-->

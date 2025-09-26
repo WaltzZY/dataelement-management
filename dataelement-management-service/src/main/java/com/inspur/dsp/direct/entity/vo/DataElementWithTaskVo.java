@@ -62,6 +62,11 @@ public class DataElementWithTaskVo {
      * 状态code
      */
     private String status;
+
+    private String bdeStatus;
+    private String ctStatus;
+
+    private String displaystatus;
     /**
      * statusChinese
      */
