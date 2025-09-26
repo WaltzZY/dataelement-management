@@ -40,30 +40,6 @@ public class QueryAllSituationForCollectorController {
         return queryAllSituationForCollectorService.getAllSituationList(baseDataElementSearchDTO);
     }
 
-//    /**
-//     * 查询基准数据详情数据
-//     * 使用范围：020-1、020-2、020-3、020-4、020-7、020-8、020-9、020-10
-//     *
-//     * @param baseDataElementSearchDTO 查询条件，包含dataId
-//     * @return 基准数据元详情
-//     */
-//    @PostMapping("/getAllSituationDetail")
-//    public BaseDataElement getAllSituationDetail(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO) {
-//        return queryAllSituationForCollectorService.getAllSituationDetail(baseDataElementSearchDTO);
-//    }
-
-//    /**
-//     * 查询基准数据详情数据（带记录详情）
-//     * 使用范围：020-5、020-6
-//     *
-//     * @param baseDataElementSearchDTO 查询条件，包含dataId
-//     * @return 基准数据元详情（包含记录详情）
-//     */
-//    @PostMapping("/getAllSituationWithRecordDetail")
-//    public BaseDataElementDTO getAllSituationWithRecordDetail(@RequestBody BaseDataElementSearchDTO baseDataElementSearchDTO) {
-//        return queryAllSituationForCollectorService.getAllSituationWithRecordDetail(baseDataElementSearchDTO);
-//    }
-
     /**
      * 下载数据
      *

@@ -361,18 +361,10 @@
                     <choose>
                         <when test="status == 'pending'">(ct.status = 'pending')</when>
                         <when test="status == 'pending_claimed'">(ct.status = 'pending_claimed')</when>
-                        <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status =
-                            'confirmed')
-                        </when>
-                        <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status =
-                            'rejected')
-                        </when>
-                        <when test="status == 'claimed'">(bde.status IN
-                            ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')
-                        </when>
-                        <when test="status == 'not_claimed'">(bde.status IN
-                            ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')
-                        </when>
+                        <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status = 'confirmed') </when>
+                        <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status =  'rejected') </when>
+                        <when test="status == 'claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed') </when>
+                        <when test="status == 'not_claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed') </when>
                         <when test="status == 'negotiating'">(bde.status = 'negotiating')</when>
                         <when test="status == 'designated_source'">(bde.status = 'designated_source')</when>
                     </choose>
