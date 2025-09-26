@@ -70,8 +70,10 @@
                 </foreach>
             </if>
             <if test="dto.keyword != null and dto.keyword != ''">
-                and (bde.name like #{dto.keyword} or bde.definition like #{dto.keyword}
-                or bde.source_unit_name like #{dto.keyword} or dde.source_unit_name like #{dto.keyword}
+                and (bde.name like concat('%', #{dto.keyword}, '%')
+                or bde.definition like concat('%', #{dto.keyword}, '%')
+                or bde.source_unit_name like concat('%', #{dto.keyword}, '%')
+                or dde.source_unit_name like concat('%', #{dto.keyword}, '%')
                 )
             </if>
             <if test="dto.sendDateBegin != null and dto.sendDateEnd != null">
@@ -158,10 +160,10 @@
         LEFT JOIN confirmation_task ct ON bdl.dataid = ct.base_dataelement_dataid
         AND (ct.status in ('claimed', 'confirmed'))
         WHERE bdl.status = 'pending_approval'
-        <if test="dto.sendDateBegin != null and dto.sendDateBegin != ''">
+        <if test="dto.sendDateBegin != null">
             AND bdl.send_date >= #{dto.sendDateBegin}
         </if>
-        <if test="dto.sendDateEnd != null and dto.sendDateEnd != ''">
+        <if test="dto.sendDateEnd != null">
             AND bdl.send_date &lt;= #{dto.sendDateEnd}
         </if>
         <if test="dto.keyword != null and dto.keyword != ''">
@@ -193,16 +195,16 @@
         collectunitqty
         FROM base_data_element bdl
         WHERE status = 'designated_source'
-        <if test="dto.sendDateBegin != null and dto.sendDateBegin != ''">
+        <if test="dto.sendDateBegin != null">
             AND send_date >= #{dto.sendDateBegin}
         </if>
-        <if test="dto.sendDateEnd != null and dto.sendDateEnd != ''">
+        <if test="dto.sendDateEnd != null">
             AND send_date &lt;= #{dto.sendDateEnd}
         </if>
-        <if test="dto.confirmDateBegin != null and dto.confirmDateBegin != ''">
+        <if test="dto.confirmDateBegin != null">
             AND confirm_date >= #{dto.confirmDateBegin}
         </if>
-        <if test="dto.confirmDateEnd != null and dto.confirmDateEnd != ''">
+        <if test="dto.confirmDateEnd != null">
             AND confirm_date &lt;= #{dto.confirmDateEnd}
         </if>
         <if test="dto.sourceUnitCodeList != null and dto.sourceUnitCodeList.size() > 0">
@@ -348,16 +350,16 @@
             <if test="dto.keyword != null and dto.keyword != ''">
                 and (name like concat('%', #{dto.keyword}, '%') or definition like concat('%', #{dto.keyword}, '%'))
             </if>
-            <if test="dto.sendDateBegin != null and dto.sendDateBegin != ''">
+            <if test="dto.sendDateBegin != null">
                 and send_date >= #{dto.sendDateBegin}
             </if>
-            <if test="dto.sendDateEnd != null and dto.sendDateEnd != ''">
+            <if test="dto.sendDateEnd != null">
                 and send_date <![CDATA[<=]]> #{dto.sendDateEnd}
             </if>
-            <if test="dto.confirmDateBegin != null and dto.confirmDateBegin != ''">
+            <if test="dto.confirmDateBegin != null">
                 and confirm_date >= #{dto.confirmDateBegin}
             </if>
-            <if test="dto.confirmDateEnd != null and dto.confirmDateEnd != ''">
+            <if test="dto.confirmDateEnd != null">
                 and confirm_date <![CDATA[<=]]> #{dto.confirmDateEnd}
             </if>
             <if test="dto.sourceUnitCodeList != null and dto.sourceUnitCodeList.size() != 0">
