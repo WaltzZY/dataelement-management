@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -96,19 +97,23 @@ public class BaseDataElement implements Serializable {
 
     /**
      * 数据元发布日期
+     *
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "publish_date")
     private Date publishDate;
 
     /**
      * 发起定源时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "send_date")
     private Date sendDate;
 
     /**
      * 确定数源单位时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "confirm_date")
     private Date confirmDate;
 
@@ -127,6 +132,7 @@ public class BaseDataElement implements Serializable {
     /**
      * 创建日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_date")
     private Date createDate;
 

@@ -129,7 +129,7 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
             determineResultForCollectorExportDTO.setCollectunitqty(baseDataElement.getCollectunitqty());
             determineResultForCollectorExportDTO.setName(baseDataElement.getName());
             determineResultForCollectorExportDTO.setDatatype(baseDataElement.getDatatype());
-            determineResultForCollectorExportDTO.setSendDate(baseDataElement.getSendDate() == null ? new Date(0) : baseDataElement.getSendDate());
+            determineResultForCollectorExportDTO.setSendDate(baseDataElement.getSendDate());
             determineResultForCollectorExportDTO.setDefinition(baseDataElement.getDefinition());
             exportDTOList.add(determineResultForCollectorExportDTO);
         }

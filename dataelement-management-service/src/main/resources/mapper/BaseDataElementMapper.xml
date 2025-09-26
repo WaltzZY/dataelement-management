@@ -356,19 +356,26 @@
         ct.processing_date
         FROM base_data_element bde LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
-            <if test="base.statusList.size() > 0">
-                <foreach collection="base.statusList" item="status" open="(" separator=" OR " close=")">
-                    <choose>
-                        <when test="status == 'pending'">(ct.status = 'pending')</when>
-                        <when test="status == 'pending_claimed'">(ct.status = 'pending_claimed')</when>
-                        <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status = 'confirmed') </when>
-                        <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status =  'rejected') </when>
-                        <when test="status == 'claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed') </when>
-                        <when test="status == 'not_claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed') </when>
-                        <when test="status == 'negotiating'">(bde.status = 'negotiating')</when>
-                        <when test="status == 'designated_source'">(bde.status = 'designated_source')</when>
-                    </choose>
-                </foreach>
+            <!-- 添加保底条件 -->
+            1=1
+            <if test="base.statusList != null and base.statusList.size() > 0">
+                AND (
+                <trim prefixOverrides="OR">
+                    <foreach collection="base.statusList" item="status">
+                        <choose>
+                            <when test="status == 'pending'">OR (ct.status = 'pending')</when>
+                            <when test="status == 'pending_claimed'">OR (ct.status = 'pending_claimed')</when>
+                            <when test="status == 'confirmed'">OR (bde.status = 'pending_approval' AND ct.status = 'confirmed')</when>
+                            <when test="status == 'rejected'">OR (bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
+                            <when test="status == 'claimed'">OR (bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
+                            <when test="status == 'not_claimed'">OR (bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
+                            <when test="status == 'negotiating'">OR (bde.status = 'negotiating')</when>
+                            <when test="status == 'designated_source'">OR (bde.status = 'designated_source')</when>
+                            <otherwise>OR 1=0</otherwise>
+                        </choose>
+                    </foreach>
+                </trim>
+                )
             </if>
             <if test="base.orgCode != null and base.orgCode != ''">
                 AND ct.processing_unit_code = #{base.orgCode}

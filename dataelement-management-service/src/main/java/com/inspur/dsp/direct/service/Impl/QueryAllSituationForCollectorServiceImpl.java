@@ -139,10 +139,9 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             }
             String statusChinese = StatusUtil.getStatusChinese(displayStatus);
             exportDTO.setStatus(statusChinese);
-            Date date = new Date(0);
-            exportDTO.setSendDate(dataElementWithTaskVo.getSendDate() == null ? date : dataElementWithTaskVo.getSendDate());
-            exportDTO.setReceiveDate(dataElementWithTaskVo.getReceiveDate() == null ? date : dataElementWithTaskVo.getReceiveDate());
-            exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate() == null ? date : dataElementWithTaskVo.getProcessingDate());
+            exportDTO.setSendDate(dataElementWithTaskVo.getSendDate());
+            exportDTO.setReceiveDate(dataElementWithTaskVo.getReceiveDate());
+            exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate());
             exportDTO.setDataType(dataElementWithTaskVo.getDataType());
             exportDTOList.add(exportDTO);
         }
