@@ -151,9 +151,11 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
             return;
         }
         List<DetermineResultForCollectorExportDTO> exportDTOList = new ArrayList<>();
-        for (BaseDataElement baseDataElement : baseDataElements) {
+        for (int i = 0; i < baseDataElements.size(); i++) {
+            BaseDataElement baseDataElement = baseDataElements.get(i);
             DetermineResultForCollectorExportDTO determineResultForCollectorExportDTO = new DetermineResultForCollectorExportDTO();
-            determineResultForCollectorExportDTO.setCollectunitqty(baseDataElement.getCollectunitqty());
+            determineResultForCollectorExportDTO.setId(i + 1);
+            determineResultForCollectorExportDTO.setSourceUnitName(baseDataElement.getSourceUnitName());
             determineResultForCollectorExportDTO.setName(baseDataElement.getName());
             determineResultForCollectorExportDTO.setDatatype(baseDataElement.getDatatype());
             determineResultForCollectorExportDTO.setSendDate(baseDataElement.getSendDate());
@@ -164,10 +166,9 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         try {
             commonService.exportExcelData(exportDTOList, response, "采集方-本单元作为数源单位的数据元列表", DetermineResultForCollectorExportDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[待协商数据]失败", e);
-            throw new RuntimeException("导出数据[待协商数据]失败");
+            log.error("导出数据[采集方-本单元作为数源单位的数据元列表]失败", e);
+            throw new RuntimeException("导出数据[采集方-本单元作为数源单位的数据元列表]失败");
         }
-
 
     }
 

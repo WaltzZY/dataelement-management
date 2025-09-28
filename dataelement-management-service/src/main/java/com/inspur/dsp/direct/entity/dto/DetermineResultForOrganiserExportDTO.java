@@ -17,20 +17,21 @@ import java.util.Date;
 public class DetermineResultForOrganiserExportDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @ExcelProperty(index = 0, value = "数据元名称")
+    @ExcelProperty(index = 0, value = "序号")
+    private Integer id;
+    @ExcelProperty(index = 1, value = "数据元名称")
     private String name;
-    @ExcelProperty(index = 1, value = "定义")
+    @ExcelProperty(index = 2, value = "定义")
     private String definition;
-    @ExcelProperty(index = 2, value = "采集单位数量")
+    @ExcelProperty(index = 3, value = "采集单位数量")
     private Integer collectunitqty;
-    @ExcelProperty(index = 3, value = "状态")
+    @ExcelProperty(index = 4, value = "状态")
     private String status;
-    @ExcelProperty(index = 4, value = "发起时间")
+    @ExcelProperty(index = 5, value = "发起时间")
     private Date publicDate;
-    @ExcelProperty(index = 5, value = "数源单位")
+    @ExcelProperty(index = 6, value = "数源单位")
     private String sourceUnitName;
-    @ExcelProperty(index = 6, value = "定源时间")
+    @ExcelProperty(index = 7, value = "定源时间")
     private Date sendDate;
 
 

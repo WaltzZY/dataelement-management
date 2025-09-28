@@ -78,8 +78,6 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
                 displayStatus = ctStatus;
             } else if ("designated_source".equals(ctStatus)) {
                 displayStatus = ctStatus;
-            } else {
-                displayStatus = "nothing";
             }
             String statusChinese = StatusUtil.getStatusChinese(displayStatus);
             dataElementWithTaskVo.setDisplaystatus(statusChinese);
@@ -107,8 +105,10 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             return;
         }
         List<QueryAllSituationForCollectorExportDTO> exportDTOList = new ArrayList<>();
-        for (DataElementWithTaskVo dataElementWithTaskVo : dataElementWithTaskVoList) {
+        for (int i = 0; i < dataElementWithTaskVoList.size(); i++) {
+            DataElementWithTaskVo dataElementWithTaskVo = dataElementWithTaskVoList.get(i);
             QueryAllSituationForCollectorExportDTO exportDTO = new QueryAllSituationForCollectorExportDTO();
+            exportDTO.setId(i + 1);
             exportDTO.setDefinition(dataElementWithTaskVo.getDefinition());
             exportDTO.setName(dataElementWithTaskVo.getName());
             String ctStatus = dataElementWithTaskVo.getCtStatus();
@@ -141,12 +141,11 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             exportDTO.setDataType(dataElementWithTaskVo.getDataType());
             exportDTOList.add(exportDTO);
         }
-
         try {
-            commonService.exportExcelData(exportDTOList, response, "组织方-已定源数据", QueryAllSituationForCollectorExportDTO.class);
+            commonService.exportExcelData(exportDTOList, response, "采集方-查询整体情况服务实现类", QueryAllSituationForCollectorExportDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[组织方-已定源数据]失败", e);
-            throw new RuntimeException("导出数据[组织方-已定源数据]失败");
+            log.error("导出数据[采集方-查询整体情况服务实现类]失败", e);
+            throw new RuntimeException("导出数据[采集方-查询整体情况服务实现类]失败");
         }
 
     }

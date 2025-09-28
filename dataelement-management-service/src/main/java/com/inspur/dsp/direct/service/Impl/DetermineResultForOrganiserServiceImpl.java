@@ -58,8 +58,10 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
         try {
             List<GetDetermineResultVo> baseDataElements = baseDataElementMapper.getDetermineResultList(null, dto);
             List<DetermineResultForOrganiserExportDTO> exportDTOList = new ArrayList<>();
-            for (GetDetermineResultVo baseDataElement : baseDataElements) {
+            for (int i = 0; i < baseDataElements.size(); i++) {
                 DetermineResultForOrganiserExportDTO exportDTO = new DetermineResultForOrganiserExportDTO();
+                GetDetermineResultVo baseDataElement = baseDataElements.get(i);
+                exportDTO.setId(i + 1);
                 exportDTO.setName(baseDataElement.getName());
                 exportDTO.setStatus(StatusUtil.getStatusChinese(baseDataElement.getStatus()));
                 exportDTO.setDefinition(baseDataElement.getDefinition());
