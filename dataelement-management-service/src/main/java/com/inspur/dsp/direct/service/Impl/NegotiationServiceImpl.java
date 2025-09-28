@@ -280,7 +280,7 @@ public class NegotiationServiceImpl implements NegotiationService {
         negResultMap.put(dto.getDataid(), dto.getOrgCode());
 
         // 3. 调用方法7：SubmitNegotiationResult(MAP NegResultMap)
-        submitNegotiationResult(negResultMap);
+        submitNegotiationResult(negResultMap, 1L);
     }
 
     @Override
@@ -319,7 +319,7 @@ public class NegotiationServiceImpl implements NegotiationService {
         }
 
         // 5. 以negResultMap为参数，调用SubmitNegotiationResult方法
-        return submitNegotiationResult(negResultMap);
+        return submitNegotiationResult(negResultMap, (long) vdto.size());
     }
 
     @Override
@@ -345,12 +345,11 @@ public class NegotiationServiceImpl implements NegotiationService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ImportNegotiationReturnDTO submitNegotiationResult(Map<String, String> negResultMap) {
+    public ImportNegotiationReturnDTO submitNegotiationResult(Map<String, String> negResultMap, Long totalCount) {
         // 1. 创建ImportNegotiationReturnDTO
         ImportNegotiationReturnDTO result = new ImportNegotiationReturnDTO();
         List<ImportNegotiationFailDetailDTO> failDetails = new ArrayList<>();
         long successCount = 0;
-        long totalCount = negResultMap.size();
 
         // 2. 循环NegResultMap
         for (Map.Entry<String, String> entry : negResultMap.entrySet()) {
