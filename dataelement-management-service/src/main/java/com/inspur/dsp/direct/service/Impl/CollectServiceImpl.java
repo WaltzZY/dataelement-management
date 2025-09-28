@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -186,7 +185,7 @@ public class CollectServiceImpl implements CollectService {
         // 查询数据,不分页
         List<GetCollectDataVo> list = baseDataElementMapper.getCollectData(null, dto, sortSql, organCode);
         if (CollectionUtils.isEmpty(list)) {
-            throw new IllegalArgumentException("没有可导出的数据!");
+            log.warn("无待处理数据");
         }
         // 设置响应头信息
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -207,7 +206,12 @@ public class CollectServiceImpl implements CollectService {
         }
         if ("pending".equals(dto.getAuditStatus())) {
             // 转换成Excel数据实体
-            List<PendingCollectDataExcel> pendingCollectDataExcels = list.stream().map(PendingCollectDataExcel::toExcel).collect(Collectors.toList());
+            List<PendingCollectDataExcel> pendingCollectDataExcels = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                GetCollectDataVo vo = list.get(i);
+                PendingCollectDataExcel excel = PendingCollectDataExcel.toExcel(vo, i + 1);
+                pendingCollectDataExcels.add(excel);
+            }
             // 使用easyexcel导出数据
             try {
                 EasyExcel.write(response.getOutputStream(), PendingCollectDataExcel.class)
@@ -219,7 +223,12 @@ public class CollectServiceImpl implements CollectService {
             }
         } else {
             // 转换成Excel数据实体
-            List<ProcessedCollectDataExcel> excelList = list.stream().map(ProcessedCollectDataExcel::toExcel).collect(Collectors.toList());
+            List<ProcessedCollectDataExcel> excelList = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                GetCollectDataVo vo = list.get(i);
+                ProcessedCollectDataExcel excel = ProcessedCollectDataExcel.toExcel(vo, i + 1);
+                excelList.add(excel);
+            }
             // 使用easyexcel导出数据
             try {
                 EasyExcel.write(response.getOutputStream(), ProcessedCollectDataExcel.class)

@@ -12,39 +12,45 @@ import lombok.Data;
 public class ProcessedCollectDataExcel {
 
     /**
+     * 序号
+     */
+    @ExcelProperty(index = 0, value = "序号")
+    private Integer index;
+    /**
      * 数据元名称
      */
-    @ExcelProperty(index = 0, value = "数据元名称")
+    @ExcelProperty(index = 1, value = "数据元名称")
     private String name;
     /**
      * 数据元定义描述
      */
-    @ExcelProperty(index = 1, value = "定义")
+    @ExcelProperty(index = 2, value = "定义")
     private String definition;
     /**
      * 数据类型
      */
-    @ExcelProperty(index = 2, value = "数据类型")
+    @ExcelProperty(index = 3, value = "数据类型")
     private String datatype;
     /**
      * 数据元状态描述
      */
-    @ExcelProperty(index = 3, value = "状态")
+    @ExcelProperty(index = 4, value = "状态")
     private String statusDesc;
     /**
      * 接收时间
      */
-    @ExcelProperty(index = 4, value = "接收时间")
+    @ExcelProperty(index = 5, value = "接收时间")
     private String receiveTime;
 
     /**
      * 处理时间
      */
-    @ExcelProperty(index = 5, value = "处理时间")
+    @ExcelProperty(index = 6, value = "处理时间")
     private String processingDate;
 
-    public static ProcessedCollectDataExcel toExcel(GetCollectDataVo vo) {
+    public static ProcessedCollectDataExcel toExcel(GetCollectDataVo vo, int index) {
         ProcessedCollectDataExcel pendingCollectDataExcel = new ProcessedCollectDataExcel();
+        pendingCollectDataExcel.setIndex(index);
         pendingCollectDataExcel.setName(vo.getName());
         pendingCollectDataExcel.setDefinition(vo.getDefinition());
         pendingCollectDataExcel.setDatatype(vo.getDatatype());

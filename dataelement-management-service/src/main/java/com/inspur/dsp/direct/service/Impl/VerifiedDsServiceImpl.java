@@ -79,23 +79,30 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
                 // 查询待核定数据
                 vos = baseDataElementMapper.selectPaPage(null, dto, sortSql);
                 // 转为待核定导出对象
-                List<PaExcel> paExcelList = vos.stream().map(vo -> {
-                    return PaExcel.builder()
+                List<PaExcel> paExcelList = new ArrayList<>();
+                for (int i = 0, vosSize = vos.size(); i < vosSize; i++) {
+                    GetPendingApprovalPageVo vo = vos.get(i);
+                    PaExcel build = PaExcel.builder()
+                            .index(i + 1)
                             .name(vo.getName())
                             .definition(vo.getDefinition())
                             .statusDesc(StatusEnums.getDescByCode(vo.getStatus()))
                             .paUnitName(vo.getPaUnitName())
                             .sendDate(vo.getSendDate())
                             .build();
-                }).collect(Collectors.toList());
+                    paExcelList.add(build);
+                }
                 // 使用EasyExcel导出
                 commonService.exportExcelData(paExcelList, response,"待核定数源单位数据", PaExcel.class);
             } else {
                 // 查询已定源数据
                 vos = baseDataElementMapper.selectConfirmedPage(null, dto, sortSql);
                 // 转为已定源导出对象
-                List<ConfirmationExcel> confirmationExcels = vos.stream().map(vo -> {
-                    return ConfirmationExcel.builder()
+                List<ConfirmationExcel> confirmationExcels = new ArrayList<>();
+                for (int i = 0; i < vos.size(); i++) {
+                    GetPendingApprovalPageVo vo = vos.get(i);
+                    ConfirmationExcel build = ConfirmationExcel.builder()
+                            .index(i + 1)
                             .name(vo.getName())
                             .definition(vo.getDefinition())
                             .collectunitqty(vo.getCollectunitqty())
@@ -104,7 +111,8 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
                             .sourceUnitName(vo.getSourceUnitName())
                             .confirmDate(vo.getConfirmDate())
                             .build();
-                }).collect(Collectors.toList());
+                    confirmationExcels.add(build);
+                }
                 // 使用EasyExcel导出
                 commonService.exportExcelData(confirmationExcels, response,"已定源数据", ConfirmationExcel.class);
             }

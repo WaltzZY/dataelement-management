@@ -18,19 +18,23 @@ public class ExportToDoNegoDTO {
     @ExcelProperty(index = 1, value = "数据元名称")
     private String name;
 
+    /** 数据元描述 */
+    @ExcelProperty(index = 2, value = "数据元定义")
+    private String definition;
+
     /** 同意成为数源单位的采集单位 */
-    @ExcelProperty(index = 2, value = "同意成为数源单位的采集单位")
+    @ExcelProperty(index = 3, value = "同意成为数源单位的采集单位")
     private String agreeUnit;
 
     /** 拒绝成为数源单位的采集单位 */
-    @ExcelProperty(index = 3, value = "拒绝成为数源单位的采集单位")
+    @ExcelProperty(index = 4, value = "拒绝成为数源单位的采集单位")
     private String refuseUnit;
 
     /** 状态 */
-    @ExcelProperty(index = 4, value = "状态")
+    @ExcelProperty(index = 5, value = "状态")
     private String status;
 
     /** 发起时间 */
-    @ExcelProperty(index = 5, value = "发起时间")
+    @ExcelProperty(index = 6, value = "发起时间")
     private Date sendDate;
 }
