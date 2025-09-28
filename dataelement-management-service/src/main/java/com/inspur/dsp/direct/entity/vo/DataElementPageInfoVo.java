@@ -51,4 +51,7 @@ public class DataElementPageInfoVo {
     private String statusDesc;
     /** 采集单位数量 */
     private Integer collectunitqty;
+
+    /** 任务处理单位名称 */
+    private String paUnitName;
 }

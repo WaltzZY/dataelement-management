@@ -5,29 +5,31 @@
     <!-- 数据元列表查询 -->
     <select id="getAllDataElementPage" resultType="com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo">
         SELECT
-        dataid,
-        name,
-        definition,
-        send_date AS sendDate,
-        collectunitqty,
-        source_unit_code AS sourceUnitCode,
-        source_unit_name AS sourceUnitName,
-        status,
-        confirm_date AS confirmDate
-        FROM base_data_element
+        bde.dataid,
+        bde.name,
+        bde.definition,
+        bde.send_date AS sendDate,
+        bde.collectunitqty,
+        bde.source_unit_code AS sourceUnitCode,
+        bde.source_unit_name AS sourceUnitName,
+        ct.processing_unit_name AS paUnitName,
+        bde.status,
+        bde.confirm_date AS confirmDate
+        FROM base_data_element bde
+        LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         WHERE 1=1
 
-        <!-- 数源单位社会信用代码精确匹配（多选） -->
-        <if test="queryDto.sourceUnitCode != null and queryDto.sourceUnitCode.size() > 0">
-            AND source_unit_code IN
-            <foreach collection="queryDto.sourceUnitCode" item="unitCode" open="(" close=")" separator=",">
+        <!-- 数源单位社会信用代码精确匹配（多选）-->
+        <if test="queryDto.collectUnitCodeList != null and queryDto.collectUnitCodeList.size() > 0">
+            AND bde.source_unit_code IN
+            <foreach collection="queryDto.collectUnitCodeList" item="unitCode" open="(" close=")" separator=",">
                 #{unitCode}
             </foreach>
         </if>
 
         <!-- 数据元状态精确匹配（多选） -->
         <if test="queryDto.statusList != null and queryDto.statusList.size() > 0">
-            AND status IN
+            AND bde.status IN
             <foreach collection="queryDto.statusList" item="status" open="(" close=")" separator=",">
                 #{status}
             </foreach>
@@ -35,25 +37,27 @@
 
         <!-- 发起时间范围查询 -->
         <if test="queryDto.sendDateBegin != null">
-            AND send_date >= #{queryDto.sendDateBegin}
+            AND bde.send_date >= #{queryDto.sendDateBegin}
         </if>
         <if test="queryDto.sendDateEnd != null">
-            AND send_date &lt; DATE_ADD(#{queryDto.sendDateEnd}, INTERVAL 1 DAY)
+            AND bde.send_date &lt;= #{queryDto.sendDateEnd}
         </if>
 
         <!-- 定源时间范围查询 -->
         <if test="queryDto.confirmDateBegin != null">
-            AND confirm_date >= #{queryDto.confirmDateBegin}
+            AND bde.confirm_date >= #{queryDto.confirmDateBegin}
         </if>
         <if test="queryDto.confirmDateEnd != null">
-            AND confirm_date &lt; DATE_ADD(#{queryDto.confirmDateEnd}, INTERVAL 1 DAY)
+            AND bde.confirm_date &lt;= #{queryDto.confirmDateEnd}
         </if>
 
         <!-- 关键字在数据元名称、定义和数源单位名称中模糊匹配，并去除前后空格 -->
         <if test="queryDto.keyword != null and queryDto.keyword != ''">
-            AND (name LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%')
-            OR definition LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%')
-            OR source_unit_name LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%'))
+            AND (
+            bde.name LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%')
+            OR bde.definition LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%')
+            OR bde.source_unit_name LIKE CONCAT('%', TRIM(#{queryDto.keyword}), '%')
+            )
         </if>
 
         <!-- 动态排序逻辑 -->
@@ -62,42 +66,42 @@
             <choose>
                 <!-- 采集单位数量按数字排序 -->
                 <when test="queryDto.sortField == 'collectunitqty'">
-                    collectunitqty ${queryDto.sortOrder}
+                    bde.collectunitqty ${queryDto.sortOrder}
                 </when>
                 <!-- 状态按字母排序 -->
                 <when test="queryDto.sortField == 'status'">
-                    status ${queryDto.sortOrder}
+                    bde.status ${queryDto.sortOrder}
                 </when>
                 <!-- 数源单位按字母排序，null值始终放在后面 -->
                 <when test="queryDto.sortField == 'sourceUnitName'">
                     <choose>
                         <when test="queryDto.sortOrder == 'asc'">
-                            CASE WHEN source_unit_name IS NULL THEN 1 ELSE 0 END ASC,
-                            source_unit_name ASC
+                            CASE WHEN bde.source_unit_name IS NULL THEN 1 ELSE 0 END ASC,
+                            bde.source_unit_name ASC
                         </when>
                         <otherwise>
-                            CASE WHEN source_unit_name IS NULL THEN 1 ELSE 0 END ASC,
-                            source_unit_name DESC
+                            CASE WHEN bde.source_unit_name IS NULL THEN 1 ELSE 0 END ASC,
+                            bde.source_unit_name DESC
                         </otherwise>
                     </choose>
                 </when>
                 <!-- 发起时间按时间排序 -->
                 <when test="queryDto.sortField == 'sendDate'">
-                    send_date ${queryDto.sortOrder}
+                    bde.send_date ${queryDto.sortOrder}
                 </when>
                 <!-- 定源时间按时间排序 -->
                 <when test="queryDto.sortField == 'confirmDate'">
-                    confirm_date ${queryDto.sortOrder}
+                    bde.confirm_date ${queryDto.sortOrder}
                 </when>
                 <!-- 默认按发起时间倒序 -->
                 <otherwise>
-                    send_date DESC
+                    bde.send_date DESC
                 </otherwise>
             </choose>
         </if>
         <!-- 没有指定排序字段时，默认按发起时间倒序 -->
         <if test="queryDto.sortField == null or queryDto.sortField == '' or queryDto.sortOrder == null or queryDto.sortOrder == ''">
-            ORDER BY send_date DESC
+            ORDER BY bde.send_date DESC
         </if>
     </select>
 

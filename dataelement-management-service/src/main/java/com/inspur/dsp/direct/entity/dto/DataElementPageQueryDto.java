@@ -48,7 +48,7 @@ public class DataElementPageQueryDto {
     /**
      * 数源单位统一社会信用代码列表
      */
-    private List<String> sourceUnitCode;
+    private List<String> collectUnitCodeList;
 
     /**
      * 定源时间查询起始时间

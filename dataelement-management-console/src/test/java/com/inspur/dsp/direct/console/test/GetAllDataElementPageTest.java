@@ -133,7 +133,7 @@ public class GetAllDataElementPageTest {
         DataElementPageQueryDto queryDto = new DataElementPageQueryDto();
         queryDto.setPageNum(1L);
         queryDto.setPageSize(10L);
-        queryDto.setSourceUnitCode(Arrays.asList("91110000123456789A"));
+        queryDto.setCollectUnitCodeList(Arrays.asList("91110000123456789A"));
 
         try {
             Page<DataElementPageInfoVo> result = controller.getAllDataElementPage(queryDto);
@@ -162,13 +162,13 @@ public class GetAllDataElementPageTest {
         System.out.println("\n=== 测试用例5：时间范围查询 ===");
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
             DataElementPageQueryDto queryDto = new DataElementPageQueryDto();
             queryDto.setPageNum(1L);
             queryDto.setPageSize(10L);
-            queryDto.setSendDateBegin(sdf.parse("2025-09-26 00:00:00"));
-            queryDto.setSendDateEnd(sdf.parse("2025-09-26 23:59:59"));
+            queryDto.setSendDateBegin(sdf.parse("2025-09-28"));
+            queryDto.setSendDateEnd(sdf.parse("2025-09-28"));
 
             Page<DataElementPageInfoVo> result = controller.getAllDataElementPage(queryDto);
 
@@ -195,15 +195,15 @@ public class GetAllDataElementPageTest {
         System.out.println("\n=== 测试用例6：组合条件查询 ===");
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
             DataElementPageQueryDto queryDto = new DataElementPageQueryDto();
             queryDto.setPageNum(1L);
             queryDto.setPageSize(10L);
             queryDto.setStatusList(Arrays.asList("DESIGNATED_SOURCE", "PENDING_SOURCE"));
             queryDto.setKeyword("企业");
-            queryDto.setSendDateBegin(sdf.parse("2024-01-15 00:00:00"));
-            queryDto.setSendDateEnd(sdf.parse("2024-01-17 23:59:59"));
+            queryDto.setSendDateBegin(sdf.parse("2025-09-28"));
+            queryDto.setSendDateEnd(sdf.parse("2025-09-28"));
 
             Page<DataElementPageInfoVo> result = controller.getAllDataElementPage(queryDto);
 

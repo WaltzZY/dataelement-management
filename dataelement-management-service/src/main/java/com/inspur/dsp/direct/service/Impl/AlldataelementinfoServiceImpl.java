@@ -5,36 +5,42 @@ import com.inspur.dsp.direct.dao.AlldataelementinfoMapper;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.dao.OrganisersClaim.ClaimDomainDataElementMapper;
 import com.inspur.dsp.direct.dao.SourceEventRecordMapper;
-import com.inspur.dsp.direct.dao.OrganizationUnitMapper;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.dbentity.DomainDataElement;
 import com.inspur.dsp.direct.dbentity.OrganizationUnit;
-import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
+import com.inspur.dsp.direct.dbentity.SourceEventRecord;
+import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.DataElementPageExportDto;
+import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
 import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.dto.ExcelRowDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
-import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
 import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
-import com.inspur.dsp.direct.domain.UserLoginInfo;
+import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
+import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
-import com.inspur.dsp.direct.enums.AlldataelementSortFieldEnums;
 import com.inspur.dsp.direct.service.AlldataelementinfoService;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import com.inspur.dsp.direct.enums.AlldataelementSortFieldEnums;
+
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Calendar;
+import org.springframework.util.StringUtils;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 /**
  * 数据元信息相关业务实现类
@@ -61,21 +67,16 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     @Autowired
     private ClaimDomainDataElementMapper claimDomainDataElementMapper;
 
-    @Autowired
-    private OrganizationUnitMapper organizationUnitMapper;
-
+    /**
+     * 在 Service 层处理日期边界逻辑
+     */
     @Override
     public Page<DataElementPageInfoVo> getAllDataElementPage(DataElementPageQueryDto queryDto) {
-        log.info("开始执行数据元列表查询，查询条件：{}", queryDto);
+        // 处理日期边界问题
+        normalizeDateRange(queryDto);
 
-        // 关键字去空格处理
-        if (StringUtils.isNotBlank(queryDto.getKeyword())) {
-            queryDto.setKeyword(queryDto.getKeyword().trim());
-            log.info("关键字去空格后：{}", queryDto.getKeyword());
-        }
-
-        // 排序参数校验和处理
-        validateAndProcessSortParams(queryDto);
+        // 校验并规范化排序参数
+        validateAndNormalizeSortParams(queryDto);
 
         // 创建分页对象，从queryDto获取分页参数
         Page<DataElementPageInfoVo> page = new Page<>(queryDto.getPageNum(), queryDto.getPageSize());
@@ -88,86 +89,114 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             });
         }
 
-        log.info("数据元列表查询完成，返回{}条记录", data.size());
         return page.setRecords(data);
     }
 
-    @Override
-    public void exportDataElementList(DataElementPageQueryDto queryDto, HttpServletResponse response) {
-        log.info("开始导出数据元列表，查询条件：{}", queryDto);
-
-        // 关键字去空格处理
-        if (StringUtils.isNotBlank(queryDto.getKeyword())) {
-            queryDto.setKeyword(queryDto.getKeyword().trim());
-            log.info("导出时关键字去空格后：{}", queryDto.getKeyword());
+    /**
+     * 规范化日期范围查询参数
+     * 解决前端传入年月日、数据库存储年月日时分秒的匹配问题
+     */
+    private void normalizeDateRange(DataElementPageQueryDto queryDto) {
+        // 处理发起时间范围
+        if (queryDto.getSendDateBegin() != null) {
+            // 开始时间设置为当天 00:00:00
+            queryDto.setSendDateBegin(getStartOfDay(queryDto.getSendDateBegin()));
         }
 
-        // 排序参数校验和处理
-        validateAndProcessSortParams(queryDto);
-
-        // 不分页，获取所有符合条件的数据
-        queryDto.setPageNum(1L);
-        queryDto.setPageSize(Long.MAX_VALUE);
-
-        // 直接调用Mapper方法获取数据
-        Page<DataElementPageInfoVo> page = new Page<>(1, Integer.MAX_VALUE);
-        List<DataElementPageInfoVo> dataList = alldataelementinfoMapper.getAllDataElementPage(page, queryDto);
-
-        if (CollectionUtils.isEmpty(dataList)) {
-            log.warn("没有查询到符合条件的数据，无法导出");
-            throw new IllegalArgumentException("没有可导出的数据!");
+        if (queryDto.getSendDateEnd() != null) {
+            // 结束时间设置为当天 23:59:59
+            queryDto.setSendDateEnd(getEndOfDay(queryDto.getSendDateEnd()));
         }
 
-        log.info("查询到{}条数据需要导出", dataList.size());
-
-        // 设置状态描述（因为直接调用Mapper，需要手动设置）
-        dataList.forEach(vo -> {
-            vo.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
-        });
-
-        // 批量查询采集单位信息
-        List<String> dataIds = dataList.stream()
-                .map(DataElementPageInfoVo::getDataid)
-                .collect(Collectors.toList());
-
-        // 查询每个数据元的采集单位
-        Map<String, String> collectDeptMap = getCollectDeptNames(dataIds);
-
-        // 转换为导出DTO列表
-        List<DataElementPageExportDto> exportList = new ArrayList<>();
-        int serialNumber = 1;
-
-        for (DataElementPageInfoVo vo : dataList) {
-            DataElementPageExportDto exportDto = new DataElementPageExportDto();
-            exportDto.setSerialNumber(String.valueOf(serialNumber++));
-            exportDto.setName(vo.getName());
-            exportDto.setDefinition(vo.getDefinition());
-            exportDto.setStatusDesc(vo.getStatusDesc());
-            exportDto.setSourceUnitName(vo.getSourceUnitName());
-
-            // 设置采集单位名称（从domain_data_element表查询获得）
-            String collectDeptName = collectDeptMap.get(vo.getDataid());
-            exportDto.setCollectDeptName(collectDeptName);
-
-            exportDto.setSendDate(vo.getSendDate());
-            exportDto.setConfirmDate(vo.getConfirmDate());
-            exportDto.setDataid(vo.getDataid());
-
-            exportList.add(exportDto);
+        // 处理定源时间范围
+        if (queryDto.getConfirmDateBegin() != null) {
+            queryDto.setConfirmDateBegin(getStartOfDay(queryDto.getConfirmDateBegin()));
         }
 
-        // 调用通用导出服务
-        try {
-            commonService.exportExcelData(exportList, response, "数据元列表", DataElementPageExportDto.class);
-            log.info("数据元列表导出完成，共导出{}条记录", exportList.size());
-        } catch (IOException e) {
-            log.error("导出数据元列表失败", e);
-            throw new RuntimeException("导出数据元列表失败: " + e.getMessage(), e);
+        if (queryDto.getConfirmDateEnd() != null) {
+            queryDto.setConfirmDateEnd(getEndOfDay(queryDto.getConfirmDateEnd()));
         }
+
+        log.debug("日期范围规范化完成 - 发起时间: {} ~ {}, 定源时间: {} ~ {}",
+                queryDto.getSendDateBegin(), queryDto.getSendDateEnd(),
+                queryDto.getConfirmDateBegin(), queryDto.getConfirmDateEnd());
+    }
+
+    /**
+     * 获取某一天的开始时间 (00:00:00.000)
+     */
+    private Date getStartOfDay(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取某一天的结束时间 (23:59:59.999)
+     */
+    private Date getEndOfDay(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+
+        return calendar.getTime();
+    }
+
+    /**
+     * 校验并规范化排序参数
+     */
+    private void validateAndNormalizeSortParams(DataElementPageQueryDto queryDto) {
+        String sortField = queryDto.getSortField();
+        String sortOrder = queryDto.getSortOrder();
+
+        // 如果没有指定排序字段，使用默认排序
+        if (sortField == null || sortField.trim().isEmpty()) {
+            queryDto.setSortField(null);
+            queryDto.setSortOrder(null);
+            return;
+        }
+
+        // 校验排序字段是否有效
+        if (!AlldataelementSortFieldEnums.isValidSortField(sortField)) {
+            log.warn("无效的排序字段: {}, 使用默认排序", sortField);
+            queryDto.setSortField(null);
+            queryDto.setSortOrder(null);
+            return;
+        }
+
+        // 校验并规范化排序方向
+        if (sortOrder == null || sortOrder.trim().isEmpty()) {
+            queryDto.setSortOrder("asc"); // 默认升序
+        } else {
+            String normalizedOrder = sortOrder.trim().toLowerCase();
+            if (!normalizedOrder.equals("asc") && !normalizedOrder.equals("desc")) {
+                log.warn("无效的排序方向: {}, 使用默认升序", sortOrder);
+                queryDto.setSortOrder("asc");
+            } else {
+                queryDto.setSortOrder(normalizedOrder);
+            }
+        }
+
+        log.info("使用排序字段: {}, 排序方向: {}", queryDto.getSortField(), queryDto.getSortOrder());
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public UploadConfirmResultVo uploadconfirmunitfile(MultipartFile file) {
         log.info("开始处理上传文件: {}", file.getOriginalFilename());
 
@@ -176,10 +205,6 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
         // 读取Excel文件
         List<ExcelRowDto> excelData = commonService.importExcelData(file, ExcelRowDto.class);
-
-        if (CollectionUtils.isEmpty(excelData)) {
-            throw new IllegalArgumentException("Excel文件内容为空!");
-        }
 
         // 处理统计
         int totalCount = excelData.size();
@@ -196,279 +221,322 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
                     successCount++;
                 } else {
                     failureCount++;
-                    FailureDetailVo failure = new FailureDetailVo();
-                    failure.setSerialNumber(String.valueOf(i + 1));
-                    failure.setName(row.getElementName());           // name字段
-                    failure.setUnit_code(row.getUnitCode());         // unit_code字段
-                    failure.setUnit_name(result.getUnitName());      // unit_name字段
-                    failure.setFailReason(result.getFailureReason()); // failReason字段
-                    failureDetails.add(failure);
+                    failureDetails.add(result.getFailureDetail());
                 }
             } catch (Exception e) {
-                log.error("处理第{}行数据失败", i + 1, e);
+                log.error("处理第{}行数据时发生异常: {}", i + 1, e.getMessage(), e);
                 failureCount++;
-                FailureDetailVo failure = new FailureDetailVo();
-                failure.setSerialNumber(String.valueOf(i + 1));
-                failure.setName(row.getElementName());
-                failure.setUnit_code(row.getUnitCode());
-                failure.setFailReason("处理异常: " + e.getMessage());
-                failureDetails.add(failure);
+                FailureDetailVo failureDetail = FailureDetailVo.builder()
+                        .serialNumber(row.getSerialNumber())
+                        .name(row.getElementName())
+                        .unit_code(row.getUnitCode())
+                        .failReason("系统异常: " + e.getMessage())
+                        .build();
+                failureDetails.add(failureDetail);
             }
         }
 
-        // 构建返回结果
-        UploadConfirmResultVo result = new UploadConfirmResultVo();
-        result.setTotal(totalCount);
-        result.setSucessQty(successCount);
-        result.setFailQty(failureCount);
-        result.setFailDetails(failureDetails);
+        log.info("文件处理完成, 总数: {}, 成功: {}, 失败: {}",
+                totalCount, successCount, failureCount);
 
-        log.info("文件处理完成，总记录数：{}，成功：{}，失败：{}", totalCount, successCount, failureCount);
-        return result;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void manualConfirmUnit(ManualConfirmUnitDto confirmDto) {
-        log.info("开始执行手动定源，参数：{}", confirmDto);
-
-        // 校验数据元是否存在
-        BaseDataElement baseDataElement = baseDataElementMapper.selectById(confirmDto.getDataid());
-        if (baseDataElement == null) {
-            throw new IllegalArgumentException("数据元不存在!");
-        }
-
-        // 校验数源单位是否存在
-        OrganizationUnit organizationUnit = organizationUnitMapper.selectById(confirmDto.getSourceUnitId());
-        if (organizationUnit == null) {
-            throw new IllegalArgumentException("数源单位不存在!");
-        }
-
-        // 获取当前用户信息
-        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-
-        // 更新数据元信息
-        baseDataElement.setSourceUnitCode(organizationUnit.getUnitCode());
-        baseDataElement.setSourceUnitName(organizationUnit.getUnitName());
-        baseDataElement.setStatus(StatusEnums.DESIGNATED_SOURCE.getCode());
-        baseDataElement.setConfirmDate(new Date());
-        baseDataElement.setLastModifyAccount(userInfo.getAccount());
-        baseDataElement.setLastModifyDate(new Date());
-
-        // 保存更新
-        int updateCount = baseDataElementMapper.updateById(baseDataElement);
-        if (updateCount == 0) {
-            throw new RuntimeException("手动定源失败，更新数据元信息失败");
-        }
-
-        log.info("手动定源完成，数据元ID：{}，数源单位：{}({})",
-                confirmDto.getDataid(), organizationUnit.getUnitName(), organizationUnit.getUnitCode());
-    }
-
-    /**
-     * 批量查询采集单位名称
-     *
-     * @param dataIds 数据元ID列表
-     * @return 数据元ID -> 采集单位名称的映射
-     */
-    private Map<String, String> getCollectDeptNames(List<String> dataIds) {
-        if (CollectionUtils.isEmpty(dataIds)) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> collectDeptMap = dataIds.stream()
-                .collect(Collectors.toMap(
-                        dataId -> dataId,
-                        dataId -> {
-                            try {
-                                // 根据基准数据元ID查询领域数据元列表
-                                List<DomainDataElement> domainElements =
-                                        claimDomainDataElementMapper.selectDomainDataElementByBaseDataElementDataId(dataId);
-
-                                if (CollectionUtils.isEmpty(domainElements)) {
-                                    return ""; // 没有找到采集单位
-                                }
-
-                                // 提取所有采集单位名称并用"|"分隔合并
-                                return domainElements.stream()
-                                        .map(DomainDataElement::getSourceUnitName)
-                                        .filter(StringUtils::isNotBlank)
-                                        .distinct() // 去重
-                                        .collect(Collectors.joining("|"));
-
-                            } catch (Exception e) {
-                                log.warn("查询数据元{}的采集单位失败: {}", dataId, e.getMessage());
-                                return "";
-                            }
-                        }
-                ));
-
-        log.info("批量查询采集单位完成，共查询{}个数据元", collectDeptMap.size());
-        return collectDeptMap;
-    }
-
-    /**
-     * 校验和处理排序参数
-     *
-     * @param queryDto 查询条件DTO
-     */
-    private void validateAndProcessSortParams(DataElementPageQueryDto queryDto) {
-        String sortField = queryDto.getSortField();
-        String sortOrder = queryDto.getSortOrder();
-
-        // 如果排序字段为空，不需要处理
-        if (StringUtils.isBlank(sortField)) {
-            return;
-        }
-
-        // 使用枚举校验排序字段
-        AlldataelementSortFieldEnums sortFieldEnum = AlldataelementSortFieldEnums.getByField(sortField);
-        if (sortFieldEnum == null) {
-            log.warn("不支持的排序字段：{}，重置为默认排序", sortField);
-            queryDto.setSortField(null);
-            queryDto.setSortOrder(null);
-            return;
-        }
-
-        // 校验排序方向
-        if (StringUtils.isNotBlank(sortOrder)) {
-            sortOrder = sortOrder.toLowerCase();
-            if (!"asc".equals(sortOrder) && !"desc".equals(sortOrder)) {
-                log.warn("不支持的排序方向：{}，重置为默认排序", sortOrder);
-                queryDto.setSortField(null);
-                queryDto.setSortOrder(null);
-                return;
-            }
-            queryDto.setSortOrder(sortOrder);
-        } else {
-            // 如果没有指定排序方向，默认为升序
-            queryDto.setSortOrder("asc");
-        }
-
-        log.info("排序参数校验通过，排序字段：{}({})，排序方向：{}",
-                queryDto.getSortField(), sortFieldEnum.getDescription(), queryDto.getSortOrder());
-    }
-
-    /**
-     * 处理Excel行数据
-     *
-     * @param row      Excel行数据
-     * @param rowIndex 行号
-     * @return 处理结果
-     */
-    private ProcessResult processRow(ExcelRowDto row, int rowIndex) {
-        try {
-            // 数据校验
-            if (StringUtils.isBlank(row.getElementName())) {
-                return ProcessResult.failure("数据元名称不能为空");
-            }
-
-            if (StringUtils.isBlank(row.getUnitCode())) {
-                return ProcessResult.failure("数源单位统一社会信用代码不能为空");
-            }
-
-            // 查找数据元
-            BaseDataElement baseDataElement = baseDataElementMapper.selectFirstByName(row.getElementName());
-            if (baseDataElement == null) {
-                return ProcessResult.failure("数据元不存在");
-            }
-
-            // 查找数源单位
-            OrganizationUnit organizationUnit = organizationUnitMapper.selectFirstByUnitCode(row.getUnitCode());
-            if (organizationUnit == null) {
-                return ProcessResult.failure("数源单位不存在");
-            }
-
-            // 获取当前用户信息
-            UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-
-            // 更新数据元信息
-            baseDataElement.setSourceUnitCode(organizationUnit.getUnitCode());
-            baseDataElement.setSourceUnitName(organizationUnit.getUnitName());
-            baseDataElement.setStatus(StatusEnums.DESIGNATED_SOURCE.getCode());
-            baseDataElement.setConfirmDate(new Date());
-            baseDataElement.setLastModifyAccount(userInfo.getAccount());
-            baseDataElement.setLastModifyDate(new Date());
-
-            // 保存更新
-            int updateCount = baseDataElementMapper.updateById(baseDataElement);
-            if (updateCount == 0) {
-                return ProcessResult.failure("更新数据元失败");
-            }
-
-            return ProcessResult.success();
-
-        } catch (Exception e) {
-            log.error("处理第{}行数据异常", rowIndex, e);
-            return ProcessResult.failure("处理异常: " + e.getMessage());
-        }
+        return UploadConfirmResultVo.builder()
+                .total(totalCount)
+                .sucessQty(successCount)
+                .failQty(failureCount)
+                .failDetails(failureDetails)
+                .build();
     }
 
     /**
      * 文件校验
-     *
-     * @param file 上传的文件
      */
     private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
+        if (file.isEmpty()) {
             throw new IllegalArgumentException("上传文件不能为空");
         }
 
         String fileName = file.getOriginalFilename();
-        if (StringUtils.isBlank(fileName) ||
-                (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls"))) {
-            throw new IllegalArgumentException("文件格式不正确，请上传Excel文件");
+        if (fileName == null || (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls"))) {
+            throw new IllegalArgumentException("文件格式不正确，仅支持xlsx和xls格式");
         }
 
-        // 文件大小校验（10MB限制）
-        long maxFileSize = 10 * 1024 * 1024;
-        if (file.getSize() > maxFileSize) {
-            throw new IllegalArgumentException("文件大小不能超过10MB");
+        if (file.getSize() > 100 * 1024 * 1024) { // 100MB限制
+            throw new IllegalArgumentException("文件大小不能超过100MB");
         }
     }
 
     /**
-     * 处理结果内部类
+     * 处理单行数据 - 校验所有条件并收集所有错误信息
      */
-    @Data
-    public static class ProcessResult {
+    private ProcessResult processRow(ExcelRowDto row, int rowNumber) {
+        log.debug("处理第{}行数据: {}", rowNumber, row);
 
-        /**
-         * 是否成功
-         */
-        private boolean success;
+        List<String> errorMessages = new ArrayList<>();
 
-        /**
-         * 失败原因
-         */
-        private String failureReason;
-
-        /**
-         * 单位名称
-         */
-        private String unitName;
-
-        private ProcessResult(boolean success, String failureReason) {
-            this.success = success;
-            this.failureReason = failureReason;
+        // 1. 数据元名称校验
+        if (!StringUtils.hasText(row.getElementName())) {
+            errorMessages.add("数据元名称不能为空");
         }
 
-        private ProcessResult(boolean success, String failureReason, String unitName) {
+        // 2. 数源单位代码校验
+        if (!StringUtils.hasText(row.getUnitCode())) {
+            errorMessages.add("数源单位统一社会信用代码不能为空");
+        }
+
+        // 3. 验证部门是否存在
+        OrganizationUnit organizationUnit = null;
+        if (StringUtils.hasText(row.getUnitCode())) {
+            organizationUnit = commonService.getOrgInfoByOrgCode(row.getUnitCode());
+            if (organizationUnit == null) {
+                errorMessages.add("数源单位不存在");
+            }
+        }
+
+        // 4. 根据名称查询数据元
+        BaseDataElement element = null;
+        if (StringUtils.hasText(row.getElementName())) {
+            LambdaQueryWrapper<BaseDataElement> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(BaseDataElement::getName, row.getElementName());
+            element = baseDataElementMapper.selectOne(wrapper);
+
+            if (element == null) {
+                errorMessages.add("数据元不存在");
+            } else {
+                // 5. 检查数据元状态（只有在数据元存在时才检查）
+                if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(element.getStatus())) {
+                    errorMessages.add("数据元已定源");
+                }
+            }
+        }
+
+        // 如果有任何错误，返回失败结果
+        if (!errorMessages.isEmpty()) {
+            String combinedErrorMessage = String.join("；", errorMessages);
+            log.debug("第{}行数据校验失败: {}", rowNumber, combinedErrorMessage);
+            return ProcessResult.failure(row, combinedErrorMessage);
+        }
+
+        // 所有校验通过，执行更新操作
+        updateDataElementStatus(element.getDataid(), row.getUnitCode(), RecordSourceTypeEnums.IMPORT_SOURCE.getCode());
+
+        log.debug("成功处理第{}行数据，数据元ID: {}", rowNumber, element.getDataid());
+        return ProcessResult.success();
+    }
+
+    /**
+     * 统一的更新数据源状态方法
+     * @param dataElementId 数据元ID
+     * @param unitCode 单位代码
+     * @param sourceType 定源方式
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDataElementStatus(String dataElementId, String unitCode, String sourceType) {
+        log.info("开始更新数据元状态，数据元ID：{}，单位代码：{}，定源方式：{}", dataElementId, unitCode, sourceType);
+
+        // 获取当前登录用户信息
+        log.debug("正在获取当前登录用户信息...");
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+
+        // 添加用户信息日志
+        if (userInfo != null) {
+            log.info("获取到当前登录用户信息 - 账号：{}，姓名：{}，机构代码：{}，机构名称：{}",
+                    userInfo.getAccount(),
+                    userInfo.getName(),
+                    userInfo.getOrgCode(),
+                    userInfo.getOrgName());
+        } else {
+            log.warn("未能获取到当前登录用户信息，userInfo为null");
+            throw new RuntimeException("获取用户信息失败，请确认用户已登录");
+        }
+
+        // 获取当前用户部门对象
+        log.debug("正在获取当前用户部门信息，机构代码：{}", userInfo.getOrgCode());
+        OrganizationUnit currentUserOrg = commonService.getOrgInfoByOrgCode(userInfo.getOrgCode());
+        if (currentUserOrg != null) {
+            log.info("获取到当前用户部门信息 - 部门名称：{}，联系人：{}，联系电话：{}",
+                    currentUserOrg.getUnitName(),
+                    currentUserOrg.getContactName(),
+                    currentUserOrg.getContactPhone());
+        } else {
+            log.warn("未能获取到当前用户部门信息，机构代码：{}", userInfo.getOrgCode());
+        }
+        // 查询数据元
+        BaseDataElement element = baseDataElementMapper.selectById(dataElementId);
+        if (element == null) {
+            throw new RuntimeException("数据元不存在");
+        }
+
+        // 验证数源单位存在性
+        OrganizationUnit organizationUnit = commonService.getOrgInfoByOrgCode(unitCode);
+        if (organizationUnit == null) {
+            throw new RuntimeException("数源单位不存在");
+        }
+
+        Date now = new Date();
+
+        // 更新基准数据元信息
+        element.setStatus(StatusEnums.DESIGNATED_SOURCE.getCode());
+        element.setSourceUnitCode(unitCode);
+        element.setSourceUnitName(organizationUnit.getUnitName());
+        element.setConfirmDate(now);
+        element.setLastModifyDate(now);
+        element.setLastModifyAccount(userInfo.getAccount());
+
+        int updateResult = baseDataElementMapper.updateById(element);
+        if (updateResult <= 0) {
+            throw new RuntimeException("更新数据元信息失败");
+        }
+
+        // 新增定源记录表
+        SourceEventRecord record = SourceEventRecord.builder()
+                .recordId(UUID.randomUUID().toString())
+                .dataElementId(element.getDataid())
+                .dataElementName(element.getName())
+                .sourceType(sourceType)
+                .sourceDate(now)
+                .operatorAccount(userInfo.getAccount())
+                .contactPhone(organizationUnit.getContactPhone())
+                .contactName(organizationUnit.getContactName())
+                .sourceUnitCode(unitCode)
+                .sourceUnitName(organizationUnit.getUnitName())
+                .sendUnitCode(currentUserOrg != null ? currentUserOrg.getUnitCode() : userInfo.getOrgCode())
+                .sendUnitName(currentUserOrg != null ? currentUserOrg.getUnitName() : userInfo.getOrgName())
+                .build();
+
+        int insertResult = sourceEventRecordMapper.insert(record);
+        if (insertResult <= 0) {
+            throw new RuntimeException("插入定源事件记录失败");
+        }
+
+        log.info("成功更新数据源状态，数据元ID：{}，数源单位：{}，定源方式：{}",
+                dataElementId, organizationUnit.getUnitName(), sourceType);
+    }
+
+    /**
+     * 处理结果封装类
+     */
+    private static class ProcessResult {
+        private boolean success;
+        private FailureDetailVo failureDetail;
+
+        private ProcessResult(boolean success, FailureDetailVo failureDetail) {
             this.success = success;
-            this.failureReason = failureReason;
-            this.unitName = unitName;
+            this.failureDetail = failureDetail;
         }
 
         public static ProcessResult success() {
             return new ProcessResult(true, null);
         }
 
-        public static ProcessResult failure(String reason) {
-            return new ProcessResult(false, reason);
+        public static ProcessResult failure(ExcelRowDto row, String reason) {
+            FailureDetailVo detail = FailureDetailVo.builder()
+                    .serialNumber(row.getSerialNumber())
+                    .name(row.getElementName())
+                    .unit_code(row.getUnitCode())
+                    .failReason(reason)
+                    .build();
+            return new ProcessResult(false, detail);
         }
 
-        public static ProcessResult failure(String reason, String unitName) {
-            return new ProcessResult(false, reason, unitName);
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public FailureDetailVo getFailureDetail() {
+            return failureDetail;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void manualConfirmUnit(ManualConfirmUnitDto confirmDto) {
+        log.info("开始手动定源操作，请求参数：{}", confirmDto);
+
+        try {
+            // 调用统一的更新数据源状态方法
+            updateDataElementStatus(confirmDto.getDataid(), confirmDto.getSourceUnitId(), RecordSourceTypeEnums.MANUAL_SOURCE.getCode());
+
+            log.info("手动定源操作成功，数据元ID：{}", confirmDto.getDataid());
+
+        } catch (Exception e) {
+            log.error("手动定源操作失败，请求参数：{}，错误信息：{}", confirmDto, e.getMessage(), e);
+            throw new RuntimeException("手动定源操作失败：" + e.getMessage());
+        }
+    }
+    /**
+     * 导出数据元列表
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    @Override
+    public void exportDataElementList(DataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("开始导出数据元列表，查询条件：{}", queryDto);
+
+        // 直接调用Mapper查询，不使用分页
+        List<DataElementPageInfoVo> dataList = alldataelementinfoMapper.getAllDataElementPage(null, queryDto);
+
+        if (CollectionUtils.isEmpty(dataList)) {
+            throw new IllegalArgumentException("没有可导出的数据!");
+        }
+
+        log.info("查询到{}条数据需要导出", dataList.size());
+
+        // 设置状态描述（因为直接调用Mapper，需要手动设置）
+        dataList.forEach(vo -> {
+            vo.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
+        });
+
+        // 收集采集单位信息
+        for (DataElementPageInfoVo vo : dataList) {
+            try {
+                // 使用dataid查询关联的DomainDataElement列表
+                List<DomainDataElement> domainDataElements =
+                        claimDomainDataElementMapper.selectDomainDataElementByBaseDataElementDataId(vo.getDataid());
+
+                if (!CollectionUtils.isEmpty(domainDataElements)) {
+                    // 提取所有source_unit_name并用"|"分割组合（根据OrganisersClaimServiceImpl的实现）
+                    String collectUnitNames = domainDataElements.stream()
+                            .map(DomainDataElement::getSourceUnitName)
+                            .filter(name -> name != null && !name.trim().isEmpty())
+                            .collect(Collectors.joining("|"));
+
+                    // 设置采集单位名称
+                    vo.setCollectDeptName(collectUnitNames);
+                } else {
+                    // 如果没有查询到采集单位信息，设置为空字符串
+                    vo.setCollectDeptName("");
+                }
+            } catch (Exception e) {
+                log.warn("查询数据元{}的采集单位信息失败: {}", vo.getDataid(), e.getMessage());
+                vo.setCollectDeptName("");
+            }
+        }
+
+        // 转换为导出DTO列表
+        List<DataElementPageExportDto> exportList = new ArrayList<>();
+        int serialNumber = 1;
+
+        for (DataElementPageInfoVo vo : dataList) {
+            DataElementPageExportDto exportDto = new DataElementPageExportDto();
+            exportDto.setSerialNumber(String.valueOf(serialNumber++));
+            exportDto.setName(vo.getName());
+            exportDto.setDefinition(vo.getDefinition());
+            exportDto.setStatusDesc(vo.getStatusDesc());
+            exportDto.setSourceUnitName(vo.getSourceUnitName());
+            exportDto.setCollectDeptName(vo.getCollectDeptName()); // 设置采集单位信息
+            exportDto.setSendDate(vo.getSendDate());
+            exportDto.setConfirmDate(vo.getConfirmDate());
+
+            exportList.add(exportDto);
+        }
+
+        // 调用通用导出服务
+        try {
+            commonService.exportExcelData(exportList, response, "数据元列表", DataElementPageExportDto.class);
+            log.info("数据元列表导出完成，共导出{}条记录", exportList.size());
+        } catch (IOException e) {
+            log.error("导出数据元列表失败", e);
+            throw new RuntimeException("导出数据元列表失败: " + e.getMessage(), e);
         }
     }
 }

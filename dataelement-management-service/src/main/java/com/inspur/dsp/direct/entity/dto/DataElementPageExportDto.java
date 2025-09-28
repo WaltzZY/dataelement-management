@@ -68,9 +68,4 @@ public class DataElementPageExportDto {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date confirmDate;
 
-    /**
-     * 数据行唯一标识
-     */
-    @ExcelProperty(index = 8, value = "数据元ID")
-    private String dataid;
 }

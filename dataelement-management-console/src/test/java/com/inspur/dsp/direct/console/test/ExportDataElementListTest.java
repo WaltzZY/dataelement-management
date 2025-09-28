@@ -77,7 +77,7 @@ public class ExportDataElementListTest {
 
         try {
             DataElementPageQueryDto queryDto = new DataElementPageQueryDto();
-            queryDto.setKeyword("数据"); // 设置关键词过滤条件
+            queryDto.setKeyword("余额"); // 设置关键词过滤条件
 
             controller.exportDataElementList(queryDto, mockResponse);
 
@@ -135,7 +135,7 @@ public class ExportDataElementListTest {
 
         try {
             DataElementPageQueryDto queryDto = new DataElementPageQueryDto();
-            queryDto.setSourceUnitCode(Arrays.asList("91110000123456789A", "91110000987654321B")); // 设置数源单位代码列表
+            queryDto.setCollectUnitCodeList(Arrays.asList("11100000000014445H", "911800001000556000")); // 设置数源单位代码列表
 
             controller.exportDataElementList(queryDto, mockResponse);
 
@@ -163,11 +163,11 @@ public class ExportDataElementListTest {
         System.out.println("=== 测试用例5：按发起时间范围过滤导出 ===");
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
             DataElementPageQueryDto queryDto = new DataElementPageQueryDto();
-            queryDto.setSendDateBegin(sdf.parse("2024-01-01 00:00:00")); // 发起时间开始
-            queryDto.setSendDateEnd(sdf.parse("2024-12-31 23:59:59"));   // 发起时间结束
+            queryDto.setSendDateBegin(sdf.parse("2025-09-28")); // 发起时间开始
+            queryDto.setSendDateEnd(sdf.parse("2025-09-28"));   // 发起时间结束
 
             controller.exportDataElementList(queryDto, mockResponse);
 
@@ -232,7 +232,7 @@ public class ExportDataElementListTest {
             DataElementPageQueryDto queryDto = new DataElementPageQueryDto();
             queryDto.setKeyword("数据元"); // 关键词
             queryDto.setStatusList(Arrays.asList("1", "3")); // 状态列表
-            queryDto.setSourceUnitCode(Arrays.asList("91110000123456789A")); // 数源单位代码
+            queryDto.setCollectUnitCodeList(Arrays.asList("91110000123456789A")); // 数源单位代码
             queryDto.setSendDateBegin(sdf.parse("2024-01-01 00:00:00")); // 发起时间开始
             queryDto.setSendDateEnd(sdf.parse("2024-12-31 23:59:59")); // 发起时间结束
 
