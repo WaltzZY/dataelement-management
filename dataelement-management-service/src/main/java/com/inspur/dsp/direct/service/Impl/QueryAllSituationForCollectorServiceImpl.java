@@ -78,6 +78,8 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
                 displayStatus = ctStatus;
             } else if ("designated_source".equals(ctStatus)) {
                 displayStatus = ctStatus;
+            }else {
+                displayStatus = "nothing";
             }
             String statusChinese = StatusUtil.getStatusChinese(displayStatus);
             dataElementWithTaskVo.setDisplaystatus(statusChinese);
