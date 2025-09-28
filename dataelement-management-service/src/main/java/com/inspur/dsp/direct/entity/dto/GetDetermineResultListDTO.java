@@ -27,7 +27,7 @@ public class GetDetermineResultListDTO {
     /**
      * 数源单位统一社会信用代码
      */
-    private List<String> sourceUnitCodeList;
+    private List<String> collectUnitCodeList;
     /**
      * 发起时间开始
      */
@@ -48,6 +48,13 @@ public class GetDetermineResultListDTO {
      */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date confirmDateEnd;
+    /** 排序字段 */
+    private String sortField;
+
+    /** 排序方式 */
+    private String sortOrder;
+    /** 排序sql */
+    private String sortSql;
 
     public void setSendDateBegin(Date sendDateBegin) {
         this.sendDateBegin = DateUtils.getStartOfDay(sendDateBegin);

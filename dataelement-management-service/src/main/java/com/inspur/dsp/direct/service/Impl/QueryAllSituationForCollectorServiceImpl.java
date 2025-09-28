@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.service.Impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
@@ -7,6 +8,7 @@ import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.dto.QueryAllSituationForCollectorExportDTO;
 import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
+import com.inspur.dsp.direct.enums.NePageSortFieldEnums;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.QueryAllSituationForCollectorService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -42,20 +44,15 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
      */
     @Override
     public Page<DataElementWithTaskVo> getAllSituationList(BaseDataElementSearchDTO baseDataElementSearchDTO) {
+        String sortSql = NePageSortFieldEnums.getOrderByField(baseDataElementSearchDTO.getSortField(), baseDataElementSearchDTO.getSortOrder());
+        baseDataElementSearchDTO.setSortSql(sortSql);
+        log.warn("getAllSituationList函数接收到的参数为: {}", JSONObject.toJSONString(baseDataElementSearchDTO));
         Page<DataElementWithTaskVo> page = new Page<>(baseDataElementSearchDTO.getPageNum(), baseDataElementSearchDTO.getPageSize());
         // 获取当前登录用户信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         // 获取登录人账户
         String orgCode = userInfo.getOrgCode();
         baseDataElementSearchDTO.setOrgCode(orgCode);
-        // List<String> statusList = baseDataElementSearchDTO.getStatusList();
-        // if (statusList != null && !statusList.isEmpty()) {
-        //     List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
-        //     List<String> baseList = lists[0];
-        //     List<String> taskList = lists[1];
-        //     baseDataElementSearchDTO.setBaseStatusList(baseList);
-        //     baseDataElementSearchDTO.setTaskStatusList(taskList);
-        // }
         List<DataElementWithTaskVo> baseDataElementList = baseDataElementMapper.getDetermineResultListWithOrganiser(page, baseDataElementSearchDTO);
         // 校验结果
         if (CollectionUtils.isEmpty(baseDataElementList)) {
@@ -81,7 +78,7 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
                 displayStatus = ctStatus;
             } else if ("designated_source".equals(ctStatus)) {
                 displayStatus = ctStatus;
-            } else {
+            }else {
                 displayStatus = "nothing";
             }
             String statusChinese = StatusUtil.getStatusChinese(displayStatus);
@@ -91,96 +88,18 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
     }
 
 
-//    /**
-//     * 查询基准数据详情数据
-//     */
-//    @Override
-//    public BaseDataElementDTO getAllSituationDetail(BaseDataElementSearchDTO baseDataElementSearchDTO) {
-//        // 查询基准数据元详情
-//        BaseDataElement baseDataElement = baseDataElementMapper.getAllSituationDetail(baseDataElementSearchDTO);
-//        // 如果实体为空，返回空对象
-//        if (baseDataElement == null) {
-//            return new BaseDataElementDTO();
-//        }
-//        BaseDataElementDTO baseDataElementDTO = new BaseDataElementDTO();
-//        BeanUtils.copyProperties(baseDataElement, baseDataElementDTO);
-//
-//        // 查询关联的确认任务
-//        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.getTaskByDataId(baseDataElementSearchDTO);
-//        // 如果确认任务不为空，设置到基准数据元中
-//        if (!CollectionUtils.isEmpty(confirmationTaskList)) {
-//            baseDataElementDTO.setConfirmationTaskDTOList(Collections.EMPTY_LIST);
-//        }
-//        List<ConfirmationTaskDTO> confirmationTaskDTOList = new ArrayList<>();
-//        for (ConfirmationTask confirmationTask : confirmationTaskList) {
-//            ConfirmationTaskDTO confirmationTaskDTO = new ConfirmationTaskDTO();
-//            BeanUtils.copyProperties(confirmationTask, confirmationTaskDTO);
-//            confirmationTaskDTOList.add(confirmationTaskDTO);
-//        }
-//        baseDataElementDTO.setConfirmationTaskDTOList(confirmationTaskDTOList);
-//        return baseDataElementDTO;
-//    }
-//
-//    /**
-//     * 查询基准数据详情数据（带记录详情）
-//     */
-//    @Override
-//    public BaseDataElementDTO getAllSituationWithRecordDetail(BaseDataElementSearchDTO baseDataElementSearchDTO) {
-//        // TODO: 需要获取dataId
-//
-//        // 查询基准数据元详情
-//        BaseDataElement baseDataElement = baseDataElementMapper.getAllSituationDetail(baseDataElementSearchDTO);
-//        // 如果实体为空，返回空对象
-//        if (baseDataElement == null) {
-//            return new BaseDataElementDTO();
-//        }
-//        BaseDataElementDTO baseDataElementDTO = new BaseDataElementDTO();
-//        BeanUtils.copyProperties(baseDataElement, baseDataElementDTO);
-//
-//        // 查询关联的确认任务
-//        List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.getTaskByDataId(baseDataElementSearchDTO);
-//        // 如果确认任务不为空，设置到基准数据元中
-//        if (!CollectionUtils.isEmpty(confirmationTaskList)) {
-//            baseDataElementDTO.setConfirmationTaskDTOList(Collections.EMPTY_LIST);
-//        }
-//        List<ConfirmationTaskDTO> confirmationTaskDTOList = new ArrayList<>();
-//        for (ConfirmationTask confirmationTask : confirmationTaskList) {
-//            ConfirmationTaskDTO confirmationTaskDTO = new ConfirmationTaskDTO();
-//            BeanUtils.copyProperties(confirmationTask, confirmationTaskDTO);
-//            confirmationTaskDTOList.add(confirmationTaskDTO);
-//        }
-//        // 查询事件记录详情
-//        SourceEventRecord sourceEventRecord = sourceEventRecordMapper.getEventRecordByDataId(baseDataElementSearchDTO);
-//        // 如果事件记录不为空，设置到基准数据元中
-//        if (sourceEventRecord == null) {
-//            baseDataElementDTO.setSourceEventRecordDTO(new SourceEventRecordDTO());
-//        } else {
-//            SourceEventRecordDTO sourceEventRecordDTO = new SourceEventRecordDTO();
-//            BeanUtils.copyProperties(sourceEventRecord, sourceEventRecordDTO);
-//            baseDataElementDTO.setSourceEventRecordDTO(sourceEventRecordDTO);
-//        }
-//        return baseDataElementDTO;
-//    }
-
     /**
      * 下载数据
      */
     @Override
     public void download(BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
-
+        String sortSql = NePageSortFieldEnums.getOrderByField(baseDataElementSearchDTO.getSortField(), baseDataElementSearchDTO.getSortOrder());
+        baseDataElementSearchDTO.setSortSql(sortSql);
         // 获取当前登录用户信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         // 获取登录人账户
         String orgCode = userInfo.getOrgCode();
         baseDataElementSearchDTO.setOrgCode(orgCode);
-        // List<String> statusList = baseDataElementSearchDTO.getStatusList();
-        // if (statusList != null && !statusList.isEmpty()) {
-        //     List<String>[] lists = StatusUtil.buildStatusConditions(statusList);
-        //     List<String> baseList = lists[0];
-        //     List<String> taskList = lists[1];
-        //     baseDataElementSearchDTO.setBaseStatusList(baseList);
-        //     baseDataElementSearchDTO.setTaskStatusList(taskList);
-        // }
         List<DataElementWithTaskVo> dataElementWithTaskVoList = baseDataElementMapper.getDetermineResultListWithOrganiser(baseDataElementSearchDTO);
         // 校验结果
         if (CollectionUtils.isEmpty(dataElementWithTaskVoList)) {
@@ -188,25 +107,47 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             return;
         }
         List<QueryAllSituationForCollectorExportDTO> exportDTOList = new ArrayList<>();
-        for (DataElementWithTaskVo dataElementWithTaskVo : dataElementWithTaskVoList) {
+        for (int i = 0; i < dataElementWithTaskVoList.size(); i++) {
+            DataElementWithTaskVo dataElementWithTaskVo = dataElementWithTaskVoList.get(i);
             QueryAllSituationForCollectorExportDTO exportDTO = new QueryAllSituationForCollectorExportDTO();
-            String statusChinese = StatusUtil.getStatusChinese(dataElementWithTaskVo.getStatus());
+            exportDTO.setId(i + 1);
             exportDTO.setDefinition(dataElementWithTaskVo.getDefinition());
             exportDTO.setName(dataElementWithTaskVo.getName());
+            String ctStatus = dataElementWithTaskVo.getCtStatus();
+            String bdeStatus = dataElementWithTaskVo.getBdeStatus();
+            String displayStatus = "";
+            if ("pending".equals(ctStatus)) {
+                displayStatus = ctStatus;
+            } else if ("pending_claimed".equals(ctStatus)) {
+                displayStatus = ctStatus;
+            } else if ("confirmed".equals(ctStatus) && "pending_approval".equals(bdeStatus)) {
+                displayStatus = "confirmed";
+            } else if ("rejected".equals(ctStatus) && "pending_negotiation".equals(bdeStatus)) {
+                displayStatus = "rejected";
+            } else if ("claimed".equals(ctStatus) && ("claimed_ing".equals(bdeStatus) || "pending_approval".equals(bdeStatus) || "pending_negotiation".equals(bdeStatus))) {
+                displayStatus = "claimed";
+            } else if ("not_claimed".equals(ctStatus) && ("claimed_ing".equals(bdeStatus) || "pending_approval".equals(bdeStatus) || "pending_negotiation".equals(bdeStatus))) {
+                displayStatus = "not_claimed";
+            } else if ("negotiating".equals(ctStatus)) {
+                displayStatus = ctStatus;
+            } else if ("designated_source".equals(ctStatus)) {
+                displayStatus = ctStatus;
+            } else {
+                displayStatus = "nothing";
+            }
+            String statusChinese = StatusUtil.getStatusChinese(displayStatus);
             exportDTO.setStatus(statusChinese);
-            Date date = new Date(0);
-            exportDTO.setSendDate(dataElementWithTaskVo.getSendDate() == null ? date : dataElementWithTaskVo.getSendDate());
-            exportDTO.setReceiveDate(dataElementWithTaskVo.getReceiveDate() == null ? date : dataElementWithTaskVo.getReceiveDate());
-            exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate() == null ? date : dataElementWithTaskVo.getProcessingDate());
+            exportDTO.setSendDate(dataElementWithTaskVo.getSendDate());
+            exportDTO.setReceiveDate(dataElementWithTaskVo.getReceiveDate());
+            exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate());
             exportDTO.setDataType(dataElementWithTaskVo.getDataType());
             exportDTOList.add(exportDTO);
         }
-
         try {
-            commonService.exportExcelData(exportDTOList, response, "组织方-已定源数据", QueryAllSituationForCollectorExportDTO.class);
+            commonService.exportExcelData(exportDTOList, response, "采集方-查询整体情况服务实现类", QueryAllSituationForCollectorExportDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[组织方-已定源数据]失败", e);
-            throw new RuntimeException("导出数据[组织方-已定源数据]失败");
+            log.error("导出数据[采集方-查询整体情况服务实现类]失败", e);
+            throw new RuntimeException("导出数据[采集方-查询整体情况服务实现类]失败");
         }
 
     }

@@ -314,7 +314,12 @@ public class OrganisersServiceImpl implements OrganisersService {
         }
         if (dto.getStatusList().contains(StatusEnums.PENDING_SOURCE.getCode())) {
             // 转换成Excel数据实体
-            List<PsDataElementExcel> psExcelList = list.stream().map(PsDataElementExcel::toExcel).collect(Collectors.toList());
+            List<PsDataElementExcel> psExcelList = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                DataElementPageInfoVo vo = list.get(i);
+                PsDataElementExcel excel = PsDataElementExcel.toExcel(vo, i+1);
+                psExcelList.add(excel);
+            }
             // 使用easyexcel导出数据
             try {
                 EasyExcel.write(response.getOutputStream(), PsDataElementExcel.class)
@@ -326,7 +331,12 @@ public class OrganisersServiceImpl implements OrganisersService {
             }
         } else {
             // 转换成Excel数据实体
-            List<DataElementExcel> excelList = list.stream().map(DataElementExcel::toExcel).collect(Collectors.toList());
+            List<DataElementExcel> excelList = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                DataElementPageInfoVo vo = list.get(i);
+                DataElementExcel excel = DataElementExcel.toExcel(vo, i+1);
+                excelList.add(excel);
+            }
             // 使用easyexcel导出数据
             try {
                 EasyExcel.write(response.getOutputStream(), DataElementExcel.class)

@@ -95,10 +95,10 @@
           #{status}
         </foreach>
       </if>
-      <if test="dto.sendDateBegin != null and dto.sendDateBegin != ''">
+      <if test="dto.sendDateBegin != null">
         AND bde.send_date &gt;= #{dto.sendDateBegin}
       </if>
-      <if test="dto.sendDateEnd != null and dto.sendDateEnd != ''">
+      <if test="dto.sendDateEnd != null">
         AND bde.send_date &lt;= #{dto.sendDateEnd}
       </if>
       <if test="dto.keyword != null and dto.keyword != ''">
@@ -107,16 +107,16 @@
         OR bde.definition LIKE CONCAT('%', #{dto.keyword}, '%')
         )
       </if>
-      <if test="dto.sourceUnitCodeList != null and dto.sourceUnitCodeList.size() > 0">
+      <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() > 0">
         AND bde.source_unit_code IN
-        <foreach collection="dto.sourceUnitCodeList" item="unitCode" open="(" separator="," close=")">
+        <foreach collection="dto.collectUnitCodeList" item="unitCode" open="(" separator="," close=")">
           #{unitCode}
         </foreach>
       </if>
-      <if test="dto.confirmDateBegin != null and dto.confirmDateBegin != ''">
+      <if test="dto.confirmDateBegin != null">
         AND bde.confirm_date &gt;= #{dto.confirmDateBegin}
       </if>
-      <if test="dto.confirmDateEnd != null and dto.confirmDateEnd != ''">
+      <if test="dto.confirmDateEnd != null">
         AND bde.confirm_date &lt;= #{dto.confirmDateEnd}
       </if>
     </where>

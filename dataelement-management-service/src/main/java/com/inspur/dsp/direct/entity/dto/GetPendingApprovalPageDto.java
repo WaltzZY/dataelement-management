@@ -47,7 +47,7 @@ public class GetPendingApprovalPageDto {
     /**
      * 数源单位code集合
      */
-    private List<String> sourceUnitCodeList;
+    private List<String> collectUnitCodeList;
 
     /**
      * 基准数据元名称/定义/数源单位名称模糊

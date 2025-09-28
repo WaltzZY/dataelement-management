@@ -1,7 +1,10 @@
 package com.inspur.dsp.direct.entity.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.inspur.dsp.direct.util.DateUtils;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -13,11 +16,13 @@ public class CollectDataElementPageDto {
     /**
      * 处理时间结束
      */
-    private String processDateEnd;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date processDateEnd;
     /**
      * 处理时间开始
      */
-    private String processDateBegin;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date processDateBegin;
     /**
      * 页码
      */
@@ -29,11 +34,13 @@ public class CollectDataElementPageDto {
     /**
      * 接收时间结束
      */
-    private String receiveTimeEnd;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date sendDateEnd;
     /**
      * 接收时间开始
      */
-    private String receiveTimeStart;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date sendDateBegin;
     /**
      * 基准数据元名称、定义
      */
@@ -50,4 +57,20 @@ public class CollectDataElementPageDto {
      * 排序方式：AES，DESC
      */
     private String sortOrder;
+
+    public void setSendDateBegin(Date sendDateBegin) {
+        this.sendDateBegin = DateUtils.getStartOfDay(sendDateBegin);
+    }
+
+    public void setSendDateEnd(Date sendDateEnd) {
+        this.sendDateEnd = DateUtils.getEndOfDay(sendDateEnd);
+    }
+
+    public void setProcessDateBegin(Date processDateBegin) {
+        this.processDateBegin = DateUtils.getStartOfDay(processDateBegin);
+    }
+
+    public void setProcessDateEnd(Date processDateEnd) {
+        this.processDateEnd = DateUtils.getEndOfDay(processDateEnd);
+    }
 }

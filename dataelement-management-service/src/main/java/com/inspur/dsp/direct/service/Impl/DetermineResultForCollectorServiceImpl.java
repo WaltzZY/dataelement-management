@@ -2,6 +2,7 @@ package com.inspur.dsp.direct.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.inspur.dsp.common.utils.StrUtil;
 import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.dao.SourceEventRecordMapper;
@@ -21,9 +22,13 @@ import org.springframework.util.CollectionUtils;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -59,12 +64,29 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
 
         String sendDateBegin = baseDataElementSearchDTO.getSendDateBegin();
         String sendDateEnd = baseDataElementSearchDTO.getSendDateEnd();
-        if (StringUtils.isNotBlank(sendDateBegin) && StringUtils.isNotBlank(sendDateEnd)) {
-            String sendBegin = new SimpleDateFormat("yyyy-MM-dd").format(sendDateBegin);
-            String sendEnd = new SimpleDateFormat("yyyy-MM-dd").format(sendDateEnd);
-            queryWrapper.between("send_date", sendBegin, sendEnd);
+        ZoneId zoneId = ZoneId.systemDefault();
+        // 转换开始时间：毫秒时间戳 → 当天零点
+        LocalDate beginDate = null;
+        if (sendDateBegin != null) {
+            Instant beginInstant = Instant.ofEpochMilli(Long.parseLong(sendDateBegin));
+            ZonedDateTime beginZdt = beginInstant.atZone(zoneId);
+            beginDate = beginZdt.toLocalDate(); // 提取日期部分（自动丢弃时间）
         }
-
+        // 转换结束时间：毫秒时间戳 → 次日零点
+        LocalDate endDate = null;
+        if (sendDateEnd != null) {
+            Instant endInstant = Instant.ofEpochMilli(Long.parseLong(sendDateEnd));
+            ZonedDateTime endZdt = endInstant.atZone(zoneId);
+            endDate = endZdt.toLocalDate().plusDays(1); // 加1天得到次日零点
+        }
+        // 构建查询条件
+        if (beginDate != null && endDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String beginStr = beginDate.format(formatter) + " 00:00:00";
+            String endStr = endDate.format(formatter) + " 00:00:00";
+            // 使用MyBatis-Plus的queryWrapper
+            queryWrapper.between("send_date", beginStr, endStr);
+        }
         String keywords = baseDataElementSearchDTO.getKeyword();
         if (StringUtils.isNotBlank(keywords)) {
             queryWrapper.and(i -> i
@@ -72,6 +94,11 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
                     .or()
                     .like(StringUtils.isNotBlank(keywords), "definition", keywords)
             );
+        }
+        String sortOrder = baseDataElementSearchDTO.getSortOrder();
+        String sortField = baseDataElementSearchDTO.getSortField();
+        if (StringUtils.isNotBlank(sortOrder) && StringUtils.isNotBlank(sortField)) {
+            queryWrapper.orderBy(false, sortOrder.equals("asc"), StrUtil.toUnderlineCase(sortField));
         }
         Page<BaseDataElement> baseDataElementPage = baseDataElementMapper.selectPage(page, queryWrapper);
         List<BaseDataElement> records = baseDataElementPage.getRecords();
@@ -124,12 +151,14 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
             return;
         }
         List<DetermineResultForCollectorExportDTO> exportDTOList = new ArrayList<>();
-        for (BaseDataElement baseDataElement : baseDataElements) {
+        for (int i = 0; i < baseDataElements.size(); i++) {
+            BaseDataElement baseDataElement = baseDataElements.get(i);
             DetermineResultForCollectorExportDTO determineResultForCollectorExportDTO = new DetermineResultForCollectorExportDTO();
-            determineResultForCollectorExportDTO.setCollectunitqty(baseDataElement.getCollectunitqty());
+            determineResultForCollectorExportDTO.setId(i + 1);
+            determineResultForCollectorExportDTO.setSourceUnitName(baseDataElement.getSourceUnitName());
             determineResultForCollectorExportDTO.setName(baseDataElement.getName());
             determineResultForCollectorExportDTO.setDatatype(baseDataElement.getDatatype());
-            determineResultForCollectorExportDTO.setSendDate(baseDataElement.getSendDate() == null ? new Date(0) : baseDataElement.getSendDate());
+            determineResultForCollectorExportDTO.setSendDate(baseDataElement.getSendDate());
             determineResultForCollectorExportDTO.setDefinition(baseDataElement.getDefinition());
             exportDTOList.add(determineResultForCollectorExportDTO);
         }
@@ -137,10 +166,9 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         try {
             commonService.exportExcelData(exportDTOList, response, "采集方-本单元作为数源单位的数据元列表", DetermineResultForCollectorExportDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[待协商数据]失败", e);
-            throw new RuntimeException("导出数据[待协商数据]失败");
+            log.error("导出数据[采集方-本单元作为数源单位的数据元列表]失败", e);
+            throw new RuntimeException("导出数据[采集方-本单元作为数源单位的数据元列表]失败");
         }
-
 
     }
 

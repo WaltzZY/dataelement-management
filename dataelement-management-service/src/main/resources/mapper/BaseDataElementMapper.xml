@@ -116,10 +116,10 @@
         <if test="dto.auditStatus == 'processed'">
             and ct.status in ('confirmed','rejected')
         </if>
-        <if test="dto.receiveTimeStart != null and dto.receiveTimeStart != '' and dto.receiveTimeEnd != '' and dto.receiveTimeEnd != null">
-            and bde.send_date between #{dto.receiveTimeStart} and #{dto.receiveTimeEnd}
+        <if test="dto.sendDateBegin != null and dto.sendDateEnd != null">
+            and bde.send_date between #{dto.sendDateBegin} and #{dto.sendDateEnd}
         </if>
-        <if test="dto.processDateBegin != null and dto.processDateBegin != '' and dto.processDateEnd != '' and dto.processDateEnd != null">
+        <if test="dto.processDateBegin != null and dto.processDateEnd != null">
             and ct.processing_date between #{dto.processDateBegin} and #{dto.processDateEnd}
         </if>
         <if test="dto.statusList != null and dto.statusList.size() != 0">
@@ -207,9 +207,9 @@
         <if test="dto.confirmDateEnd != null">
             AND confirm_date &lt;= #{dto.confirmDateEnd}
         </if>
-        <if test="dto.sourceUnitCodeList != null and dto.sourceUnitCodeList.size() > 0">
+        <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() > 0">
             AND source_unit_code IN
-            <foreach collection="dto.sourceUnitCodeList" item="unitCode" open="(" separator="," close=")">
+            <foreach collection="dto.collectUnitCodeList" item="unitCode" open="(" separator="," close=")">
                 #{unitCode}
             </foreach>
         </if>
@@ -352,52 +352,52 @@
         bde.source_unit_code,
         bde.source_unit_name,
         ct.task_id,
-        ct.send_date AS recieve_date,
-        ct.processing_date
+        DATE_FORMAT(ct.send_date, '%Y-%m-%d %H:%i:%s') AS recieve_date,
+        DATE_FORMAT(ct.processing_date, '%Y-%m-%d %H:%i:%s') AS processing_date
         FROM base_data_element bde LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
-            <if test="base.statusList.size() > 0">
-                <foreach collection="base.statusList" item="status" open="(" separator=" OR " close=")">
-                    <choose>
-                        <when test="status == 'pending'">(ct.status = 'pending')</when>
-                        <when test="status == 'pending_claimed'">(ct.status = 'pending_claimed')</when>
-                        <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status =
-                            'confirmed')
-                        </when>
-                        <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status =
-                            'rejected')
-                        </when>
-                        <when test="status == 'claimed'">(bde.status IN
-                            ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')
-                        </when>
-                        <when test="status == 'not_claimed'">(bde.status IN
-                            ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')
-                        </when>
-                        <when test="status == 'negotiating'">(bde.status = 'negotiating')</when>
-                        <when test="status == 'designated_source'">(bde.status = 'designated_source')</when>
-                    </choose>
-                </foreach>
+            <!-- 添加保底条件 -->
+            1=1
+            <if test="base.statusList != null and base.statusList.size() > 0">
+                AND (
+                <trim prefixOverrides="OR">
+                    <foreach collection="base.statusList" item="status">
+                        <choose>
+                            <when test="status == 'pending'">OR (ct.status = 'pending')</when>
+                            <when test="status == 'pending_claimed'">OR (ct.status = 'pending_claimed')</when>
+                            <when test="status == 'confirmed'">OR (bde.status = 'pending_approval' AND ct.status = 'confirmed')</when>
+                            <when test="status == 'rejected'">OR (bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
+                            <when test="status == 'claimed'">OR (bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
+                            <when test="status == 'not_claimed'">OR (bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
+                            <when test="status == 'negotiating'">OR (bde.status = 'negotiating')</when>
+                            <when test="status == 'designated_source'">OR (bde.status = 'designated_source')</when>
+                            <otherwise>OR 1=0</otherwise>
+                        </choose>
+                    </foreach>
+                </trim>
+                )
             </if>
             <if test="base.orgCode != null and base.orgCode != ''">
                 AND ct.processing_unit_code = #{base.orgCode}
             </if>
             <if test="base.sendDateBegin != null and base.sendDateBegin != '' and base.sendDateEnd != null and base.sendDateEnd != ''">
-                AND ct.send_date BETWEEN FROM_UNIXTIME(#{base.sendDateBegin} / 1000,'%Y-%m-%d') AND
-                FROM_UNIXTIME(#{base.sendDateEnd} / 1000, '%Y-%m-%d')
+                AND ct.send_date BETWEEN DATE(FROM_UNIXTIME(#{base.sendDateBegin} / 1000)) AND DATE(FROM_UNIXTIME(#{base.sendDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
             <if test="base.processDateBegin != null and base.processDateBegin != '' and base.processDateEnd != null and base.processDateEnd != ''">
-                AND ct.processing_date BETWEEN FROM_UNIXTIME(#{base.processDateBegin} / 1000,'%Y-%m-%d') AND
-                FROM_UNIXTIME(#{base.processDateEnd} / 1000, '%Y-%m-%d')
+                AND ct.processing_date BETWEEN DATE(FROM_UNIXTIME(#{base.processDateBegin} / 1000)) AND DATE(FROM_UNIXTIME(#{base.processDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
             <if test="base.receiveDateBegin != null and base.receiveDateBegin != '' and base.receiveDateEnd != null and base.receiveDateEnd != ''">
-                AND bde.confirm_date BETWEEN FROM_UNIXTIME(#{base.receiveDateBegin} / 1000,'%Y-%m-%d') AND
-                FROM_UNIXTIME(#{base.receiveDateEnd} / 1000, '%Y-%m-%d')
+                AND bde.confirm_date BETWEEN DATE(FROM_UNIXTIME(#{base.receiveDateBegin} / 1000)) AND
+                DATE(FROM_UNIXTIME(#{base.receiveDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
             <if test="base.keyword != null and base.keyword != ''">
                 AND (bde.name LIKE CONCAT('%', #{base.keyword}, '%') OR bde.definition LIKE CONCAT('%', #{base.keyword},
                 '%'))
             </if>
         </where>
+        <if test="base.sortSql != null and base.sortSql != ''">
+            order by ${base.sortSql}
+        </if>
         ) AS test
     </select>
 
@@ -418,25 +418,22 @@
             <if test="dto.keyword != null and dto.keyword != ''">
                 and (name like concat('%', #{dto.keyword}, '%') or definition like concat('%', #{dto.keyword}, '%'))
             </if>
-            <if test="dto.sendDateBegin != null">
-                and send_date >= #{dto.sendDateBegin}
+            <if test="dto.sendDateBegin != null and dto.sendDateBegin != '' and dto.sendDateEnd != null and dto.sendDateEnd != ''">
+                AND send_date BETWEEN DATE(FROM_UNIXTIME(#{dto.sendDateBegin} / 1000)) AND DATE(FROM_UNIXTIME(#{dto.sendDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
-            <if test="dto.sendDateEnd != null">
-                and send_date <![CDATA[<=]]> #{dto.sendDateEnd}
+            <if test="dto.confirmDateBegin != null and dto.confirmDateBegin != '' and dto.confirmDateEnd != null and dto.confirmDateEnd != ''">
+                AND confirm_date BETWEEN DATE(FROM_UNIXTIME(#{dto.confirmDateEnd} / 1000)) AND DATE(FROM_UNIXTIME(#{dto.confirmDateEnd} / 1000)) + INTERVAL 1 DAY
             </if>
-            <if test="dto.confirmDateBegin != null">
-                and confirm_date >= #{dto.confirmDateBegin}
-            </if>
-            <if test="dto.confirmDateEnd != null">
-                and confirm_date <![CDATA[<=]]> #{dto.confirmDateEnd}
-            </if>
-            <if test="dto.sourceUnitCodeList != null and dto.sourceUnitCodeList.size() != 0">
+            <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() != 0">
                 and source_unit_code in
-                <foreach item="item" collection="dto.sourceUnitCodeList" index="index" separator="," open="(" close=")">
+                <foreach item="item" collection="dto.collectUnitCodeList" index="index" separator="," open="(" close=")">
                     #{item}
                 </foreach>
             </if>
         </where>
+        <if test="dto.sortSql != null and dto.sortSql != ''">
+            order by ${dto.sortSql}
+        </if>
     </select>
 
     <resultMap id="getCollectUnitListResultMap" type="com.inspur.dsp.direct.entity.vo.GetCollectUnitVo">

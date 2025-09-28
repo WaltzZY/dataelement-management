@@ -453,6 +453,7 @@ public class NegotiationServiceImpl implements NegotiationService {
             ExportToDoNegoDTO todoneg = new ExportToDoNegoDTO();
             todoneg.setSeqNo(String.valueOf(seqNo++));
             todoneg.setName(vos.getName());
+            todoneg.setDefinition(vos.getDefinition());
 
             // todonet.agreeUnit=vos.collectUnitsAndStatus对象中，status=true的unitName的"|"分隔的合并字符串
             String agreeUnit = vos.getCollectUnitsAndStatus().stream()
@@ -495,6 +496,7 @@ public class NegotiationServiceImpl implements NegotiationService {
             ExportDoingNegoDTO doingneg = new ExportDoingNegoDTO();
             doingneg.setSeqNo(String.valueOf(seqNo++));
             doingneg.setName(vos.getName());
+            doingneg.setDefinition(vos.getDefinition());
 
             // agreeUnit=vos.collectUnitsAndStatus对象中，status=true的unitName的"|"分隔的合并字符串
             String agreeUnit = vos.getCollectUnitsAndStatus().stream()
@@ -543,6 +545,7 @@ public class NegotiationServiceImpl implements NegotiationService {
             ExportDoneNegoDTO doneneg = new ExportDoneNegoDTO();
             doneneg.setSeqNo(String.valueOf(seqNo++));
             doneneg.setName(vos.getName());
+            doneneg.setDefinition(vos.getDefinition());
 
             // collectUnit=vos.collectUnitsAndStatus对象中，所有unitName的"|"分隔的合并字符串
             String collectUnit = vos.getCollectUnitsAndStatus().stream()

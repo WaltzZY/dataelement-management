@@ -41,4 +41,12 @@ public class BaseDataElementSearchDTO {
     private List<String> statusList;
     private List<String> taskStatusList;
     private List<String> baseStatusList;
+    /** 排序字段 */
+    private String sortField;
+
+    /** 排序方式 */
+    private String sortOrder;
+    /** 排序sql */
+    private String sortSql;
+
 }

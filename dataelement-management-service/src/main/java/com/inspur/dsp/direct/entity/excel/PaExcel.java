@@ -16,34 +16,38 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaExcel {
-
+    /**
+     * 序号
+     */
+    @ExcelProperty(value = "序号", index = 0)
+    private Integer index;
     /**
      * 数据元名称
      */
-    @ExcelProperty(value = "数据元名称", index = 0)
+    @ExcelProperty(value = "数据元名称", index = 1)
     private String name;
 
     /**
      * 数据元定义描述
      */
-    @ExcelProperty(value = "定义", index = 1)
+    @ExcelProperty(value = "定义", index = 2)
     private String definition;
 
     /**
      * 数据元状态描述
      */
-    @ExcelProperty(value = "状态", index = 2)
+    @ExcelProperty(value = "状态", index = 3)
     private String statusDesc;
 
     /**
      * 待核定数源单位名称
      */
-    @ExcelProperty(value = "待核定数源单位", index = 3)
+    @ExcelProperty(value = "待核定数源单位", index = 4)
     private String paUnitName;
 
     /**
      * 发起时间
      */
-    @ExcelProperty(value = "发起时间", index = 4)
+    @ExcelProperty(value = "发起时间", index = 5)
     private Date sendDate;
 }
