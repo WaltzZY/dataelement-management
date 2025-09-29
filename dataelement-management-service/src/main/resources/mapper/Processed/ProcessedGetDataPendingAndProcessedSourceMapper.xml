@@ -137,13 +137,17 @@
          JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
             ct.processing_unit_code = #{orgCode}
-<!--            ct.processing_unit_code = '11100000000014445H'-->
-            <if test="dto.status != null and dto.status.size() > 0">
-                AND ct.status IN
-                <foreach collection="dto.status" item="item" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
+            <choose>
+                <when test="dto.status != null and dto.status.size() > 0">
+                    AND ct.status IN
+                    <foreach collection="dto.status" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    AND ct.status IN ('confirmed', 'rejected', 'claimed', 'not_claimed')
+                </otherwise>
+            </choose>
 
 <!--            TODO : 注意：看用不用所有时间传参都要再校验是否为空字符串-->
             <if test="dto.sendDateBegin != null and dto.sendDateEnd != null">
