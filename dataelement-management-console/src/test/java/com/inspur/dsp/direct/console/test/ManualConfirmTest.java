@@ -33,7 +33,7 @@ public class ManualConfirmTest {
         System.out.println("=== 测试用例1：正常手动定源 ===");
 
         try {
-            String testDataId = "01234567-89ab-cdef-0123-456789abcdef";
+            String testDataId = "222e8400-e29b-41d4-a716-446655440013";
 
             // 1. 查询测试前的数据状态
             BaseDataElement beforeElement = baseDataElementMapper.selectById(testDataId);
@@ -52,7 +52,7 @@ public class ManualConfirmTest {
             // 2. 构造手动定源请求
             ManualConfirmUnitDto confirmDto = ManualConfirmUnitDto.builder()
                     .dataid(testDataId)
-                    .sourceUnitId("111000000000132000")  // 使用已存在的测试单位
+                    .sourceUnitId("914500001000889000")  // 使用已存在的测试单位
                     .build();
 
             System.out.println("\n执行手动定源操作...");
