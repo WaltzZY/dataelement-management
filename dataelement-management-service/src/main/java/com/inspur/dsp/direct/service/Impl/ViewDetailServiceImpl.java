@@ -8,6 +8,8 @@ import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.bo.DomainSourceUnitInfo;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
 import com.inspur.dsp.direct.entity.enums.DataElementStatus;
+import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
+import com.inspur.dsp.direct.entity.vo.DomainDataElementVO;
 import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
@@ -19,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,8 +53,65 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
         GetDuPontInfoVo getDuPontInfoVo = new GetDuPontInfoVo();
         BeanUtils.copyProperties(baseInfo, getDuPontInfoVo);
+        // 1、已定源情况
+        if ("designated_source".equals(baseInfo.getStatus())) {
+            List<DomainDataElement> domainDataElements = domainDataElementMapper.selectAllByBaseDataelementDataid(dataid);
+            List<DomainDataElementVO> domainDataElementVOS = new ArrayList<>();
+            if (domainDataElements != null) {
+                for (DomainDataElement domainDataElement : domainDataElements) {
+                    DomainDataElementVO dataElementVO = new DomainDataElementVO();
+                    String sourceUnitCode = domainDataElement.getSourceUnitCode();
+                    BeanUtils.copyProperties(domainDataElement, dataElementVO);
+                    if (sourceUnitCode.equals(baseInfo.getSourceUnitCode())) {
+                        dataElementVO.setLinked(true);
+                    }
+                    domainDataElementVOS.add(dataElementVO);
+                }
+                getDuPontInfoVo.setChildList(domainDataElementVOS);
+                return getDuPontInfoVo;
+            }
+        }
+
+        // 2、待核定状态
+        if ("pending_approval".equals(baseInfo.getStatus())) {
+            List<DomainDataElement> domainDataElements = domainDataElementMapper.selectAllByBaseDataelementDataid(dataid);
+            List<ConfirmationTask> confirmationTasks = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn(null, Collections.singletonList(dataid));
+            List<DomainDataElementVO> domainDataElementVOS = new ArrayList<>();
+            if (domainDataElements != null) {
+                for (DomainDataElement domainDataElement : domainDataElements) {
+                    String sourceUnitCode = domainDataElement.getSourceUnitCode();
+                    DomainDataElementVO dataElementVO = new DomainDataElementVO();
+                    BeanUtils.copyProperties(domainDataElement, dataElementVO);
+                    if (confirmationTasks == null) {
+                        continue;
+                    }
+                    for (ConfirmationTask confirmationTask : confirmationTasks) {
+                        String processingUnitCode = confirmationTask.getProcessingUnitCode();
+                        if (!processingUnitCode.equals(sourceUnitCode)) {
+                            continue;
+                        }
+                        String status = confirmationTask.getStatus();
+                        if ("confirmed".equals(status) || "claimed".equals(status)) {
+                            dataElementVO.setLinked(true);
+                        }
+                    }
+                    domainDataElementVOS.add(dataElementVO);
+                }
+                getDuPontInfoVo.setChildList(domainDataElementVOS);
+                return getDuPontInfoVo;
+            }
+        }
+
         List<DomainDataElement> domainDataElements = domainDataElementMapper.selectAllByBaseDataelementDataid(dataid);
-        getDuPontInfoVo.setChildList(domainDataElements);
+        List<DomainDataElementVO> domainDataElementVOS = new ArrayList<>();
+        if (domainDataElements != null) {
+            for (DomainDataElement domainDataElement : domainDataElements) {
+                DomainDataElementVO dataElementVO = new DomainDataElementVO();
+                BeanUtils.copyProperties(domainDataElement, dataElementVO);
+                domainDataElementVOS.add(dataElementVO);
+            }
+            getDuPontInfoVo.setChildList(domainDataElementVOS);
+        }
         return getDuPontInfoVo;
     }
 
@@ -108,6 +166,33 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             return sourceEventRecord;
         }
         return new SourceEventRecord();
+    }
+
+
+    @Override
+    public DataElementWithTaskVo getElementDetailWithStatus(String dataId) {
+
+        // 获取当前登录用户信息
+        // UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        // 获取登录人账户
+        // String orgCode = userInfo.getOrgCode();
+        DataElementWithTaskVo baseDataElement = baseDataElementMapper.getElementDetailWithStatus(null, dataId);
+        if (baseDataElement == null) {
+            return new DataElementWithTaskVo();
+        }
+        String ctStatus = baseDataElement.getCtStatus();
+        String bdeStatus = baseDataElement.getBdeStatus();
+        String ctStatusChinese = StatusUtil.getStatusChinese(ctStatus);
+        baseDataElement.setCtStatusChinese(ctStatusChinese);
+        String bdeStatusChinese = StatusUtil.getStatusChinese(bdeStatus);
+        baseDataElement.setBdeStatusChinese(bdeStatusChinese);
+        String displayStatus = ctStatus;
+        if ("negotiating".equals(bdeStatus) || "designated_source".equals(bdeStatus)) {
+            displayStatus = bdeStatus;
+        }
+        String statusChinese = StatusUtil.getStatusChinese(displayStatus);
+        baseDataElement.setDisplaystatus(statusChinese);
+        return baseDataElement;
     }
 
     @Override

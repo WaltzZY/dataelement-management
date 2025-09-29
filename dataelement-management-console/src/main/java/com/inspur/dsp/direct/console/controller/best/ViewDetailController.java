@@ -5,6 +5,7 @@ import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
+import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
 import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 import com.inspur.dsp.direct.service.ViewDetailService;
@@ -41,13 +42,18 @@ public class ViewDetailController {
         return viewDetailService.getElementDetailWithTask(dataId);
     }
 
+    @RespAdvice
+    @GetMapping("/getElementDetailWithStatus/{dataId}")
+    public DataElementWithTaskVo getElementDetailWithStatus(@PathVariable("dataId") String dataId) {
+        return viewDetailService.getElementDetailWithStatus(dataId);
+    }
+
 
     @RespAdvice
     @GetMapping("/getConfirmationTask/{dataId}")
     public ConfirmationTask getTask(@PathVariable("dataId") String dataId) {
         return viewDetailService.getConfirmationTask(dataId);
     }
-
 
 
     @RespAdvice

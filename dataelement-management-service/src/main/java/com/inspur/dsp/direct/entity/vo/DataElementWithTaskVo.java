@@ -15,7 +15,7 @@ public class DataElementWithTaskVo {
      * 发起时间
      */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private String receiveDate;
+    private String confirmDate;
     /**
      * 发起时间
      */
@@ -58,7 +58,9 @@ public class DataElementWithTaskVo {
     private String status;
 
     private String bdeStatus;
+    private String bdeStatusChinese;
     private String ctStatus;
+    private String ctStatusChinese;
 
     private String displaystatus;
     /**

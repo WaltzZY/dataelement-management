@@ -38,6 +38,12 @@ public class BaseDataElementSearchDTO {
     @JSONField(format = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private String processDateEnd;
+    @JSONField(format = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private String confirmDateBegin;
+    @JSONField(format = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private String confirmDateEnd;
     private List<String> statusList;
     private List<String> taskStatusList;
     private List<String> baseStatusList;
