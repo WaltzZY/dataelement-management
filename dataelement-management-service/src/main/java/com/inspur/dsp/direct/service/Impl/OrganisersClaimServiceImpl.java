@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.inspur.dsp.direct.enums.StatusEnums.CLAIMED;
@@ -154,8 +155,9 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
                     vo.setCollectunitnames(collectUnitNames);
                 }
 
+                AtomicInteger i = new AtomicInteger(0); // 导出列表序号
                 List<OrganisersClaimPendingExcel> pendingExcelList = list_pendingSource.stream().map(vo -> {
-                    return OrganisersClaimPendingExcel.builder().name(vo.getName()).definition(vo.getDefinition()).collectQty(String.valueOf(vo.getCollectunitqty())).collectUnit(vo.getCollectunitnames()).status(StatusEnums.getDescByCode(vo.getStatus())).build();
+                    return OrganisersClaimPendingExcel.builder().seq(String.valueOf(i.incrementAndGet())).name(vo.getName()).definition(vo.getDefinition()).collectQty(String.valueOf(vo.getCollectunitqty())).collectUnit(vo.getCollectunitnames()).status(StatusEnums.getDescByCode(vo.getStatus())).build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
                 commonService.exportExcelData(pendingExcelList, response, "组织方发起认领-待定源列表", OrganisersClaimPendingExcel.class);
