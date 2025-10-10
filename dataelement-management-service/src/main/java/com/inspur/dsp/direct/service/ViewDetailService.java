@@ -4,6 +4,7 @@ import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
+import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
 import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 
@@ -25,5 +26,7 @@ public interface ViewDetailService {
 
     ConfirmationTask getConfirmationTask(String dataId);
 
+
+    DataElementWithTaskVo getElementDetailWithStatus(String dataId);
 
 }

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -81,8 +82,10 @@ public class ProcessedServiceImpl implements ProcessedService {
 
             List<GetProcessedDataElementVO> processedDataElement = getDataPendingAndProcessedSourceMapper.getProcessedDataElement( dto, orgCode,orderBySql);
 
+            AtomicInteger i = new AtomicInteger(0); // 导出列表序号
             List<ProcessedExcel> processedExcelList = processedDataElement.stream().map(vo -> {
                 return ProcessedExcel.builder()
+                        .seq(String.valueOf(i.incrementAndGet()))
                         .name(vo.getName())
                         .definition(vo.getDefinition())
                         .type(vo.getDatatype())

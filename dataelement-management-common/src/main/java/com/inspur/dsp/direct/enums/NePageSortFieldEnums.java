@@ -30,7 +30,7 @@ public enum NePageSortFieldEnums {
 
     private static String getSortField(String sortField) {
         try {
-            return StrUtil.toCamelCase(sortField);
+            return StrUtil.toUnderlineCase(sortField);
         } catch (Exception e) {
             return null;
         }
@@ -58,6 +58,13 @@ public enum NePageSortFieldEnums {
             return null;
         }
         return " " + getSortField(sortField) + " " + sortOrder;
+    }
+
+    public static void main(String[] args) {
+
+        String camelCase = StrUtil.toUnderlineCase("processingDate");
+        System.out.println(camelCase);
+
     }
 
 }

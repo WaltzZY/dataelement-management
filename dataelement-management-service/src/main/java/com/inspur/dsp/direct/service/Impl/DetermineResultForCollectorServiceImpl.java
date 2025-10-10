@@ -21,7 +21,6 @@ import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -62,8 +61,8 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         queryWrapper.eq("source_unit_code", orgCode);
         queryWrapper.eq("status", "designated_source");
 
-        String sendDateBegin = baseDataElementSearchDTO.getSendDateBegin();
-        String sendDateEnd = baseDataElementSearchDTO.getSendDateEnd();
+        String sendDateBegin = baseDataElementSearchDTO.getConfirmDateBegin();
+        String sendDateEnd = baseDataElementSearchDTO.getConfirmDateEnd();
         ZoneId zoneId = ZoneId.systemDefault();
         // 转换开始时间：毫秒时间戳 → 当天零点
         LocalDate beginDate = null;
@@ -98,7 +97,11 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         String sortOrder = baseDataElementSearchDTO.getSortOrder();
         String sortField = baseDataElementSearchDTO.getSortField();
         if (StringUtils.isNotBlank(sortOrder) && StringUtils.isNotBlank(sortField)) {
-            queryWrapper.orderBy(false, sortOrder.equals("asc"), StrUtil.toUnderlineCase(sortField));
+            if (sortOrder.equalsIgnoreCase("asc")) {
+                queryWrapper.orderByAsc(StrUtil.toUnderlineCase(sortField));
+            } else {
+                queryWrapper.orderByDesc(StrUtil.toUnderlineCase(sortField));
+            }
         }
         Page<BaseDataElement> baseDataElementPage = baseDataElementMapper.selectPage(page, queryWrapper);
         List<BaseDataElement> records = baseDataElementPage.getRecords();

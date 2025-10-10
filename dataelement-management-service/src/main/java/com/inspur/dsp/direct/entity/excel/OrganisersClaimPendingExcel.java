@@ -15,33 +15,40 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrganisersClaimPendingExcel {
+
+    /**
+     * 序号
+     */
+     @ExcelProperty(value = "序号", index = 0)
+    private String seq;
+
     /**
      * 数据元名称
      */
-    @ExcelProperty(value = "数据元名称", index = 0)
+    @ExcelProperty(value = "数据元名称", index = 1)
     private String name;
 
     /**
      * 数据元定义描述
      */
-    @ExcelProperty(value = "定义", index = 1)
+    @ExcelProperty(value = "定义", index = 2)
     private String definition;
 
     /**
      * 采集单位数量
      */
-    @ExcelProperty(value = "采集单位数量", index = 2)
+    @ExcelProperty(value = "采集单位数量", index = 3)
     private String collectQty;
 
     /**
      * 采集单位
      */
-    @ExcelProperty(value = "采集单位", index = 3)
+    @ExcelProperty(value = "采集单位", index = 4)
     private String collectUnit;
 
     /**
      * 状态
      */
-    @ExcelProperty(value = "状态", index = 4)
+    @ExcelProperty(value = "状态", index = 5)
     private String status;
 }

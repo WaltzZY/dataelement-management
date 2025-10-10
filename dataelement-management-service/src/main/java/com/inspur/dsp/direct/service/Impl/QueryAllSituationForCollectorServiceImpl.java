@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -61,25 +60,9 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         for (DataElementWithTaskVo dataElementWithTaskVo : baseDataElementList) {
             String ctStatus = dataElementWithTaskVo.getCtStatus();
             String bdeStatus = dataElementWithTaskVo.getBdeStatus();
-            String displayStatus = "";
-            if ("pending".equals(ctStatus)) {
-                displayStatus = ctStatus;
-            } else if ("pending_claimed".equals(ctStatus)) {
-                displayStatus = ctStatus;
-            } else if ("confirmed".equals(ctStatus) && "pending_approval".equals(bdeStatus)) {
-                displayStatus = "confirmed";
-            } else if ("rejected".equals(ctStatus) && "pending_negotiation".equals(bdeStatus)) {
-                displayStatus = "rejected";
-            } else if ("claimed".equals(ctStatus) && ("claimed_ing".equals(bdeStatus) || "pending_approval".equals(bdeStatus) || "pending_negotiation".equals(bdeStatus))) {
-                displayStatus = "claimed";
-            } else if ("not_claimed".equals(ctStatus) && ("claimed_ing".equals(bdeStatus) || "pending_approval".equals(bdeStatus) || "pending_negotiation".equals(bdeStatus))) {
-                displayStatus = "not_claimed";
-            } else if ("negotiating".equals(ctStatus)) {
-                displayStatus = ctStatus;
-            } else if ("designated_source".equals(ctStatus)) {
-                displayStatus = ctStatus;
-            }else {
-                displayStatus = "nothing";
+            String displayStatus = ctStatus;
+            if ("negotiating".equals(bdeStatus) || "designated_source".equals(bdeStatus)) {
+                displayStatus = bdeStatus;
             }
             String statusChinese = StatusUtil.getStatusChinese(displayStatus);
             dataElementWithTaskVo.setDisplaystatus(statusChinese);
@@ -115,30 +98,14 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             exportDTO.setName(dataElementWithTaskVo.getName());
             String ctStatus = dataElementWithTaskVo.getCtStatus();
             String bdeStatus = dataElementWithTaskVo.getBdeStatus();
-            String displayStatus = "";
-            if ("pending".equals(ctStatus)) {
-                displayStatus = ctStatus;
-            } else if ("pending_claimed".equals(ctStatus)) {
-                displayStatus = ctStatus;
-            } else if ("confirmed".equals(ctStatus) && "pending_approval".equals(bdeStatus)) {
-                displayStatus = "confirmed";
-            } else if ("rejected".equals(ctStatus) && "pending_negotiation".equals(bdeStatus)) {
-                displayStatus = "rejected";
-            } else if ("claimed".equals(ctStatus) && ("claimed_ing".equals(bdeStatus) || "pending_approval".equals(bdeStatus) || "pending_negotiation".equals(bdeStatus))) {
-                displayStatus = "claimed";
-            } else if ("not_claimed".equals(ctStatus) && ("claimed_ing".equals(bdeStatus) || "pending_approval".equals(bdeStatus) || "pending_negotiation".equals(bdeStatus))) {
-                displayStatus = "not_claimed";
-            } else if ("negotiating".equals(ctStatus)) {
-                displayStatus = ctStatus;
-            } else if ("designated_source".equals(ctStatus)) {
-                displayStatus = ctStatus;
-            } else {
-                displayStatus = "nothing";
+            String displayStatus = ctStatus;
+            if ("negotiating".equals(bdeStatus) || "designated_source".equals(bdeStatus)) {
+                displayStatus = bdeStatus;
             }
             String statusChinese = StatusUtil.getStatusChinese(displayStatus);
             exportDTO.setStatus(statusChinese);
             exportDTO.setSendDate(dataElementWithTaskVo.getSendDate());
-            exportDTO.setReceiveDate(dataElementWithTaskVo.getReceiveDate());
+            exportDTO.setReceiveDate(dataElementWithTaskVo.getConfirmDate());
             exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate());
             exportDTO.setDataType(dataElementWithTaskVo.getDataType());
             exportDTOList.add(exportDTO);

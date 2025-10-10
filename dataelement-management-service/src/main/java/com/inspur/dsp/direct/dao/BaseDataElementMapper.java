@@ -3,11 +3,7 @@ package com.inspur.dsp.direct.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
-import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
-import com.inspur.dsp.direct.entity.dto.CollectDataElementPageDto;
-import com.inspur.dsp.direct.entity.dto.GetDataElementPageDto;
-import com.inspur.dsp.direct.entity.dto.GetDetermineResultListDTO;
-import com.inspur.dsp.direct.entity.dto.GetPendingApprovalPageDto;
+import com.inspur.dsp.direct.entity.dto.*;
 import com.inspur.dsp.direct.entity.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -52,6 +48,8 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
     List<GetPendingApprovalPageVo> selectConfirmedPage(@Param("page") Page<?> page, @Param("dto") GetPendingApprovalPageDto dto, @Param("sortSql") String sortSql);
 
     List<DataElementWithTaskVo> getDetermineResultListWithOrganiser(Page page, @Param("base") BaseDataElementSearchDTO baseDataElementSearchDTO);
+
+    DataElementWithTaskVo getElementDetailWithStatus(@Param("orgCode") String orgCode, @Param("dataid") String dataid);
 
     @Deprecated
     List<DataElementWithTaskVo> getDetermineResultListWithOrganiserTest(@Param("base") BaseDataElementSearchDTO baseDataElementSearchDTO);

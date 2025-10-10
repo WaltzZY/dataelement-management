@@ -1,6 +1,5 @@
 package com.inspur.dsp.direct.entity.vo;
 
-import com.inspur.dsp.direct.dbentity.DomainDataElement;
 import lombok.Data;
 
 import java.util.Date;
@@ -58,7 +57,6 @@ public class GetDuPontInfoVo {
     /**
      * 值域
      */
-
     private String valueDomain;
 
     /**
@@ -130,7 +128,7 @@ public class GetDuPontInfoVo {
 
 
     private String lastModifyAccount;
-    private List<DomainDataElement> childList;
+    private List<DomainDataElementVO> childList;
 
     private String statusChinese;
 }

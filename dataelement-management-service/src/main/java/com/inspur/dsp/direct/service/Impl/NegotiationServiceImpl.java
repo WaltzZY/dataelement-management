@@ -391,7 +391,7 @@ public class NegotiationServiceImpl implements NegotiationService {
                 // 创建一个SourceEventRecord对象
                 SourceEventRecord sourceEventRecord = new SourceEventRecord();
                 sourceEventRecord.setRecordId(UUID.randomUUID().toString());
-                sourceEventRecord.setDataElementId(baseinfo.getDataElementId());
+                sourceEventRecord.setDataElementId(baseinfo.getDataid());
                 sourceEventRecord.setDataElementName(baseinfo.getName());
                 sourceEventRecord.setSourceType(RecordSourceTypeEnums.NEGOTIATION_RESULT_ENTRY.getCode());
                 sourceEventRecord.setSourceDate(new Date());
