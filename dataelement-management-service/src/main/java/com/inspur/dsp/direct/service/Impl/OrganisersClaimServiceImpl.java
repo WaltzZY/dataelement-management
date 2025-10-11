@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -60,12 +61,18 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
 
         String orderBySql = DeSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
 
-        // 查询senddateBegin零点到senddateEnd第二天零点的数据​
+        // 查询senddateBegin零点到senddateEnd第二天零点的数据
         if (dto.getSendDateBegin() != null){
             dto.setSendDateBegin(dto.getSendDateBegin().toLocalDate().atStartOfDay());
         }
         if (dto.getSendDateEnd() != null){
             dto.setSendDateEnd(dto.getSendDateEnd().toLocalDate().plusDays(1).atStartOfDay());
+        }
+        if (Objects.nonNull(dto.getGeneratedatetimeBegin())) {
+            dto.setGeneratedatetimeBegin(dto.getGeneratedatetimeBegin().toLocalDate().atStartOfDay());
+        }
+        if (Objects.nonNull(dto.getGeneratedatetimeEnd())) {
+            dto.setGeneratedatetimeEnd(dto.getGeneratedatetimeEnd().toLocalDate().plusDays(1).atStartOfDay());
         }
 
         // 使用ClaimDataElementMapper.selectBaseDataElementByStatus获取数据列表

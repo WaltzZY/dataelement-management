@@ -38,4 +38,10 @@ public class ClaimDataElementVO {
     private String lastModifyAccount;
     private String collectunitnames;
     private String statusDesc;
+
+    /**
+     * 定数时间
+     */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime generatedatetime;
 }

@@ -24,31 +24,32 @@
         <result column="last_modify_date" property="lastModifyDate"/>
         <result column="last_modify_account" property="lastModifyAccount"/>
         <result column="collectunitnames" property="collectunitnames"/>
+        <result column="generatedatetime" property="generatedatetime"/>
     </resultMap>
 
     <!-- 根据状态查询数据元列表 -->
     <select id="selectBaseDataElementByStatus" parameterType="com.inspur.dsp.direct.entity.dto.GetDataElementDTO"
             resultMap="ClaimDataElementVOMap">
-        SELECT
-        dataid,
-        data_element_id,
-        status,
-        name,
-        definition,
-        datatype,
-        data_format,
-        value_domain,
-        source_unit_code,
-        source_unit_name,
-        publish_date,
-        send_date,
-        confirm_date,
-        collectunitqty,
-        remarks,
-        create_date,
-        create_account,
-        last_modify_date,
-        last_modify_account
+        SELECT dataid,
+               data_element_id,
+               status,
+               name,
+               definition,
+               datatype,
+               data_format,
+               value_domain,
+               source_unit_code,
+               source_unit_name,
+               publish_date,
+               send_date,
+               confirm_date,
+               collectunitqty,
+               remarks,
+               create_date,
+               create_account,
+               last_modify_date,
+               last_modify_account,
+               generatedatetime
         FROM base_data_element
         <where>
             <if test="dto.status != null and dto.status.size() > 0">
@@ -57,23 +58,24 @@
                     #{statusItem}
                 </foreach>
             </if>
-<!--            <if test="dto.status != null and dto.status != ''">-->
-<!--                 status = #{dto.status}-->
-<!--            </if>-->
+            <!--            <if test="dto.status != null and dto.status != ''">-->
+            <!--                 status = #{dto.status}-->
+            <!--            </if>-->
             <if test="dto.sendDateBegin != null and dto.sendDateEnd != null">
                 AND send_date BETWEEN #{dto.sendDateBegin} AND #{dto.sendDateEnd}
+            </if>
+            <if test="dto.generatedatetimeBegin != null and dto.generatedatetimeEnd != null">
+                AND generatedatetime BETWEEN #{dto.generatedatetimeBegin} AND #{dto.generatedatetimeEnd}
             </if>
             <if test="dto.keyword != null and dto.keyword != ''">
                 AND (name LIKE CONCAT('%', #{dto.keyword}, '%') OR definition LIKE CONCAT('%', #{dto.keyword}, '%'))
             </if>
             AND collectunitqty > 1
         </where>
-
-                <!-- 动态排序逻辑 -->
-                <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
-                    ORDER BY ${orderBySql}
-                </if>
-
+        <!-- 动态排序逻辑 -->
+        <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
+            ORDER BY ${orderBySql}
+        </if>
     </select>
 
 </mapper>
