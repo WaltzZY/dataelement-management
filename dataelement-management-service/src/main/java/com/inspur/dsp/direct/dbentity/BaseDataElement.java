@@ -132,8 +132,9 @@ public class BaseDataElement implements Serializable {
     /**
      * 定数时间
      */
-    @TableField(value = "destiny_date")
-    private Date destinyDate;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    @TableField(value = "generatedatetime")
+    private Date generatedatetime;
 
     /**
      * 备注
