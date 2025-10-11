@@ -167,7 +167,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
                     return OrganisersClaimPendingExcel.builder().seq(String.valueOf(i.incrementAndGet())).name(vo.getName()).definition(vo.getDefinition()).collectQty(String.valueOf(vo.getCollectunitqty())).collectUnit(vo.getCollectunitnames()).status(StatusEnums.getDescByCode(vo.getStatus())).build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
-                commonService.exportExcelData(pendingExcelList, response, "组织方发起认领-待定源列表", OrganisersClaimPendingExcel.class);
+                commonService.exportExcelData(pendingExcelList, response, "待定源（认领型）基准数据元清单", OrganisersClaimPendingExcel.class);
 
             } else if (dto.getStatus() != null && dto.getStatus().contains("claimed_ing")) {
 
@@ -190,7 +190,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
                     return OrganisersClaimingExcel.builder().name(vo.getName()).definition(vo.getDefinition()).collectQty(String.valueOf(vo.getCollectunitqty())).collectUnit(vo.getCollectunitnames()).status(StatusEnums.getDescByCode(vo.getStatus())).sendDate(vo.getSendDate()).build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
-                commonService.exportExcelData(pendingExcelList, response, "组织方发起认领-认领中列表", OrganisersClaimingExcel.class);
+                commonService.exportExcelData(pendingExcelList, response, "认领中基准数据元清单", OrganisersClaimingExcel.class);
             }
         } catch (Exception e) {
             log.error("导出数据失败", e);

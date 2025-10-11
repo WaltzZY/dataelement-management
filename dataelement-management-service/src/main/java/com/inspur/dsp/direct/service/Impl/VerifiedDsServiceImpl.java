@@ -93,7 +93,7 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
                     paExcelList.add(build);
                 }
                 // 使用EasyExcel导出
-                commonService.exportExcelData(paExcelList, response,"待核定数源单位数据", PaExcel.class);
+                commonService.exportExcelData(paExcelList, response,"待核定基准数据元清单", PaExcel.class);
             } else {
                 // 查询已定源数据
                 vos = baseDataElementMapper.selectConfirmedPage(null, dto, sortSql);
@@ -114,7 +114,7 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
                     confirmationExcels.add(build);
                 }
                 // 使用EasyExcel导出
-                commonService.exportExcelData(confirmationExcels, response,"已定源数据", ConfirmationExcel.class);
+                commonService.exportExcelData(confirmationExcels, response,"已定源基准数据元清单", ConfirmationExcel.class);
             }
         } catch (Exception e) {
             log.error("导出数据失败", e);

@@ -301,9 +301,9 @@ public class OrganisersServiceImpl implements OrganisersService {
         // 根据状态设置文件名
         String baseFileName = "数据元列表";
         if (dto.getStatusList().contains(StatusEnums.PENDING_SOURCE.getCode())) {
-            baseFileName = "待定源数据元列表";
+            baseFileName = "待定源（确认型）基准数据元清单";
         } else {
-            baseFileName = "确认中数据元列表";
+            baseFileName = "确认中基准数据元清单";
         }
         try {
             String fileName = java.net.URLEncoder.encode(baseFileName, "UTF-8");

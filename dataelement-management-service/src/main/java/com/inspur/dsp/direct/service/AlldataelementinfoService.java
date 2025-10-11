@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
 import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
+import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
 import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * 数据元信息相关业务接口
@@ -36,6 +38,15 @@ public interface AlldataelementinfoService {
      * @throws RuntimeException 当文件处理或数据库操作异常时抛出
      */
     UploadConfirmResultVo uploadconfirmunitfile(MultipartFile file);
+
+    /**
+     * 导出导入失败清单
+     * 根据失败详情列表导出Excel文件
+     *
+     * @param failureDetails 失败详情列表
+     * @param response HttpServletResponse对象
+     */
+    void exportImportFailureList(List<FailureDetailVo> failureDetails, HttpServletResponse response);
 
     /**
      * 手动定源

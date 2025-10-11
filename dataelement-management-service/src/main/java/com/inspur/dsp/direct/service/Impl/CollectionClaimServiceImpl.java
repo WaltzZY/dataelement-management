@@ -136,7 +136,7 @@ public class CollectionClaimServiceImpl implements CollectionClaimService {
                             .build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
-                commonService.exportExcelData(processingExcelList, response, "采集方待认领-待处理数据元列表", CollectionProcessingExcel.class);
+                commonService.exportExcelData(processingExcelList, response, "待认领基准数据元清单", CollectionProcessingExcel.class);
 
             }else if (dto.getStatus() != null && dto.getStatus().contains("claimed") && dto.getStatus().contains("not_claimed")){
                 List<GetDataPendingAndProcessedSourceVO> collectionProcessed = getDataPendingAndProcessedSourceMapper.getDataPendingAndProcessedData(null,dto,orgCode, orderBySql);
@@ -152,7 +152,7 @@ public class CollectionClaimServiceImpl implements CollectionClaimService {
                             .build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
-                commonService.exportExcelData(processedExcelList, response, "采集方待认领-已处理数据元列表", CollectionProcessedExcel.class);
+                commonService.exportExcelData(processedExcelList, response, "已处理基准数据元（认领型）清单", CollectionProcessedExcel.class);
             }
         }catch (Exception e) {  throw new RuntimeException("导出数据失败");}
     }

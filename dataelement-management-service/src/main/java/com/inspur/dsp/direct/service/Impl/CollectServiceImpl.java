@@ -195,7 +195,7 @@ public class CollectServiceImpl implements CollectService {
         if ("pending".equals(dto.getAuditStatus())) {
             baseFileName = "待处理数据元列表";
         } else {
-            baseFileName = "已处理数据元列表";
+            baseFileName = "已处理基准数据元（确认型）清单";
         }
         try {
             String fileName = java.net.URLEncoder.encode(baseFileName, "UTF-8");

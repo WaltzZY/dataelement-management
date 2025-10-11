@@ -111,10 +111,10 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             exportDTOList.add(exportDTO);
         }
         try {
-            commonService.exportExcelData(exportDTOList, response, "采集方-查询整体情况服务实现类", QueryAllSituationForCollectorExportDTO.class);
+            commonService.exportExcelData(exportDTOList, response, "本单位定源情况", QueryAllSituationForCollectorExportDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[采集方-查询整体情况服务实现类]失败", e);
-            throw new RuntimeException("导出数据[采集方-查询整体情况服务实现类]失败");
+            log.error("导出数据[本单位定源情况]失败", e);
+            throw new RuntimeException("导出数据[本单位定源情况]失败");
         }
 
     }

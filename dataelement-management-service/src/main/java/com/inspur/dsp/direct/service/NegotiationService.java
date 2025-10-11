@@ -2,6 +2,7 @@ package com.inspur.dsp.direct.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.entity.dto.BatchNegotiationDto;
+import com.inspur.dsp.direct.entity.dto.ImportNegotiationFailDetailDTO;
 import com.inspur.dsp.direct.entity.dto.ImportNegotiationReturnDTO;
 import com.inspur.dsp.direct.entity.dto.NegotiationParmDTO;
 import com.inspur.dsp.direct.entity.dto.SingleNegotiationDto;
@@ -11,6 +12,7 @@ import com.inspur.dsp.direct.entity.vo.NegotiationRecordInfoVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface NegotiationService {
 
@@ -27,4 +29,6 @@ public interface NegotiationService {
     ImportNegotiationReturnDTO importNegotiationResult(MultipartFile file);
 
     void exportNegotiationList(NegotiationParmDTO dto, HttpServletResponse response);
+
+    void exportNegotiationFailList(List<ImportNegotiationFailDetailDTO> failDetails, HttpServletResponse response);
 }

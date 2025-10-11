@@ -17,6 +17,7 @@ import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.BatchNegotiationDto;
 import com.inspur.dsp.direct.entity.dto.ExportDoingNegoDTO;
 import com.inspur.dsp.direct.entity.dto.ExportDoneNegoDTO;
+import com.inspur.dsp.direct.entity.dto.ExportNegotiationFailDTO;
 import com.inspur.dsp.direct.entity.dto.ExportToDoNegoDTO;
 import com.inspur.dsp.direct.entity.dto.ImportNegotiationFailDetailDTO;
 import com.inspur.dsp.direct.entity.dto.ImportNegotiationResutDTO;
@@ -351,9 +352,80 @@ public class NegotiationServiceImpl implements NegotiationService {
         List<ImportNegotiationFailDetailDTO> failDetails = new ArrayList<>();
         long successCount = 0;
 
-        // 2. 循环NegResultMap
+        // 数据完整性检查
+        List<Map.Entry<String, String>> incompleteEntries = negResultMap.entrySet().stream()
+                .filter(entry -> !StringUtils.hasText(entry.getKey()) || !StringUtils.hasText(entry.getValue()))
+                .collect(Collectors.toList());
+        
+        // 处理数据不完整的情况
+        for (Map.Entry<String, String> entry : incompleteEntries) {
+            ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
+            failDetail.setName(entry.getKey());
+            failDetail.setUnit_code(entry.getValue());
+            failDetail.setFailReason("数据不完整");
+            failDetails.add(failDetail);
+        }
+
+        // 重复数据检测 - 找出在当前导入批次中重复的数据元名称
+        Map<String, List<Map.Entry<String, String>>> duplicateGroups = negResultMap.entrySet().stream()
+                .filter(entry -> StringUtils.hasText(entry.getKey()) && StringUtils.hasText(entry.getValue()))
+                .collect(Collectors.groupingBy(Map.Entry::getKey));
+        
+        Map<String, String> validEntries = new HashMap<>();
+        
+        for (Map.Entry<String, List<Map.Entry<String, String>>> group : duplicateGroups.entrySet()) {
+            List<Map.Entry<String, String>> duplicates = group.getValue();
+            if (duplicates.size() > 1) {
+                // 保留第一条，其余标记为重复失败
+                validEntries.put(duplicates.get(0).getKey(), duplicates.get(0).getValue());
+                for (int i = 1; i < duplicates.size(); i++) {
+                    ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
+                    failDetail.setName(duplicates.get(i).getKey());
+                    failDetail.setUnit_code(duplicates.get(i).getValue());
+                    failDetail.setFailReason("数据与其它条目重复，系统已保留首次出现的数据");
+                    failDetails.add(failDetail);
+                }
+            } else {
+                validEntries.put(duplicates.get(0).getKey(), duplicates.get(0).getValue());
+            }
+        }
+
+        // 冲突检测 - 检测基准数据元与数源单位的组合是否唯一
+        List<String> conflictKeys = new ArrayList<>();
+        Map<String, String> conflictMap = new HashMap<>();
+        
+        for (Map.Entry<String, String> entry : validEntries.entrySet()) {
+            String dataElementName = entry.getKey();
+            String unitCode = entry.getValue();
+            
+            // 查找是否存在相同数据元名称但不同数源单位的情况
+            for (Map.Entry<String, String> other : validEntries.entrySet()) {
+                if (!other.equals(entry) && other.getKey().equals(dataElementName) && !other.getValue().equals(unitCode)) {
+                    conflictKeys.add(dataElementName);
+                    conflictMap.put(dataElementName, "数据与其它条目冲突，基准数据元与数源单位的组合必须唯一");
+                    break;
+                }
+            }
+        }
+        
+        // 移除冲突的条目
+        for (String conflictKey : conflictKeys) {
+            validEntries.entrySet().removeIf(entry -> entry.getKey().equals(conflictKey));
+        }
+        
+        // 处理冲突的条目，全部标记为失败
         for (Map.Entry<String, String> entry : negResultMap.entrySet()) {
-            // dataid 可能是id(单条定源), 可能是 name(批量模版导入),
+            if (conflictKeys.contains(entry.getKey())) {
+                ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
+                failDetail.setName(entry.getKey());
+                failDetail.setUnit_code(entry.getValue());
+                failDetail.setFailReason(conflictMap.get(entry.getKey()));
+                failDetails.add(failDetail);
+            }
+        }
+
+        // 2. 循环validEntries处理正常数据
+        for (Map.Entry<String, String> entry : validEntries.entrySet()) {
             String dataid = entry.getKey();
             String orgCode = entry.getValue();
 
@@ -370,18 +442,26 @@ public class NegotiationServiceImpl implements NegotiationService {
 
                 StringBuilder errorSb = new StringBuilder();
 
+                // 检查是否找到基准数据元
                 if (Objects.isNull(baseinfo)) {
-                    errorSb.append("数据元不存在!");
+                    errorSb.append("系统在状态为协商中的基准数据元集合中未找到匹配的内容");
+                } else {
+                    // 检查数据元状态是否为协商中
+                    if (!StatusEnums.NEGOTIATING.getCode().equals(baseinfo.getStatus())) {
+                        errorSb.append("系统在状态为协商中的基准数据元集合中未找到匹配的内容");
+                    }
                 }
 
-                if (Objects.nonNull(baseinfo) && StatusEnums.DESIGNATED_SOURCE.getCode().equals(baseinfo.getStatus())) {
-                    errorSb.append("|").append("该数据元已定源!");
+                // 调用组织机构信息，检查组织或单位是否存在
+                OrganizationUnit unit = null;
+                if (StringUtils.hasText(orgCode)) {
+                    unit = commonService.getOrgInfoByOrgCode(orgCode);
                 }
-
-                // 调用组织机构信息，deptinfo = OrgService.GetOrgInfo(org_code)
-                OrganizationUnit unit = commonService.getOrgInfoByOrgCode(orgCode);
                 if (Objects.isNull(unit)) {
-                    errorSb.append("|").append("组织机构不存在!");
+                    if (errorSb.length() > 0) {
+                        errorSb.append("；");
+                    }
+                    errorSb.append("未查询到相关组织或单位");
                 }
 
                 if (StringUtils.hasText(errorSb.toString())) {
@@ -421,11 +501,23 @@ public class NegotiationServiceImpl implements NegotiationService {
                 // 循环时发现异常则记录在ImportNegotiationFailDetailDTO中
                 ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
                 BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataid);
+                if (baseDataElement == null) {
+                    baseDataElement = baseDataElementMapper.selectFirstByName(dataid);
+                }
                 if (baseDataElement != null) {
                     failDetail.setDataid(dataid);
                     failDetail.setName(baseDataElement.getName());
+                } else {
+                    failDetail.setName(dataid);
                 }
+                
+                // 获取单位名称
+                OrganizationUnit unit = commonService.getOrgInfoByOrgCode(orgCode);
                 failDetail.setUnit_code(orgCode);
+                if (unit != null) {
+                    failDetail.setUnit_name(unit.getUnitName());
+                }
+                
                 failDetail.setFailReason(e.getMessage());
                 failDetails.add(failDetail);
             }
@@ -477,10 +569,10 @@ public class NegotiationServiceImpl implements NegotiationService {
 
         // 调用CommonService.exportExcelData
         try {
-            commonService.exportExcelData(todoNegoList, response, "待协商数据", ExportToDoNegoDTO.class);
+            commonService.exportExcelData(todoNegoList, response, "待协商基准数据元清单", ExportToDoNegoDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[待协商数据]失败", e);
-            throw new RuntimeException("导出数据[待协商数据]失败");
+            log.error("导出数据[待协商基准数据元清单]失败", e);
+            throw new RuntimeException("导出数据[待协商基准数据元清单]失败");
         }
     }
 
@@ -526,10 +618,10 @@ public class NegotiationServiceImpl implements NegotiationService {
 
         // 调用CommonService.ExportToExcel(doingNegoList)
         try {
-            commonService.exportExcelData(doingNegoList, response, "协商中数据", ExportDoingNegoDTO.class);
+            commonService.exportExcelData(doingNegoList, response, "协商中基准数据元清单", ExportDoingNegoDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[协商中数据]失败", e);
-            throw new RuntimeException("导出数据[协商中数据]失败");
+            log.error("导出数据[协商中基准数据元清单]失败", e);
+            throw new RuntimeException("导出数据[协商中基准数据元清单]失败");
         }
     }
 
@@ -563,10 +655,39 @@ public class NegotiationServiceImpl implements NegotiationService {
 
         // 调用CommonService.ExportToExcel(doneNegoList)
         try {
-            commonService.exportExcelData(doneNegoList, response, "已定源数据", ExportDoneNegoDTO.class);
+            commonService.exportExcelData(doneNegoList, response, "已定源基准数据元清单", ExportDoneNegoDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[已定源数据]失败", e);
-            throw new RuntimeException("导出数据[已定源数据]失败");
+            log.error("导出数据[已定源基准数据元清单]失败", e);
+            throw new RuntimeException("导出数据[已定源基准数据元清单]失败");
+        }
+    }
+
+    @Override
+    public void exportNegotiationFailList(List<ImportNegotiationFailDetailDTO> failDetails, HttpServletResponse response) {
+        // 初始化List<ExportNegotiationFailDTO> failList
+        List<ExportNegotiationFailDTO> failList = new ArrayList<>();
+
+        int seqNo = 1;
+        // 遍历failDetails，依次取出failDetail
+        for (ImportNegotiationFailDetailDTO failDetail : failDetails) {
+            // 创建ExportNegotiationFailDTO exportFail
+            ExportNegotiationFailDTO exportFail = new ExportNegotiationFailDTO();
+            exportFail.setSeqNo(String.valueOf(seqNo++));
+            exportFail.setDataElementName(failDetail.getName());
+            exportFail.setSourceUnitName(failDetail.getUnit_name());
+            exportFail.setSourceUnitCode(failDetail.getUnit_code());
+            exportFail.setFailReason(failDetail.getFailReason());
+
+            // 添加exportFail到failList中
+            failList.add(exportFail);
+        }
+
+        // 调用CommonService.exportExcelData
+        try {
+            commonService.exportExcelData(failList, response, "导入失败清单（录入协商结果）", ExportNegotiationFailDTO.class);
+        } catch (IOException e) {
+            log.error("导出数据[导入失败清单（录入协商结果）]失败", e);
+            throw new RuntimeException("导出数据[导入失败清单（录入协商结果）]失败");
         }
     }
 }

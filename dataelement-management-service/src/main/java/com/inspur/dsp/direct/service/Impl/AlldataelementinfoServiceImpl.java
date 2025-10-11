@@ -14,6 +14,7 @@ import com.inspur.dsp.direct.entity.dto.DataElementPageExportDto;
 import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
 import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.dto.ExcelRowDto;
+import com.inspur.dsp.direct.entity.dto.ImportFailureExportDTO;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
 import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
 import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
@@ -33,10 +34,7 @@ import com.inspur.dsp.direct.enums.AlldataelementSortFieldEnums;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Calendar;
 import org.springframework.util.StringUtils;
@@ -212,11 +210,26 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         int failureCount = 0;
         List<FailureDetailVo> failureDetails = new ArrayList<>();
 
+        // 预处理：检测数据完整性、重复数据和冲突数据
+        Map<String, List<ExcelRowDto>> duplicateGroups = new HashMap<>();
+        Map<String, List<Integer>> conflictGroups = new HashMap<>();
+        Set<Integer> invalidRows = new HashSet<>();
+        
+        preprocessData(excelData, duplicateGroups, conflictGroups, invalidRows, failureDetails);
+
         // 逐行处理Excel数据
         for (int i = 0; i < excelData.size(); i++) {
             ExcelRowDto row = excelData.get(i);
+            int rowNumber = i + 1;
+            
+            // 如果该行已在预处理中标记为无效，跳过处理
+            if (invalidRows.contains(i)) {
+                failureCount++;
+                continue;
+            }
+            
             try {
-                ProcessResult result = processRow(row, i + 1);
+                ProcessResult result = processRow(row, rowNumber, duplicateGroups, conflictGroups, i);
                 if (result.isSuccess()) {
                     successCount++;
                 } else {
@@ -224,7 +237,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
                     failureDetails.add(result.getFailureDetail());
                 }
             } catch (Exception e) {
-                log.error("处理第{}行数据时发生异常: {}", i + 1, e.getMessage(), e);
+                log.error("处理第{}行数据时发生异常: {}", rowNumber, e.getMessage(), e);
                 failureCount++;
                 FailureDetailVo failureDetail = FailureDetailVo.builder()
                         .serialNumber(row.getSerialNumber())
@@ -266,22 +279,118 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     }
 
     /**
+     * 预处理数据：检测数据完整性、重复数据和冲突数据
+     */
+    private void preprocessData(List<ExcelRowDto> excelData, 
+                               Map<String, List<ExcelRowDto>> duplicateGroups,
+                               Map<String, List<Integer>> conflictGroups,
+                               Set<Integer> invalidRows,
+                               List<FailureDetailVo> failureDetails) {
+        
+        // 用于记录数据出现位置
+        Map<String, Integer> dataFirstOccurrence = new HashMap<>();
+        Map<String, Integer> combinationFirstOccurrence = new HashMap<>();
+        
+        for (int i = 0; i < excelData.size(); i++) {
+            ExcelRowDto row = excelData.get(i);
+            
+            // 6. 数据不完整检查（包括列名写错）
+            if (!isDataComplete(row)) {
+                invalidRows.add(i);
+                FailureDetailVo failureDetail = FailureDetailVo.builder()
+                        .serialNumber(row.getSerialNumber())
+                        .name(row.getElementName())
+                        .unit_code(row.getUnitCode())
+                        .failReason("数据不完整（包括列名写错）")
+                        .build();
+                failureDetails.add(failureDetail);
+                continue;
+            }
+            
+            String dataKey = row.getElementName();
+            String combinationKey = row.getElementName() + "|||" + row.getUnitCode();
+            
+            // 4. 数据与其它条目重复检测（完全相同的数据元名称和数源单位组合）
+            if (combinationFirstOccurrence.containsKey(combinationKey)) {
+                // 标记为重复数据失败
+                invalidRows.add(i);
+                FailureDetailVo failureDetail = FailureDetailVo.builder()
+                        .serialNumber(row.getSerialNumber())
+                        .name(row.getElementName())
+                        .unit_code(row.getUnitCode())
+                        .failReason("数据与其它条目重复，系统已保留首次出现的数据")
+                        .build();
+                failureDetails.add(failureDetail);
+                continue;
+            }
+            
+            // 5. 数据与其它条目冲突检测（同一数据元与不同数源单位的组合）
+            if (dataFirstOccurrence.containsKey(dataKey)) {
+                // 已经存在同一数据元但不同数源单位的组合
+                String existingCombination = null;
+                for (String key : combinationFirstOccurrence.keySet()) {
+                    if (key.startsWith(dataKey + "|||")) {
+                        existingCombination = key;
+                        break;
+                    }
+                }
+                
+                if (existingCombination != null && !existingCombination.equals(combinationKey)) {
+                    // 冲突，将两个条目都标记为失败
+                    int firstIndex = combinationFirstOccurrence.get(existingCombination);
+                    
+                    // 如果首次出现的条目还没有被标记为无效，现在标记并添加失败记录
+                    if (!invalidRows.contains(firstIndex)) {
+                        invalidRows.add(firstIndex);
+                        ExcelRowDto firstRow = excelData.get(firstIndex);
+                        FailureDetailVo firstFailure = FailureDetailVo.builder()
+                                .serialNumber(firstRow.getSerialNumber())
+                                .name(firstRow.getElementName())
+                                .unit_code(firstRow.getUnitCode())
+                                .failReason("数据与其它条目冲突，基准数据元与数源单位的组合必须唯一")
+                                .build();
+                        failureDetails.add(firstFailure);
+                    }
+                    
+                    // 标记当前条目为无效并添加失败记录
+                    invalidRows.add(i);
+                    FailureDetailVo currentFailure = FailureDetailVo.builder()
+                            .serialNumber(row.getSerialNumber())
+                            .name(row.getElementName())
+                            .unit_code(row.getUnitCode())
+                            .failReason("数据与其它条目冲突，基准数据元与数源单位的组合必须唯一")
+                            .build();
+                    failureDetails.add(currentFailure);
+                    continue;
+                }
+            }
+            
+            // 记录首次出现位置
+            dataFirstOccurrence.put(dataKey, i);
+            combinationFirstOccurrence.put(combinationKey, i);
+        }
+    }
+    
+    /**
+     * 检查数据是否完整
+     */
+    private boolean isDataComplete(ExcelRowDto row) {
+        // 检查必要字段是否为空
+        return StringUtils.hasText(row.getElementName()) && 
+               StringUtils.hasText(row.getUnitCode()) &&
+               StringUtils.hasText(row.getSerialNumber());
+    }
+    
+    /**
      * 处理单行数据 - 校验所有条件并收集所有错误信息
      */
-    private ProcessResult processRow(ExcelRowDto row, int rowNumber) {
+    private ProcessResult processRow(ExcelRowDto row, int rowNumber, 
+                                   Map<String, List<ExcelRowDto>> duplicateGroups,
+                                   Map<String, List<Integer>> conflictGroups,
+                                   int currentIndex) {
         log.debug("处理第{}行数据: {}", rowNumber, row);
 
         List<String> errorMessages = new ArrayList<>();
-
-        // 1. 数据元名称校验
-        if (!StringUtils.hasText(row.getElementName())) {
-            errorMessages.add("数据元名称不能为空");
-        }
-
-        // 2. 数源单位代码校验
-        if (!StringUtils.hasText(row.getUnitCode())) {
-            errorMessages.add("数源单位统一社会信用代码不能为空");
-        }
 
         // 3. 验证部门是否存在
         OrganizationUnit organizationUnit = null;
@@ -292,7 +401,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             }
         }
 
-        // 4. 根据名称查询数据元
+        // 2. 根据名称查询数据元
         BaseDataElement element = null;
         if (StringUtils.hasText(row.getElementName())) {
             LambdaQueryWrapper<BaseDataElement> wrapper = new LambdaQueryWrapper<>();
@@ -302,7 +411,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             if (element == null) {
                 errorMessages.add("数据元不存在");
             } else {
-                // 5. 检查数据元状态（只有在数据元存在时才检查）
+                // 1. 检查数据元状态（只有在数据元存在时才检查）
                 if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(element.getStatus())) {
                     errorMessages.add("数据元已定源");
                 }
@@ -532,11 +641,56 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
         // 调用通用导出服务
         try {
-            commonService.exportExcelData(exportList, response, "数据元列表", DataElementPageExportDto.class);
-            log.info("数据元列表导出完成，共导出{}条记录", exportList.size());
+            commonService.exportExcelData(exportList, response, "整体定源情况", DataElementPageExportDto.class);
+            log.info("整体定源情况导出完成，共导出{}条记录", exportList.size());
         } catch (IOException e) {
-            log.error("导出数据元列表失败", e);
-            throw new RuntimeException("导出数据元列表失败: " + e.getMessage(), e);
+            log.error("导出整体定源情况失败", e);
+            throw new RuntimeException("导出整体定源情况失败: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void exportImportFailureList(List<FailureDetailVo> failureDetails, HttpServletResponse response) {
+        log.info("开始导出导入失败清单，失败记录数：{}", failureDetails.size());
+
+        if (CollectionUtils.isEmpty(failureDetails)) {
+            throw new IllegalArgumentException("没有失败记录可导出!");
+        }
+
+        // 转换为导出DTO列表
+        List<ImportFailureExportDTO> exportList = new ArrayList<>();
+        
+        for (FailureDetailVo failureDetail : failureDetails) {
+            ImportFailureExportDTO exportDto = new ImportFailureExportDTO();
+            exportDto.setSerialNumber(failureDetail.getSerialNumber());
+            exportDto.setName(failureDetail.getName());
+            exportDto.setUnitCode(failureDetail.getUnit_code());
+            
+            // 获取单位名称
+            String unitName = "";
+            if (failureDetail.getUnit_code() != null && !failureDetail.getUnit_code().trim().isEmpty()) {
+                try {
+                    OrganizationUnit organizationUnit = commonService.getOrgInfoByOrgCode(failureDetail.getUnit_code());
+                    if (organizationUnit != null) {
+                        unitName = organizationUnit.getUnitName();
+                    }
+                } catch (Exception e) {
+                    log.warn("获取单位名称失败，单位代码：{}, 错误：{}", failureDetail.getUnit_code(), e.getMessage());
+                }
+            }
+            exportDto.setUnitName(unitName);
+            exportDto.setFailReason(failureDetail.getFailReason());
+            
+            exportList.add(exportDto);
+        }
+
+        // 调用通用导出服务
+        try {
+            commonService.exportExcelData(exportList, response, "导入失败清单（整体定源情况）", ImportFailureExportDTO.class);
+            log.info("导入失败清单导出完成，共导出{}条记录", exportList.size());
+        } catch (IOException e) {
+            log.error("导出导入失败清单失败", e);
+            throw new RuntimeException("导出导入失败清单失败: " + e.getMessage(), e);
         }
     }
 }

@@ -3,6 +3,7 @@ package com.inspur.dsp.direct.console.controller.business;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.entity.dto.BatchNegotiationDto;
+import com.inspur.dsp.direct.entity.dto.ImportNegotiationFailDetailDTO;
 import com.inspur.dsp.direct.entity.dto.ImportNegotiationReturnDTO;
 import com.inspur.dsp.direct.entity.dto.NegotiationParmDTO;
 import com.inspur.dsp.direct.entity.dto.SingleNegotiationDto;
@@ -23,6 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+
+/**
+ * 007-009
+ */
 
 @RestController
 @RequestMapping("/negotiation")
@@ -94,5 +100,15 @@ public class NegotiationController {
     public void exportNegotiationList(@RequestBody NegotiationParmDTO dto,
                                     HttpServletResponse response) {
         negotiationService.exportNegotiationList(dto, response);
+    }
+
+    /**
+     * 导出导入失败清单（录入协商结果）
+     */
+    @PostMapping("/exportNegotiationFailList")
+    @RespAdvice
+    public void exportNegotiationFailList(@RequestBody List<ImportNegotiationFailDetailDTO> failDetails,
+                                         HttpServletResponse response) {
+        negotiationService.exportNegotiationFailList(failDetails, response);
     }
 }

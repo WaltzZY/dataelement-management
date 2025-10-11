@@ -167,10 +167,10 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         }
         // 调用CommonService.exportExcelData
         try {
-            commonService.exportExcelData(exportDTOList, response, "采集方-本单元作为数源单位的数据元列表", DetermineResultForCollectorExportDTO.class);
+            commonService.exportExcelData(exportDTOList, response, "本单位作为数源单位的基准数据元清单", DetermineResultForCollectorExportDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[采集方-本单元作为数源单位的数据元列表]失败", e);
-            throw new RuntimeException("导出数据[采集方-本单元作为数源单位的数据元列表]失败");
+            log.error("导出数据[本单位作为数源单位的基准数据元清单]失败", e);
+            throw new RuntimeException("导出数据[本单位作为数源单位的基准数据元清单]失败");
         }
 
     }

@@ -5,6 +5,7 @@ import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
 import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
+import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
 import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
 import com.inspur.dsp.direct.service.AlldataelementinfoService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * 数据元信息相关控制器
@@ -85,5 +87,23 @@ public class AlldataelementinfoController {
         log.info("手动定源开始，请求参数：{}", confirmDto);
         alldataelementinfoService.manualConfirmUnit(confirmDto);
         log.info("手动定源结束");
+    }
+
+    /**
+     * 导出导入失败清单
+     * @param failureDetails 失败详情列表
+     * @param response HttpServletResponse对象
+     */
+    @PostMapping("/exportImportFailureList")
+    public void exportImportFailureList(@RequestBody List<FailureDetailVo> failureDetails, HttpServletResponse response) {
+        log.info("导出导入失败清单开始，失败记录数：{}", failureDetails.size());
+        try {
+            alldataelementinfoService.exportImportFailureList(failureDetails, response);
+            log.info("导出导入失败清单结束");
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("没有失败记录可导出", e);
+        } catch (Exception e) {
+            throw new RuntimeException("导出导入失败清单失败", e);
+        }
     }
 }

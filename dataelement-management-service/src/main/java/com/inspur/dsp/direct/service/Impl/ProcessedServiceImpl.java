@@ -95,7 +95,7 @@ public class ProcessedServiceImpl implements ProcessedService {
                         .build();
             }).collect(Collectors.toList());
             // 使用EasyExcel导出
-            commonService.exportExcelData(processedExcelList, response, "查看已处理-查看已处理数据元列表", ProcessedExcel.class);
+            commonService.exportExcelData(processedExcelList, response, "全量已处理基准数据元清单", ProcessedExcel.class);
 
         }catch (Exception e) {  throw new RuntimeException("导出数据失败");}
     }

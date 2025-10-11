@@ -72,14 +72,14 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
                 exportDTOList.add(exportDTO);
             }
             try {
-                commonService.exportExcelData(exportDTOList, response, "组织方-已定源数据", DetermineResultForOrganiserExportDTO.class);
+                commonService.exportExcelData(exportDTOList, response, "已定源基准数据元清单", DetermineResultForOrganiserExportDTO.class);
             } catch (IOException e) {
-                log.error("导出数据[组织方-已定源数据]失败", e);
-                throw new RuntimeException("导出数据[组织方-已定源数据]失败");
+                log.error("导出数据[已定源基准数据元清单]失败", e);
+                throw new RuntimeException("导出数据[已定源基准数据元清单]失败");
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("查询组织方-已定源数据列表失败", e);
+            throw new RuntimeException("查询已定源基准数据元清单列表失败", e);
         }
     }
 }
