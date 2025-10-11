@@ -27,8 +27,8 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain, 
-    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty, 
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
+    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty,
     generatedatetime, remarks, create_date, create_account, last_modify_date, last_modify_account
   </sql>
 
@@ -37,6 +37,7 @@
         <result column="name" property="name" />
         <result column="definition" property="definition" />
         <result column="sendDate" property="sendDate" />
+        <result column="generatedatetime" property="generatedatetime" />
         <result column="collectDeptName" property="collectDeptName" />
         <result column="confirm_date" property="confirmDate" />
         <result column="sourceUnitCode" property="sourceUnitCode" />
@@ -50,6 +51,7 @@
         bde.definition as definition,
         bde.send_date as sendDate,
         bde.confirm_date as confirm_date,
+        bde.generatedatetime as generatedatetime,
         dde.source_unit_name as collectDeptName,
         bde.source_unit_code as sourceUnitCode,
         bde.source_unit_name as sourceUnitName,
@@ -82,6 +84,9 @@
             </if>
             <if test="dto.confirmDateBegin != null and dto.confirmDateEnd != null">
                 and bde.confirm_date between #{dto.confirmDateBegin} and #{dto.confirmDateEnd}
+            </if>
+            <if test="dto.generatedatetimeBegin != null and dto.generatedatetimeEnd != null">
+                and bde.generatedatetime between #{dto.generatedatetimeBegin} and #{dto.generatedatetimeEnd}
             </if>
         </where>
         <if test="sortSql != null and sortSql != ''">

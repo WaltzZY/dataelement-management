@@ -25,6 +25,16 @@ public class GetDataElementPageDto {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date sendDateBegin;
     /**
+     * 定数时间开始
+     */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date generatedatetimeBegin;
+    /**
+     * 定数时间结束
+     */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date generatedatetimeEnd;
+    /**
      * 页码
      */
     private long pageNum = 1;
@@ -76,4 +86,11 @@ public class GetDataElementPageDto {
         this.confirmDateEnd = DateUtils.getEndOfDay(confirmDateEnd);
     }
 
+    public void setGeneratedatetimeBegin(Date generatedatetimeBegin) {
+        this.generatedatetimeBegin = DateUtils.getStartOfDay(generatedatetimeBegin);
+    }
+
+    public void setGeneratedatetimeEnd(Date generatedatetimeEnd) {
+        this.generatedatetimeEnd = DateUtils.getEndOfDay(generatedatetimeEnd);
+    }
 }
