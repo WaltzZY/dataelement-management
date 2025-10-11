@@ -3,8 +3,17 @@ package com.inspur.dsp.direct.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
-import com.inspur.dsp.direct.entity.dto.*;
-import com.inspur.dsp.direct.entity.vo.*;
+import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
+import com.inspur.dsp.direct.entity.dto.CollectDataElementPageDto;
+import com.inspur.dsp.direct.entity.dto.GetDataElementPageDto;
+import com.inspur.dsp.direct.entity.dto.GetDetermineResultListDTO;
+import com.inspur.dsp.direct.entity.dto.GetPendingApprovalPageDto;
+import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
+import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
+import com.inspur.dsp.direct.entity.vo.GetCollectDataVo;
+import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
+import com.inspur.dsp.direct.entity.vo.GetDetermineResultVo;
+import com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -25,7 +34,6 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
 
     /**
      * 获取确认方数据元详情
-     *
      */
     List<GetCollectDataVo> getCollectData(Page page, @Param("dto") CollectDataElementPageDto dto, @Param("sortSql") String sortSql, @Param("organCode") String organCode);
 
@@ -64,5 +72,4 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
     List<GetDetermineResultVo> getDetermineResultList(Page page, @Param("dto") GetDetermineResultListDTO dto);
 
     List<GetCollectUnitVo> getCollectUnitList(@Param("dataId") String dataId);
-
 }

@@ -1,46 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.inspur.dsp.direct.dao.BaseDataElementMapper">
-    <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.BaseDataElement">
-        <!--@mbg.generated-->
-        <!--@Table base_data_element-->
-        <id column="dataid" jdbcType="VARCHAR" property="dataid"/>
-        <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId"/>
-        <result column="status" jdbcType="VARCHAR" property="status"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="definition" jdbcType="LONGVARCHAR" property="definition"/>
-        <result column="datatype" jdbcType="VARCHAR" property="datatype"/>
-        <result column="data_format" jdbcType="VARCHAR" property="dataFormat"/>
-        <result column="value_domain" jdbcType="LONGVARCHAR" property="valueDomain"/>
-        <result column="source_unit_code" jdbcType="VARCHAR" property="sourceUnitCode"/>
-        <result column="source_unit_name" jdbcType="VARCHAR" property="sourceUnitName"/>
-        <result column="publish_date" jdbcType="TIMESTAMP" property="publishDate"/>
-        <result column="send_date" jdbcType="TIMESTAMP" property="sendDate"/>
-        <result column="confirm_date" jdbcType="TIMESTAMP" property="confirmDate"/>
-        <result column="collectunitqty" jdbcType="INTEGER" property="collectunitqty"/>
-        <result column="remarks" jdbcType="LONGVARCHAR" property="remarks"/>
-        <result column="create_date" jdbcType="TIMESTAMP" property="createDate"/>
-        <result column="create_account" jdbcType="VARCHAR" property="createAccount"/>
-        <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate"/>
-        <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount"/>
-    </resultMap>
-    <sql id="Base_Column_List">
-        <!--@mbg.generated-->
-        dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
-        source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty,
-        remarks, create_date, create_account, last_modify_date, last_modify_account
-    </sql>
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.BaseDataElement">
+    <!--@mbg.generated-->
+    <!--@Table base_data_element-->
+    <id column="dataid" jdbcType="VARCHAR" property="dataid" />
+    <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="definition" jdbcType="LONGVARCHAR" property="definition" />
+    <result column="datatype" jdbcType="VARCHAR" property="datatype" />
+    <result column="data_format" jdbcType="VARCHAR" property="dataFormat" />
+    <result column="value_domain" jdbcType="LONGVARCHAR" property="valueDomain" />
+    <result column="source_unit_code" jdbcType="VARCHAR" property="sourceUnitCode" />
+    <result column="source_unit_name" jdbcType="VARCHAR" property="sourceUnitName" />
+    <result column="publish_date" jdbcType="TIMESTAMP" property="publishDate" />
+    <result column="send_date" jdbcType="TIMESTAMP" property="sendDate" />
+    <result column="confirm_date" jdbcType="TIMESTAMP" property="confirmDate" />
+    <result column="collectunitqty" jdbcType="INTEGER" property="collectunitqty" />
+    <result column="generatedatetime" jdbcType="TIMESTAMP" property="generatedatetime" />
+    <result column="remarks" jdbcType="LONGVARCHAR" property="remarks" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
+    <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate" />
+    <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
+    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty,
+    generatedatetime, remarks, create_date, create_account, last_modify_date, last_modify_account
+  </sql>
 
     <resultMap id="DataElementPageInfoVoResultMap" type="com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo">
-        <result column="dataid" property="dataid"/>
-        <result column="name" property="name"/>
-        <result column="definition" property="definition"/>
-        <result column="sendDate" property="sendDate"/>
-        <result column="collectDeptName" property="collectDeptName"/>
-        <result column="confirm_date" property="confirmDate"/>
-        <result column="sourceUnitCode" property="sourceUnitCode"/>
-        <result column="sourceUnitName" property="sourceUnitName"/>
-        <result column="status" property="status"/>
+        <result column="dataid" property="dataid" />
+        <result column="name" property="name" />
+        <result column="definition" property="definition" />
+        <result column="sendDate" property="sendDate" />
+        <result column="generatedatetime" property="generatedatetime" />
+        <result column="collectDeptName" property="collectDeptName" />
+        <result column="confirm_date" property="confirmDate" />
+        <result column="sourceUnitCode" property="sourceUnitCode" />
+        <result column="sourceUnitName" property="sourceUnitName" />
+        <result column="status" property="status" />
     </resultMap>
     <select id="getDataElementPage" resultMap="DataElementPageInfoVoResultMap">
         select
@@ -49,6 +51,7 @@
         bde.definition as definition,
         bde.send_date as sendDate,
         bde.confirm_date as confirm_date,
+        bde.generatedatetime as generatedatetime,
         dde.source_unit_name as collectDeptName,
         bde.source_unit_code as sourceUnitCode,
         bde.source_unit_name as sourceUnitName,
@@ -82,6 +85,9 @@
             <if test="dto.confirmDateBegin != null and dto.confirmDateEnd != null">
                 and bde.confirm_date between #{dto.confirmDateBegin} and #{dto.confirmDateEnd}
             </if>
+            <if test="dto.generatedatetimeBegin != null and dto.generatedatetimeEnd != null">
+                and bde.generatedatetime between #{dto.generatedatetimeBegin} and #{dto.generatedatetimeEnd}
+            </if>
         </where>
         <if test="sortSql != null and sortSql != ''">
             order by ${sortSql}
@@ -89,14 +95,14 @@
     </select>
 
     <resultMap id="GetCollectDataVoResultMap" type="com.inspur.dsp.direct.entity.vo.GetCollectDataVo">
-        <result column="dataElementId" property="dataElementId"/>
-        <result column="dataid" property="dataid"/>
-        <result column="datatype" property="datatype"/>
-        <result column="definition" property="definition"/>
-        <result column="processingDate" property="processingDate"/>
-        <result column="name" property="name"/>
-        <result column="receiveTime" property="receiveTime"/>
-        <result column="status" property="status"/>
+        <result column="dataElementId" property="dataElementId" />
+        <result column="dataid" property="dataid" />
+        <result column="datatype" property="datatype" />
+        <result column="definition" property="definition" />
+        <result column="processingDate" property="processingDate" />
+        <result column="name" property="name" />
+        <result column="receiveTime" property="receiveTime" />
+        <result column="status" property="status" />
     </resultMap>
     <select id="getCollectData" resultMap="GetCollectDataVoResultMap">
         select bde.data_element_id as dataElementId,
@@ -139,13 +145,13 @@
 
     <!-- 分页查询待核定基准数据元列表 -->
     <resultMap id="GetPendingApprovalPageVoResultMap" type="com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo">
-        <result column="dataid" property="dataid"/>
-        <result column="name" property="name"/>
-        <result column="definition" property="definition"/>
-        <result column="status" property="status"/>
-        <result column="paUnitCode" property="paUnitCode"/>
-        <result column="paUnitName" property="paUnitName"/>
-        <result column="sendDate" property="sendDate"/>
+        <result column="dataid" property="dataid" />
+        <result column="name" property="name" />
+        <result column="definition" property="definition" />
+        <result column="status" property="status" />
+        <result column="paUnitCode" property="paUnitCode" />
+        <result column="paUnitName" property="paUnitName" />
+        <result column="sendDate" property="sendDate" />
     </resultMap>
     <select id="selectPaPage" resultMap="GetPendingApprovalPageVoResultMap">
         SELECT
@@ -161,7 +167,7 @@
         AND (ct.status in ('claimed', 'confirmed'))
         WHERE bdl.status = 'pending_approval'
         <if test="dto.sendDateBegin != null">
-            AND bdl.send_date >= #{dto.sendDateBegin}
+            AND bdl.send_date &gt;= #{dto.sendDateBegin}
         </if>
         <if test="dto.sendDateEnd != null">
             AND bdl.send_date &lt;= #{dto.sendDateEnd}
@@ -196,20 +202,20 @@
         FROM base_data_element bdl
         WHERE status = 'designated_source'
         <if test="dto.sendDateBegin != null">
-            AND send_date >= #{dto.sendDateBegin}
+            AND send_date &gt;= #{dto.sendDateBegin}
         </if>
         <if test="dto.sendDateEnd != null">
             AND send_date &lt;= #{dto.sendDateEnd}
         </if>
         <if test="dto.confirmDateBegin != null">
-            AND confirm_date >= #{dto.confirmDateBegin}
+            AND confirm_date &gt;= #{dto.confirmDateBegin}
         </if>
         <if test="dto.confirmDateEnd != null">
             AND confirm_date &lt;= #{dto.confirmDateEnd}
         </if>
-        <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() > 0">
+        <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() &gt; 0">
             AND source_unit_code IN
-            <foreach collection="dto.collectUnitCodeList" item="unitCode" open="(" separator="," close=")">
+            <foreach close=")" collection="dto.collectUnitCodeList" item="unitCode" open="(" separator=",">
                 #{unitCode}
             </foreach>
         </if>
@@ -227,17 +233,17 @@
     </select>
 
     <resultMap id="getDetermineResultListWithOrganiserResultMap" type="com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo">
-        <result column="dataid" property="dataid"/>
-        <result column="name" property="name"/>
-        <result column="definition" property="definition"/>
-        <result column="datatype" property="dataType"/>
-        <result column="send_date" property="sendDate"/>
-        <result column="confirm_date" property="confirmDate"/>
-        <result column="source_unit_code" property="sourceUnitCode"/>
-        <result column="source_unit_name" property="sourceUnitName"/>
-        <result column="bde_status" property="bdeStatus"/>
-        <result column="ct_status" property="ctStatus"/>
-        <result column="processing_date" property="processingDate"/>
+        <result column="dataid" property="dataid" />
+        <result column="name" property="name" />
+        <result column="definition" property="definition" />
+        <result column="datatype" property="dataType" />
+        <result column="send_date" property="sendDate" />
+        <result column="confirm_date" property="confirmDate" />
+        <result column="source_unit_code" property="sourceUnitCode" />
+        <result column="source_unit_name" property="sourceUnitName" />
+        <result column="bde_status" property="bdeStatus" />
+        <result column="ct_status" property="ctStatus" />
+        <result column="processing_date" property="processingDate" />
     </resultMap>
 
 
@@ -259,9 +265,9 @@
         FROM base_data_element bde LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
             <choose>
-                <when test="(base.taskStatusList != null and base.taskStatusList.size() > 0) and (base.baseStatusList != null and base.baseStatusList.size() > 0)">
-                    <if test="base.taskStatusList.size() > 0">
-                        <foreach collection="base.taskStatusList" item="status" open="(" separator=" OR " close=")">
+                <when test="(base.taskStatusList != null and base.taskStatusList.size() &gt; 0) and (base.baseStatusList != null and base.baseStatusList.size() &gt; 0)">
+                    <if test="base.taskStatusList.size() &gt; 0">
+                        <foreach close=")" collection="base.taskStatusList" item="status" open="(" separator=" OR ">
                             <choose>
                                 <when test="status == 'pending'">(ct.status = 'pending')</when>
                                 <when test="status == 'pending_source'">(ct.status = 'pending_source')</when>
@@ -271,15 +277,15 @@
                                 <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
                                 <when test="status == 'claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
                                 <when test="status == 'not_claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
-                                <!--<otherwise></otherwise>-->
+                                <!--&amp;lt;otherwise&amp;gt;&amp;lt;/otherwise&amp;gt;-->
                             </choose>
                         </foreach>
                     </if>
-                    <if test="base.taskStatusList.size() > 0 and base.baseStatusList.size() > 0">
+                    <if test="base.taskStatusList.size() &gt; 0 and base.baseStatusList.size() &gt; 0">
                         OR
                     </if>
-                    <if test="base.baseStatusList.size() > 0">
-                        <foreach collection="base.baseStatusList" item="status" open="(" separator=" OR " close=")">
+                    <if test="base.baseStatusList.size() &gt; 0">
+                        <foreach close=")" collection="base.baseStatusList" item="status" open="(" separator=" OR ">
                             <choose>
                                 <when test="status == 'pending_approval'">(bde.status = 'pending_approval')</when>
                                 <when test="status == 'pending_negotiation'">(bde.status = 'pending_negotiation')</when>
@@ -290,10 +296,10 @@
                             </choose>
                         </foreach>
                     </if>
-                    <!--<if test="base.taskStatusList.size() == 0 and base.baseStatusList.size() == 0">1=0</if>-->
+                    <!--&amp;lt;if test="base.taskStatusList.size() == 0 and base.baseStatusList.size() == 0"&amp;gt;1=0&amp;lt;/if&amp;gt;-->
                 </when>
-                <when test="base.taskStatusList != null and base.taskStatusList.size() > 0">
-                    <foreach collection="base.taskStatusList" item="status" open="(" separator=" OR " close=")">
+                <when test="base.taskStatusList != null and base.taskStatusList.size() &gt; 0">
+                    <foreach close=")" collection="base.taskStatusList" item="status" open="(" separator=" OR ">
                         <choose>
                             <when test="status == 'pending'">(ct.status = 'pending')</when>
                             <when test="status == 'pending_source'">(ct.status = 'pending_source')</when>
@@ -306,15 +312,15 @@
                         </choose>
                     </foreach>
                 </when>
-                <when test="base.baseStatusList != null and base.baseStatusList.size() > 0">
-                    <foreach collection="base.baseStatusList" item="status" open="(" separator=" OR " close=")">
+                <when test="base.baseStatusList != null and base.baseStatusList.size() &gt; 0">
+                    <foreach close=")" collection="base.baseStatusList" item="status" open="(" separator=" OR ">
                         <choose>
                             <when test="status == 'pending_approval'">(bde.status = 'pending_approval')</when>
                             <when test="status == 'pending_negotiation'">(bde.status = 'pending_negotiation')</when>
                             <when test="status == 'confirmed'">(bde.status = 'confirmed')</when>
                             <when test="status == 'designated_source'">(bde.status = 'designated_source')</when>
                             <when test="status == 'negotiating'">(bde.status = 'negotiating')</when>
-                            <!--<otherwise>1=0</otherwise>-->
+                            <!--&amp;lt;otherwise&amp;gt;1=0&amp;lt;/otherwise&amp;gt;-->
                         </choose>
                     </foreach>
                 </when>
@@ -358,7 +364,7 @@
         <where>
             <!-- 添加保底条件 -->
             1=1
-            <if test="base.statusList != null and base.statusList.size() > 0">
+            <if test="base.statusList != null and base.statusList.size() &gt; 0">
                 AND (
                 <trim prefixOverrides="OR">
                     <foreach collection="base.statusList" item="status">
@@ -431,14 +437,14 @@
     <!--auto generated by MybatisCodeHelper on 2025-09-23-->
     <select id="selectFirstByName" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List" />
         from base_data_element
         where `name`=#{name,jdbcType=VARCHAR} limit 1
     </select>
 
     <select id="getDetermineResultList" resultType="com.inspur.dsp.direct.entity.vo.GetDetermineResultVo">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List" />
         from base_data_element
         <where>
             `status` = 'designated_source'
@@ -446,21 +452,20 @@
                 and (name like concat('%', #{dto.keyword}, '%') or definition like concat('%', #{dto.keyword}, '%'))
             </if>
             <if test="dto.sendDateBegin != null">
-                and send_date >= #{dto.sendDateBegin}
+                and send_date &gt;= #{dto.sendDateBegin}
             </if>
             <if test="dto.sendDateEnd != null">
                 and send_date <![CDATA[<=]]> #{dto.sendDateEnd}
             </if>
             <if test="dto.confirmDateBegin != null">
-                and confirm_date >= #{dto.confirmDateBegin}
+                and confirm_date &gt;= #{dto.confirmDateBegin}
             </if>
             <if test="dto.confirmDateEnd != null">
                 and confirm_date <![CDATA[<=]]> #{dto.confirmDateEnd}
             </if>
             <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() != 0">
                 and source_unit_code in
-                <foreach item="item" collection="dto.collectUnitCodeList" index="index" separator="," open="("
-                         close=")">
+                <foreach close=")" collection="dto.collectUnitCodeList" index="index" item="item" open="(" separator=",">
                     #{item}
                 </foreach>
             </if>
@@ -471,14 +476,14 @@
     </select>
 
     <resultMap id="getCollectUnitListResultMap" type="com.inspur.dsp.direct.entity.vo.GetCollectUnitVo">
-        <result column="task_id" property="taskId"/>
-        <result column="status" property="status"/>
-        <result column="source_unit_code" property="sourceUnitCode"/>
-        <result column="source_unit_name" property="sourceUnitName"/>
-        <result column="name" property="name"/>
-        <result column="processing_date" property="processingDate"/>
-        <result column="send_date" property="sendDate"/>
-        <result column="processing_opinion" property="processingOpinion"/>
+        <result column="task_id" property="taskId" />
+        <result column="status" property="status" />
+        <result column="source_unit_code" property="sourceUnitCode" />
+        <result column="source_unit_name" property="sourceUnitName" />
+        <result column="name" property="name" />
+        <result column="processing_date" property="processingDate" />
+        <result column="send_date" property="sendDate" />
+        <result column="processing_opinion" property="processingOpinion" />
     </resultMap>
 
     <select id="getCollectUnitList" resultMap="getCollectUnitListResultMap">

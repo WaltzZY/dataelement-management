@@ -54,4 +54,10 @@ public class DataElementPageInfoVo {
 
     /** 任务处理单位名称 */
     private String paUnitName;
+
+    /**
+     * 定数时间
+     */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date generatedatetime;
 }

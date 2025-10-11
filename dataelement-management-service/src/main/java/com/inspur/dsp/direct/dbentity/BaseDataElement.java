@@ -98,7 +98,6 @@ public class BaseDataElement implements Serializable {
 
     /**
      * 数据元发布日期
-     *
      */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -131,6 +130,13 @@ public class BaseDataElement implements Serializable {
     private Integer collectunitqty;
 
     /**
+     * 定数时间
+     */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    @TableField(value = "generatedatetime")
+    private Date generatedatetime;
+
+    /**
      * 备注
      */
     @TableField(value = "remarks")
@@ -161,23 +167,19 @@ public class BaseDataElement implements Serializable {
     /**
      * 最后修改人账号
      */
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @TableField(value = "last_modify_account")
     @Size(max = 30, message = "最后修改人账号最大长度要小于 30")
     private String lastModifyAccount;
-
     /**
      * 最后修改人账号
      */
     @TableField(exist = false)
     private SourceEventRecord sourceEventRecord;
-
     /**
      * 最后修改人账号
      */
     @TableField(exist = false)
     private String statusChinese;
-
     /**
      * 最后修改人账号
      */
@@ -188,5 +190,4 @@ public class BaseDataElement implements Serializable {
      */
     @TableField(exist = false)
     private String displayStatus;
-
 }

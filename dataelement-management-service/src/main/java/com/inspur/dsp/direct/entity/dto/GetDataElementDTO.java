@@ -15,6 +15,11 @@ public class GetDataElementDTO {
 //    private LocalDateTime senddateBegin;  // 状态为认领中时，查询时间范围的起始时间
 //    private LocalDateTime senddateEnd;    // 状态为认领中时，查询时间范围的结束时间
 
+    // 定数时间开始
+    private LocalDateTime generatedatetimeBegin;
+    // 定数时间结束
+    private LocalDateTime generatedatetimeEnd;
+
     private String keyword;               // 查询关键字（模糊匹配）
 
     private long pageNum;
