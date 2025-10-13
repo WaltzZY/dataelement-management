@@ -55,6 +55,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 @Slf4j
 @RequiredArgsConstructor
 public class NegotiationServiceImpl implements NegotiationService {
@@ -286,9 +287,6 @@ public class NegotiationServiceImpl implements NegotiationService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    /**
-     * 加入事务
-     */
     public ImportNegotiationReturnDTO importNegotiationResult(MultipartFile file) {
         // 1. 文件校验 file 不为null , 文件格式为xlsx/xls, 文件大小小于100m
         if (file == null) {
