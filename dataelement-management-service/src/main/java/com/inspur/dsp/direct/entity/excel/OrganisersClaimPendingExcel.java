@@ -35,12 +35,6 @@ public class OrganisersClaimPendingExcel {
     private String definition;
 
     /**
-     * 采集单位数量
-     */
-    @ExcelProperty(value = "采集单位数量", index = 3)
-    private String collectQty;
-
-    /**
      * 采集单位
      */
     @ExcelProperty(value = "采集单位", index = 4)

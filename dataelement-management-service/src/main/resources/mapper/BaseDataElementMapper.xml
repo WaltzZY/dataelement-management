@@ -188,41 +188,44 @@
     <!-- 分页查询已定源基准数据元列表 -->
     <select id="selectConfirmedPage" resultType="com.inspur.dsp.direct.entity.vo.GetPendingApprovalPageVo">
         SELECT
-        dataid,
-        name,
-        definition,
-        status,
-        source_unit_code AS sourceUnitCode,
-        source_unit_name AS sourceUnitName,
-        source_unit_code AS paUnitCode,
-        source_unit_name AS paUnitName,
-        send_date AS sendDate,
-        confirm_date AS confirmDate,
-        collectunitqty
+        bdl.dataid,
+        bdl.name,
+        bdl.definition,
+        bdl.status,
+        bdl.source_unit_code AS sourceUnitCode,
+        bdl.source_unit_name AS sourceUnitName,
+        bdl.source_unit_code AS paUnitCode,
+        bdl.source_unit_name AS paUnitName,
+        bdl.send_date AS sendDate,
+        bdl.confirm_date AS confirmDate,
+        bdl.collectunitqty,
+        dde.source_unit_name AS collectUnitName
         FROM base_data_element bdl
-        WHERE status = 'designated_source'
+        LEFT JOIN domain_data_element dde ON bdl.dataid = dde.base_dataelement_dataid
+        WHERE bdl.status = 'designated_source'
         <if test="dto.sendDateBegin != null">
-            AND send_date &gt;= #{dto.sendDateBegin}
+            AND bdl.send_date &gt;= #{dto.sendDateBegin}
         </if>
         <if test="dto.sendDateEnd != null">
-            AND send_date &lt;= #{dto.sendDateEnd}
+            AND bdl.send_date &lt;= #{dto.sendDateEnd}
         </if>
         <if test="dto.confirmDateBegin != null">
-            AND confirm_date &gt;= #{dto.confirmDateBegin}
+            AND bdl.confirm_date &gt;= #{dto.confirmDateBegin}
         </if>
         <if test="dto.confirmDateEnd != null">
-            AND confirm_date &lt;= #{dto.confirmDateEnd}
+            AND bdl.confirm_date &lt;= #{dto.confirmDateEnd}
         </if>
         <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() &gt; 0">
-            AND source_unit_code IN
+            AND dde.source_unit_code IN
             <foreach close=")" collection="dto.collectUnitCodeList" item="unitCode" open="(" separator=",">
                 #{unitCode}
             </foreach>
         </if>
         <if test="dto.keyword != null and dto.keyword != ''">
-            AND (name LIKE CONCAT('%', #{dto.keyword}, '%')
-            OR definition LIKE CONCAT('%', #{dto.keyword}, '%')
-            OR source_unit_name LIKE CONCAT('%', #{dto.keyword}, '%'))
+            AND (bdl.name LIKE CONCAT('%', #{dto.keyword}, '%')
+            OR bdl.definition LIKE CONCAT('%', #{dto.keyword}, '%')
+            OR bdl.source_unit_name LIKE CONCAT('%', #{dto.keyword}, '%')
+            OR dde.source_unit_name LIKE CONCAT('%', #{dto.keyword}, '%'))
         </if>
         <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
             ORDER BY ${sortSql}
@@ -444,8 +447,10 @@
 
     <select id="getDetermineResultList" resultType="com.inspur.dsp.direct.entity.vo.GetDetermineResultVo">
         select
-        <include refid="Base_Column_List" />
-        from base_data_element
+        bde.*,
+        GROUP_CONCAT(DISTINCT dde.source_unit_name SEPARATOR '|') as collectUnitName
+        from base_data_element bde
+        left join domain_data_element dde on bde.dataid = dde.base_dataelement_dataid
         <where>
             `status` = 'designated_source'
             <if test="dto.keyword != null and dto.keyword != ''">
@@ -470,6 +475,7 @@
                 </foreach>
             </if>
         </where>
+        GROUP BY bde.dataid
         <if test="dto.sortSql != null and dto.sortSql != ''">
             order by ${dto.sortSql}
         </if>

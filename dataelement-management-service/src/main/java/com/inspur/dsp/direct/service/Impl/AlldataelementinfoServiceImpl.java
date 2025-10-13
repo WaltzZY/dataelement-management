@@ -203,6 +203,9 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
         // 读取Excel文件
         List<ExcelRowDto> excelData = commonService.importExcelData(file, ExcelRowDto.class);
+        /**
+         * Excel读取异常
+         */
 
         // 处理统计
         int totalCount = excelData.size();
@@ -420,7 +423,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
         // 如果有任何错误，返回失败结果
         if (!errorMessages.isEmpty()) {
-            String combinedErrorMessage = String.join("；", errorMessages);
+            String combinedErrorMessage = String.join("\n", errorMessages);
             log.debug("第{}行数据校验失败: {}", rowNumber, combinedErrorMessage);
             return ProcessResult.failure(row, combinedErrorMessage);
         }

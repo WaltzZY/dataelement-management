@@ -105,10 +105,10 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
                             .index(i + 1)
                             .name(vo.getName())
                             .definition(vo.getDefinition())
-                            .collectunitqty(vo.getCollectunitqty())
                             .statusDesc(StatusEnums.getDescByCode(vo.getStatus()))
                             .sendDate(vo.getSendDate())
                             .sourceUnitName(vo.getSourceUnitName())
+                            .collectUnit(vo.getCollectUnitName())
                             .confirmDate(vo.getConfirmDate())
                             .build();
                     confirmationExcels.add(build);

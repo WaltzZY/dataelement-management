@@ -131,4 +131,13 @@
     from negotiation_record
     where base_dataelement_dataid=#{baseDataelementDataid,jdbcType=VARCHAR} limit 1
   </select>
+
+  <select id="selectNegotiationUnitNamesByBaseDataelementDataid" resultType="java.lang.String">
+    select nrd.negotiation_unit_name
+    from negotiation_record nr
+    inner join negotiation_record_detail nrd on nr.record_id = nrd.record_id
+    where nr.base_dataelement_dataid = #{baseDataelementDataid,jdbcType=VARCHAR}
+    and nrd.negotiation_unit_name is not null
+    and nrd.negotiation_unit_name != ''
+  </select>
 </mapper>

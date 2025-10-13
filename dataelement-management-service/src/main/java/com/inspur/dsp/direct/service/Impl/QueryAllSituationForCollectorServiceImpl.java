@@ -94,8 +94,9 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             DataElementWithTaskVo dataElementWithTaskVo = dataElementWithTaskVoList.get(i);
             QueryAllSituationForCollectorExportDTO exportDTO = new QueryAllSituationForCollectorExportDTO();
             exportDTO.setId(i + 1);
-            exportDTO.setDefinition(dataElementWithTaskVo.getDefinition());
             exportDTO.setName(dataElementWithTaskVo.getName());
+            exportDTO.setDefinition(dataElementWithTaskVo.getDefinition());
+            exportDTO.setDataType(dataElementWithTaskVo.getDataType());
             String ctStatus = dataElementWithTaskVo.getCtStatus();
             String bdeStatus = dataElementWithTaskVo.getBdeStatus();
             String displayStatus = ctStatus;
@@ -104,10 +105,10 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
             }
             String statusChinese = StatusUtil.getStatusChinese(displayStatus);
             exportDTO.setStatus(statusChinese);
-            exportDTO.setSendDate(dataElementWithTaskVo.getSendDate());
-            exportDTO.setReceiveDate(dataElementWithTaskVo.getConfirmDate());
+            exportDTO.setReceiveDate(dataElementWithTaskVo.getSendDate());
             exportDTO.setProcessDate(dataElementWithTaskVo.getProcessingDate());
-            exportDTO.setDataType(dataElementWithTaskVo.getDataType());
+            exportDTO.setSendDate(dataElementWithTaskVo.getConfirmDate());
+
             exportDTOList.add(exportDTO);
         }
         try {

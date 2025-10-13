@@ -123,6 +123,12 @@ public class GetDetermineResultVo implements Serializable {
     private Integer collectunitqty;
 
     /**
+     * 采集单位名称
+     */
+    @TableField(exist = false)
+    private String collectUnitName;
+
+    /**
      * 备注
      */
     @TableField(value = "remarks")

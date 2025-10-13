@@ -65,7 +65,7 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
                 exportDTO.setName(baseDataElement.getName());
                 exportDTO.setStatus(StatusUtil.getStatusChinese(baseDataElement.getStatus()));
                 exportDTO.setDefinition(baseDataElement.getDefinition());
-                exportDTO.setCollectunitqty(baseDataElement.getCollectunitqty());
+                exportDTO.setCollectunit(baseDataElement.getCollectUnitName());
                 exportDTO.setPublicDate(baseDataElement.getPublishDate());
                 exportDTO.setSendDate(baseDataElement.getSendDate());
                 exportDTO.setSourceUnitName(baseDataElement.getSourceUnitName());

@@ -23,8 +23,8 @@ public class DetermineResultForOrganiserExportDTO implements Serializable {
     private String name;
     @ExcelProperty(index = 2, value = "定义")
     private String definition;
-    @ExcelProperty(index = 3, value = "采集单位数量")
-    private Integer collectunitqty;
+    @ExcelProperty(index = 3, value = "采集单位")
+    private String collectunit;
     @ExcelProperty(index = 4, value = "状态")
     private String status;
     @ExcelProperty(index = 5, value = "发起时间")

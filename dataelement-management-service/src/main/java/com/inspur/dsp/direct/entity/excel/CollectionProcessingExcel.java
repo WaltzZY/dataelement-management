@@ -48,6 +48,6 @@ public class CollectionProcessingExcel {
     /**
      * 发起时间
      */
-    @ExcelProperty(value = "发起时间", index = 5)
+    @ExcelProperty(value = "接收时间", index = 5)
     private LocalDateTime sendDate;
 }

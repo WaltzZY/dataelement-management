@@ -17,6 +17,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 
 public class OrganisersClaimingExcel {
+    /**
+     * 序号
+     */
+    @ExcelProperty(index = 0, value = "序号")
+    private Integer index;
 
     /**
      * 数据元名称
@@ -29,12 +34,6 @@ public class OrganisersClaimingExcel {
      */
     @ExcelProperty(value = "定义", index = 1)
     private String definition;
-
-    /**
-     * 采集单位数量
-     */
-    @ExcelProperty(value = "采集单位数量", index = 2)
-    private String collectQty;
 
     /**
      * 采集单位

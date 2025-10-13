@@ -74,6 +74,11 @@ public class GetPendingApprovalPageVo {
     private int collectunitqty;
 
     /**
+     * 采集单位名称
+     */
+    private String collectUnitName;
+
+    /**
      * 发起时间
      */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")

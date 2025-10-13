@@ -61,4 +61,11 @@ public interface NegotiationRecordMapper extends BaseMapper<NegotiationRecord> {
      * @return
      */
     NegotiationRecord selectFirstByBaseDataelementDataidNotDetail(@Param("baseDataelementDataid")String baseDataelementDataid);
+
+    /**
+     * 根据基准数据元ID查询所有协商单位名称
+     * @param baseDataelementDataid 基准数据元ID
+     * @return 协商单位名称列表
+     */
+    List<String> selectNegotiationUnitNamesByBaseDataelementDataid(@Param("baseDataelementDataid")String baseDataelementDataid);
 }

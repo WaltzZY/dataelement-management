@@ -35,10 +35,10 @@ public class ConfirmationExcel {
 
 
     /**
-     * 采集单位数量
+     * 采集单位
      */
-    @ExcelProperty(value = "采集单位数量", index = 3)
-    private int collectunitqty;
+    @ExcelProperty(value = "采集单位", index = 3)
+    private String collectUnit;
 
     /**
      * 数据元状态描述

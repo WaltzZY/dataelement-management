@@ -286,6 +286,9 @@ public class NegotiationServiceImpl implements NegotiationService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 加入事务
+     */
     public ImportNegotiationReturnDTO importNegotiationResult(MultipartFile file) {
         // 1. 文件校验 file 不为null , 文件格式为xlsx/xls, 文件大小小于100m
         if (file == null) {
@@ -459,7 +462,7 @@ public class NegotiationServiceImpl implements NegotiationService {
                 }
                 if (Objects.isNull(unit)) {
                     if (errorSb.length() > 0) {
-                        errorSb.append("；");
+                        errorSb.append("\n");
                     }
                     errorSb.append("未查询到相关组织或单位");
                 }
@@ -611,6 +614,13 @@ public class NegotiationServiceImpl implements NegotiationService {
             if (negotiationRecord != null && negotiationRecord.getSendDate() != null) {
                 doingneg.setNegoSendDate(negotiationRecord.getSendDate());
             }
+
+            // 查询协商单位名称并设置
+            List<String> negotiationUnitNames = negotiationRecordMapper.selectNegotiationUnitNamesByBaseDataelementDataid(vos.getDataid());
+            String negotiationUnitNamesStr = negotiationUnitNames.stream()
+                    .filter(name -> name != null && !name.trim().isEmpty())
+                    .collect(Collectors.joining("|"));
+            doingneg.setNegotiationUnitNames(negotiationUnitNamesStr);
 
             // 添加doingneg到doingNegoList中
             doingNegoList.add(doingneg);

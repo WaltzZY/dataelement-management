@@ -158,11 +158,11 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
             BaseDataElement baseDataElement = baseDataElements.get(i);
             DetermineResultForCollectorExportDTO determineResultForCollectorExportDTO = new DetermineResultForCollectorExportDTO();
             determineResultForCollectorExportDTO.setId(i + 1);
-            determineResultForCollectorExportDTO.setSourceUnitName(baseDataElement.getSourceUnitName());
             determineResultForCollectorExportDTO.setName(baseDataElement.getName());
+            determineResultForCollectorExportDTO.setDefinition(baseDataElement.getDefinition());
+            determineResultForCollectorExportDTO.setSourceUnitName(baseDataElement.getSourceUnitName());
             determineResultForCollectorExportDTO.setDatatype(baseDataElement.getDatatype());
             determineResultForCollectorExportDTO.setSendDate(baseDataElement.getSendDate());
-            determineResultForCollectorExportDTO.setDefinition(baseDataElement.getDefinition());
             exportDTOList.add(determineResultForCollectorExportDTO);
         }
         // 调用CommonService.exportExcelData

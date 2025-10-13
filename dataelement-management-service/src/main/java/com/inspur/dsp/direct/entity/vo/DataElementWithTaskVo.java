@@ -2,7 +2,7 @@ package com.inspur.dsp.direct.entity.vo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
-
+import java.util.Date;
 @Data
 public class DataElementWithTaskVo {
 
@@ -10,17 +10,17 @@ public class DataElementWithTaskVo {
      * 发起时间
      */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private String sendDate;
+    private Date sendDate;
     /**
      * 发起时间
      */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private String confirmDate;
+    private Date confirmDate;
     /**
      * 发起时间
      */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private String processingDate;
+    private Date processingDate;
     /**
      * 数据行唯一标识，ID 编号
      */

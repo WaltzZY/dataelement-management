@@ -41,4 +41,10 @@ public class ExportDoingNegoDTO {
     /** 协商发起时间 */
     @ExcelProperty(index = 7, value = "协商发起时间")
     private Date negoSendDate;
+
+    /**
+     * 协商单位名称
+     */
+    @ExcelProperty(index = 8, value = "协商参与者")
+    private String negotiationUnitNames;
 }

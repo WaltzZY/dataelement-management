@@ -33,33 +33,34 @@ public class DataElementPageExportDto {
     /**
      * 数据元定义描述
      */
-    @ExcelProperty(index = 2, value = "数据元定义")
+    @ExcelProperty(index = 2, value = "定义")
     private String definition;
-
-    /**
-     * 状态描述
-     */
-    @ExcelProperty(index = 3, value = "状态")
-    private String statusDesc;
-
-    /**
-     * 数源单位名称
-     */
-    @ExcelProperty(index = 4, value = "数源单位")
-    private String sourceUnitName;
 
     /**
      * 采集单位名称
      */
-    @ExcelProperty(index = 5, value = "采集单位")
+    @ExcelProperty(index = 3, value = "采集单位")
     private String collectDeptName;
+
+    /**
+     * 状态描述
+     */
+    @ExcelProperty(index = 4, value = "状态")
+    private String statusDesc;
 
     /**
      * 发起时间
      */
-    @ExcelProperty(index = 6, value = "发起时间")
+    @ExcelProperty(index = 5, value = "发起时间")
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date sendDate;
+
+    /**
+     * 数源单位名称
+     */
+    @ExcelProperty(index = 6, value = "数源单位")
+    private String sourceUnitName;
+
 
     /**
      * 定源时间

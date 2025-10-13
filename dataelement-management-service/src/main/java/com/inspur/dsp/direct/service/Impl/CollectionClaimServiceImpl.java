@@ -141,8 +141,10 @@ public class CollectionClaimServiceImpl implements CollectionClaimService {
             }else if (dto.getStatus() != null && dto.getStatus().contains("claimed") && dto.getStatus().contains("not_claimed")){
                 List<GetDataPendingAndProcessedSourceVO> collectionProcessed = getDataPendingAndProcessedSourceMapper.getDataPendingAndProcessedData(null,dto,orgCode, orderBySql);
 
+                AtomicInteger j = new AtomicInteger(0); // 导出列表序号
                 List<CollectionProcessedExcel> processedExcelList = collectionProcessed.stream().map(vo -> {
                     return CollectionProcessedExcel.builder()
+                            .seq(String.valueOf(j.incrementAndGet()))
                             .name(vo.getName())
                             .definition(vo.getDefinition())
                             .type(vo.getDatatype())
