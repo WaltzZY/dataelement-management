@@ -311,10 +311,15 @@ public class NegotiationServiceImpl implements NegotiationService {
         // 2. 调用CommonService.importExcelData 解析为对象数据
         List<ImportNegotiationResutDTO> vdto = commonService.importExcelData(file, ImportNegotiationResutDTO.class);
 
-        // 3. 创建MAP(string,string) negResultMap
+        // 3. 检查解析后的数据是否为空
+        if (vdto == null || vdto.isEmpty()) {
+            throw new CustomException("文件内容为空或格式不正确，请检查文件内容");
+        }
+
+        // 4. 创建MAP(string,string) negResultMap
         Map<String, String> negResultMap = new HashMap<>();
 
-        // 4. 循环vdto
+        // 5. 循环vdto
         for (ImportNegotiationResutDTO dto : vdto) {
             // key为名称,才能校验出不存在这个数据元
             negResultMap.put(dto.getDataElementName(), dto.getUnitCode());
@@ -367,9 +372,44 @@ public class NegotiationServiceImpl implements NegotiationService {
             failDetails.add(failDetail);
         }
 
-        // 重复数据检测 - 找出在当前导入批次中重复的数据元名称
+        // 获取完整数据的条目
+        Map<String, String> completeEntries = negResultMap.entrySet().stream()
+                .filter(entry -> StringUtils.hasText(entry.getKey()) && StringUtils.hasText(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing));
+
+        // 冲突检测 - 检测基准数据元与数源单位的组合是否唯一
+        List<String> conflictKeys = new ArrayList<>();
+        Map<String, String> conflictMap = new HashMap<>();
+        
+        for (Map.Entry<String, String> entry : completeEntries.entrySet()) {
+            String dataElementName = entry.getKey();
+            String unitCode = entry.getValue();
+            
+            // 查找是否存在相同数据元名称但不同数源单位的情况
+            for (Map.Entry<String, String> other : completeEntries.entrySet()) {
+                if (!other.equals(entry) && other.getKey().equals(dataElementName) && !other.getValue().equals(unitCode)) {
+                    conflictKeys.add(dataElementName);
+                    conflictMap.put(dataElementName, "数据与其它条目冲突，基准数据元与数源单位的组合必须唯一");
+                    break;
+                }
+            }
+        }
+        
+        // 处理冲突的条目，全部标记为失败
+        for (Map.Entry<String, String> entry : negResultMap.entrySet()) {
+            if (conflictKeys.contains(entry.getKey())) {
+                ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
+                failDetail.setName(entry.getKey());
+                failDetail.setUnit_code(entry.getValue());
+                failDetail.setFailReason(conflictMap.get(entry.getKey()));
+                failDetails.add(failDetail);
+            }
+        }
+
+        // 重复数据检测 - 找出在当前导入批次中重复的数据元名称（排除冲突的条目）
         Map<String, List<Map.Entry<String, String>>> duplicateGroups = negResultMap.entrySet().stream()
                 .filter(entry -> StringUtils.hasText(entry.getKey()) && StringUtils.hasText(entry.getValue()))
+                .filter(entry -> !conflictKeys.contains(entry.getKey()))
                 .collect(Collectors.groupingBy(Map.Entry::getKey));
         
         Map<String, String> validEntries = new HashMap<>();
@@ -388,40 +428,6 @@ public class NegotiationServiceImpl implements NegotiationService {
                 }
             } else {
                 validEntries.put(duplicates.get(0).getKey(), duplicates.get(0).getValue());
-            }
-        }
-
-        // 冲突检测 - 检测基准数据元与数源单位的组合是否唯一
-        List<String> conflictKeys = new ArrayList<>();
-        Map<String, String> conflictMap = new HashMap<>();
-        
-        for (Map.Entry<String, String> entry : validEntries.entrySet()) {
-            String dataElementName = entry.getKey();
-            String unitCode = entry.getValue();
-            
-            // 查找是否存在相同数据元名称但不同数源单位的情况
-            for (Map.Entry<String, String> other : validEntries.entrySet()) {
-                if (!other.equals(entry) && other.getKey().equals(dataElementName) && !other.getValue().equals(unitCode)) {
-                    conflictKeys.add(dataElementName);
-                    conflictMap.put(dataElementName, "数据与其它条目冲突，基准数据元与数源单位的组合必须唯一");
-                    break;
-                }
-            }
-        }
-        
-        // 移除冲突的条目
-        for (String conflictKey : conflictKeys) {
-            validEntries.entrySet().removeIf(entry -> entry.getKey().equals(conflictKey));
-        }
-        
-        // 处理冲突的条目，全部标记为失败
-        for (Map.Entry<String, String> entry : negResultMap.entrySet()) {
-            if (conflictKeys.contains(entry.getKey())) {
-                ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
-                failDetail.setName(entry.getKey());
-                failDetail.setUnit_code(entry.getValue());
-                failDetail.setFailReason(conflictMap.get(entry.getKey()));
-                failDetails.add(failDetail);
             }
         }
 

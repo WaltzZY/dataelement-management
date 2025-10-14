@@ -203,9 +203,11 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
         // 读取Excel文件
         List<ExcelRowDto> excelData = commonService.importExcelData(file, ExcelRowDto.class);
-        /**
-         * Excel读取异常
-         */
+        
+        // 检查解析后的数据是否为空
+        if (excelData == null || excelData.isEmpty()) {
+            throw new IllegalArgumentException("文件内容为空或格式不正确，请检查文件内容");
+        }
 
         // 处理统计
         int totalCount = excelData.size();
@@ -297,14 +299,14 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         for (int i = 0; i < excelData.size(); i++) {
             ExcelRowDto row = excelData.get(i);
             
-            // 6. 数据不完整检查（包括列名写错）
+            // 3. 数据不完整检查（包括列名写错）
             if (!isDataComplete(row)) {
                 invalidRows.add(i);
                 FailureDetailVo failureDetail = FailureDetailVo.builder()
                         .serialNumber(row.getSerialNumber())
                         .name(row.getElementName())
                         .unit_code(row.getUnitCode())
-                        .failReason("数据不完整（包括列名写错）")
+                        .failReason("数据不完整")
                         .build();
                 failureDetails.add(failureDetail);
                 continue;
@@ -313,21 +315,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             String dataKey = row.getElementName();
             String combinationKey = row.getElementName() + "|||" + row.getUnitCode();
             
-            // 4. 数据与其它条目重复检测（完全相同的数据元名称和数源单位组合）
-            if (combinationFirstOccurrence.containsKey(combinationKey)) {
-                // 标记为重复数据失败
-                invalidRows.add(i);
-                FailureDetailVo failureDetail = FailureDetailVo.builder()
-                        .serialNumber(row.getSerialNumber())
-                        .name(row.getElementName())
-                        .unit_code(row.getUnitCode())
-                        .failReason("数据与其它条目重复，系统已保留首次出现的数据")
-                        .build();
-                failureDetails.add(failureDetail);
-                continue;
-            }
-            
-            // 5. 数据与其它条目冲突检测（同一数据元与不同数源单位的组合）
+            // 4. 数据与其它条目冲突检测（同一数据元与不同数源单位的组合）
             if (dataFirstOccurrence.containsKey(dataKey)) {
                 // 已经存在同一数据元但不同数源单位的组合
                 String existingCombination = null;
@@ -366,6 +354,20 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
                     failureDetails.add(currentFailure);
                     continue;
                 }
+            }
+            
+            // 5. 数据与其它条目重复检测（完全相同的数据元名称和数源单位组合）
+            if (combinationFirstOccurrence.containsKey(combinationKey)) {
+                // 标记为重复数据失败
+                invalidRows.add(i);
+                FailureDetailVo failureDetail = FailureDetailVo.builder()
+                        .serialNumber(row.getSerialNumber())
+                        .name(row.getElementName())
+                        .unit_code(row.getUnitCode())
+                        .failReason("数据与其它条目重复，系统已保留首次出现的数据")
+                        .build();
+                failureDetails.add(failureDetail);
+                continue;
             }
             
             // 记录首次出现位置
