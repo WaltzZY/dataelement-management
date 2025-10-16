@@ -507,4 +507,5 @@
             and dde.base_dataelement_dataid = ct.base_dataelement_dataid
         where dde.base_dataelement_dataid = #{dataId}
     </select>
+
 </mapper>
