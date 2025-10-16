@@ -26,13 +26,13 @@ public class OrganisersClaimingExcel {
     /**
      * 数据元名称
      */
-    @ExcelProperty(value = "数据元名称", index = 0)
+    @ExcelProperty(value = "数据元名称", index = 1)
     private String name;
 
     /**
      * 数据元定义描述
      */
-    @ExcelProperty(value = "定义", index = 1)
+    @ExcelProperty(value = "定义", index = 2)
     private String definition;
 
     /**

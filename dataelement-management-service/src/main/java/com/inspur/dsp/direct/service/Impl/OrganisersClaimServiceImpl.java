@@ -164,7 +164,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
 
                 AtomicInteger i = new AtomicInteger(0); // 导出列表序号
                 List<OrganisersClaimPendingExcel> pendingExcelList = list_pendingSource.stream().map(vo -> {
-                    return OrganisersClaimPendingExcel.builder().seq(String.valueOf(i.incrementAndGet())).name(vo.getName()).definition(vo.getDefinition()).collectUnit(String.valueOf(vo.getCollectunitnames())).collectUnit(vo.getCollectunitnames()).status(StatusEnums.getDescByCode(vo.getStatus())).build();
+                    return OrganisersClaimPendingExcel.builder().seq(String.valueOf(i.incrementAndGet())).name(vo.getName()).definition(vo.getDefinition()).collectUnit(vo.getCollectunitnames()).status(StatusEnums.getDescByCode(vo.getStatus())).build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
                 commonService.exportExcelData(pendingExcelList, response, "待定源（认领型）基准数据元清单", OrganisersClaimPendingExcel.class);
@@ -186,8 +186,9 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
                     vo.setCollectunitnames(collectUnitNames);
                 }
 
+                AtomicInteger i = new AtomicInteger(0);
                 List<OrganisersClaimingExcel> pendingExcelList = claimDataElementVOS.stream().map(vo -> {
-                    return OrganisersClaimingExcel.builder().name(vo.getName()).definition(vo.getDefinition()).collectUnit(String.valueOf(vo.getCollectunitqty())).collectUnit(vo.getCollectunitnames()).status(StatusEnums.getDescByCode(vo.getStatus())).sendDate(vo.getSendDate()).build();
+                    return OrganisersClaimingExcel.builder().index(i.incrementAndGet()).name(vo.getName()).definition(vo.getDefinition()).collectUnit(vo.getCollectunitnames()).status(StatusEnums.getDescByCode(vo.getStatus())).sendDate(vo.getSendDate()).build();
                 }).collect(Collectors.toList());
                 // 使用EasyExcel导出
                 commonService.exportExcelData(pendingExcelList, response, "认领中基准数据元清单", OrganisersClaimingExcel.class);

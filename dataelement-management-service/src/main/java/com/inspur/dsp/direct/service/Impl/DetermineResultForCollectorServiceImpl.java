@@ -10,6 +10,7 @@ import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.dto.DetermineResultForCollectorExportDTO;
+import com.inspur.dsp.direct.entity.vo.GetDetermineResultVo;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.DetermineResultForCollectorService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -126,41 +127,25 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
     @Override
     public void download(BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
 
-        // 调用Mapper方法查询基准数据元列表
+        // 调用Mapper方法查询基准数据元列表（包含所有采集单位）
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         // 获取登录人账户
         String orgCode = userInfo.getOrgCode();
-        QueryWrapper<BaseDataElement> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("source_unit_code", orgCode);
-        queryWrapper.eq("status", "designated_source");
-
-        String sendDateBegin = baseDataElementSearchDTO.getSendDateBegin();
-        String sendDateEnd = baseDataElementSearchDTO.getSendDateEnd();
-        if (StringUtils.isNotBlank(sendDateBegin) && StringUtils.isNotBlank(sendDateEnd)) {
-            queryWrapper.between("send_date", sendDateBegin, sendDateEnd);
-        }
-        String keywords = baseDataElementSearchDTO.getKeyword();
-        if (StringUtils.isNotBlank(keywords)) {
-            queryWrapper.and(i -> i
-                    .like(StringUtils.isNotBlank(keywords), "name", keywords)
-                    .or()
-                    .like(StringUtils.isNotBlank(keywords), "definition", keywords)
-            );
-        }
-
-        List<BaseDataElement> baseDataElements = baseDataElementMapper.selectList(queryWrapper);
+        
+        List<GetDetermineResultVo> baseDataElements = baseDataElementMapper.getDetermineResultListForCollector(orgCode, baseDataElementSearchDTO);
         if (baseDataElements.isEmpty()) {
             log.error("当前导出数据为空!");
             return;
         }
         List<DetermineResultForCollectorExportDTO> exportDTOList = new ArrayList<>();
         for (int i = 0; i < baseDataElements.size(); i++) {
-            BaseDataElement baseDataElement = baseDataElements.get(i);
+            GetDetermineResultVo baseDataElement = baseDataElements.get(i);
             DetermineResultForCollectorExportDTO determineResultForCollectorExportDTO = new DetermineResultForCollectorExportDTO();
             determineResultForCollectorExportDTO.setId(i + 1);
             determineResultForCollectorExportDTO.setName(baseDataElement.getName());
             determineResultForCollectorExportDTO.setDefinition(baseDataElement.getDefinition());
-            determineResultForCollectorExportDTO.setSourceUnitName(baseDataElement.getSourceUnitName());
+            // 使用collectUnitName字段，包含所有采集单位，用|分隔
+            determineResultForCollectorExportDTO.setSourceUnitName(baseDataElement.getCollectUnitName());
             determineResultForCollectorExportDTO.setDatatype(baseDataElement.getDatatype());
             determineResultForCollectorExportDTO.setSendDate(baseDataElement.getSendDate());
             exportDTOList.add(determineResultForCollectorExportDTO);

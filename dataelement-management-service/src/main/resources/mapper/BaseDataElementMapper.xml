@@ -199,7 +199,7 @@
         bdl.send_date AS sendDate,
         bdl.confirm_date AS confirmDate,
         bdl.collectunitqty,
-        dde.source_unit_name AS collectUnitName
+        GROUP_CONCAT(DISTINCT dde.source_unit_name SEPARATOR '|') AS collectUnitName
         FROM base_data_element bdl
         LEFT JOIN domain_data_element dde ON bdl.dataid = dde.base_dataelement_dataid
         WHERE bdl.status = 'designated_source'
@@ -227,6 +227,7 @@
             OR bdl.source_unit_name LIKE CONCAT('%', #{dto.keyword}, '%')
             OR dde.source_unit_name LIKE CONCAT('%', #{dto.keyword}, '%'))
         </if>
+        GROUP BY bdl.dataid
         <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
             ORDER BY ${sortSql}
         </if>
@@ -506,5 +507,32 @@
                  left join confirmation_task ct on dde.source_unit_code = ct.processing_unit_code
             and dde.base_dataelement_dataid = ct.base_dataelement_dataid
         where dde.base_dataelement_dataid = #{dataId}
+    </select>
+
+    <!-- 获取采集方已定源数据元列表（包含所有采集单位） -->
+    <select id="getDetermineResultListForCollector" resultType="com.inspur.dsp.direct.entity.vo.GetDetermineResultVo">
+        select
+        bde.*,
+        GROUP_CONCAT(DISTINCT dde.source_unit_name SEPARATOR '|') as collectUnitName
+        from base_data_element bde
+        left join domain_data_element dde on bde.dataid = dde.base_dataelement_dataid
+        <where>
+            bde.source_unit_code = #{orgCode} AND bde.status = 'designated_source'
+            <if test="dto.keyword != null and dto.keyword != ''">
+                and (bde.name like concat('%', #{dto.keyword}, '%') or bde.definition like concat('%', #{dto.keyword}, '%'))
+            </if>
+            <if test="dto.sendDateBegin != null and dto.sendDateEnd != null">
+                and bde.send_date between #{dto.sendDateBegin} and #{dto.sendDateEnd}
+            </if>
+        </where>
+        GROUP BY bde.dataid
+        <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">
+            <if test="dto.sortOrder == 'asc'">
+                order by bde.${dto.sortField} asc
+            </if>
+            <if test="dto.sortOrder == 'desc'">
+                order by bde.${dto.sortField} desc
+            </if>
+        </if>
     </select>
 </mapper>

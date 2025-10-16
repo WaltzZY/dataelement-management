@@ -37,12 +37,12 @@ public class OrganisersClaimPendingExcel {
     /**
      * 采集单位
      */
-    @ExcelProperty(value = "采集单位", index = 4)
+    @ExcelProperty(value = "采集单位", index = 3)
     private String collectUnit;
 
     /**
      * 状态
      */
-    @ExcelProperty(value = "状态", index = 5)
+    @ExcelProperty(value = "状态", index = 4)
     private String status;
 }
