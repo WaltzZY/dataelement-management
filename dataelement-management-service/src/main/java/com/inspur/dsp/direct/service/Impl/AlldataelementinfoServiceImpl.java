@@ -203,7 +203,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
         // 读取Excel文件
         List<ExcelRowDto> excelData = commonService.importExcelData(file, ExcelRowDto.class);
-        
+
         // 检查解析后的数据是否为空
         if (excelData == null || excelData.isEmpty()) {
             throw new IllegalArgumentException("文件内容为空或格式不正确，请检查文件内容");
@@ -219,20 +219,20 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         Map<String, List<ExcelRowDto>> duplicateGroups = new HashMap<>();
         Map<String, List<Integer>> conflictGroups = new HashMap<>();
         Set<Integer> invalidRows = new HashSet<>();
-        
+
         preprocessData(excelData, duplicateGroups, conflictGroups, invalidRows, failureDetails);
 
         // 逐行处理Excel数据
         for (int i = 0; i < excelData.size(); i++) {
             ExcelRowDto row = excelData.get(i);
             int rowNumber = i + 1;
-            
+
             // 如果该行已在预处理中标记为无效，跳过处理
             if (invalidRows.contains(i)) {
                 failureCount++;
                 continue;
             }
-            
+
             try {
                 ProcessResult result = processRow(row, rowNumber, duplicateGroups, conflictGroups, i);
                 if (result.isSuccess()) {
@@ -244,13 +244,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             } catch (Exception e) {
                 log.error("处理第{}行数据时发生异常: {}", rowNumber, e.getMessage(), e);
                 failureCount++;
-                FailureDetailVo failureDetail = FailureDetailVo.builder()
-                        .serialNumber(row.getSerialNumber())
-                        .name(row.getElementName())
-                        .unit_code(row.getUnitCode())
-                        .failReason("系统异常: " + e.getMessage())
-                        .build();
-                failureDetails.add(failureDetail);
+                failureDetails.add(createFailureDetail(row, "系统异常: " + e.getMessage()));
             }
         }
 
@@ -286,35 +280,29 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     /**
      * 预处理数据：检测数据完整性、重复数据和冲突数据
      */
-    private void preprocessData(List<ExcelRowDto> excelData, 
-                               Map<String, List<ExcelRowDto>> duplicateGroups,
-                               Map<String, List<Integer>> conflictGroups,
-                               Set<Integer> invalidRows,
-                               List<FailureDetailVo> failureDetails) {
-        
+    private void preprocessData(List<ExcelRowDto> excelData,
+                                Map<String, List<ExcelRowDto>> duplicateGroups,
+                                Map<String, List<Integer>> conflictGroups,
+                                Set<Integer> invalidRows,
+                                List<FailureDetailVo> failureDetails) {
+
         // 用于记录数据出现位置
         Map<String, Integer> dataFirstOccurrence = new HashMap<>();
         Map<String, Integer> combinationFirstOccurrence = new HashMap<>();
-        
+
         for (int i = 0; i < excelData.size(); i++) {
             ExcelRowDto row = excelData.get(i);
-            
+
             // 3. 数据不完整检查（包括列名写错）
             if (!isDataComplete(row)) {
                 invalidRows.add(i);
-                FailureDetailVo failureDetail = FailureDetailVo.builder()
-                        .serialNumber(row.getSerialNumber())
-                        .name(row.getElementName())
-                        .unit_code(row.getUnitCode())
-                        .failReason("数据不完整")
-                        .build();
-                failureDetails.add(failureDetail);
+                failureDetails.add(createFailureDetail(row, "数据不完整"));
                 continue;
             }
-            
+
             String dataKey = row.getElementName();
             String combinationKey = row.getElementName() + "|||" + row.getUnitCode();
-            
+
             // 4. 数据与其它条目冲突检测（同一数据元与不同数源单位的组合）
             if (dataFirstOccurrence.containsKey(dataKey)) {
                 // 已经存在同一数据元但不同数源单位的组合
@@ -325,74 +313,84 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
                         break;
                     }
                 }
-                
+
                 if (existingCombination != null && !existingCombination.equals(combinationKey)) {
                     // 冲突，将两个条目都标记为失败
                     int firstIndex = combinationFirstOccurrence.get(existingCombination);
-                    
+
                     // 如果首次出现的条目还没有被标记为无效，现在标记并添加失败记录
                     if (!invalidRows.contains(firstIndex)) {
                         invalidRows.add(firstIndex);
                         ExcelRowDto firstRow = excelData.get(firstIndex);
-                        FailureDetailVo firstFailure = FailureDetailVo.builder()
-                                .serialNumber(firstRow.getSerialNumber())
-                                .name(firstRow.getElementName())
-                                .unit_code(firstRow.getUnitCode())
-                                .failReason("数据与其它条目冲突，基准数据元与数源单位的组合必须唯一")
-                                .build();
-                        failureDetails.add(firstFailure);
+                        failureDetails.add(createFailureDetail(firstRow,
+                                "数据与其它条目冲突，基准数据元与数源单位的组合必须唯一"));
                     }
-                    
+
                     // 标记当前条目为无效并添加失败记录
                     invalidRows.add(i);
-                    FailureDetailVo currentFailure = FailureDetailVo.builder()
-                            .serialNumber(row.getSerialNumber())
-                            .name(row.getElementName())
-                            .unit_code(row.getUnitCode())
-                            .failReason("数据与其它条目冲突，基准数据元与数源单位的组合必须唯一")
-                            .build();
-                    failureDetails.add(currentFailure);
+                    failureDetails.add(createFailureDetail(row,
+                            "数据与其它条目冲突，基准数据元与数源单位的组合必须唯一"));
                     continue;
                 }
             }
-            
+
             // 5. 数据与其它条目重复检测（完全相同的数据元名称和数源单位组合）
             if (combinationFirstOccurrence.containsKey(combinationKey)) {
                 // 标记为重复数据失败
                 invalidRows.add(i);
-                FailureDetailVo failureDetail = FailureDetailVo.builder()
-                        .serialNumber(row.getSerialNumber())
-                        .name(row.getElementName())
-                        .unit_code(row.getUnitCode())
-                        .failReason("数据与其它条目重复，系统已保留首次出现的数据")
-                        .build();
-                failureDetails.add(failureDetail);
+                failureDetails.add(createFailureDetail(row,
+                        "数据与其它条目重复，系统已保留首次出现的数据"));
                 continue;
             }
-            
+
             // 记录首次出现位置
             dataFirstOccurrence.put(dataKey, i);
             combinationFirstOccurrence.put(combinationKey, i);
         }
     }
-    
+
     /**
      * 检查数据是否完整
      */
     private boolean isDataComplete(ExcelRowDto row) {
         // 检查必要字段是否为空
-        return StringUtils.hasText(row.getElementName()) && 
-               StringUtils.hasText(row.getUnitCode()) &&
-               StringUtils.hasText(row.getSerialNumber());
+        return StringUtils.hasText(row.getElementName()) &&
+                StringUtils.hasText(row.getUnitCode()) &&
+                StringUtils.hasText(row.getSerialNumber());
     }
-    
+
+    /**
+     * 创建失败详情对象（包含单位名称）
+     */
+    private FailureDetailVo createFailureDetail(ExcelRowDto row, String failReason) {
+        String unitName = "";
+        if (StringUtils.hasText(row.getUnitCode())) {
+            try {
+                OrganizationUnit unit = commonService.getOrgInfoByOrgCode(row.getUnitCode());
+                if (unit != null) {
+                    unitName = unit.getUnitName();
+                }
+            } catch (Exception e) {
+                log.warn("获取单位名称失败，单位代码: {}, 错误: {}", row.getUnitCode(), e.getMessage());
+            }
+        }
+
+        return FailureDetailVo.builder()
+                .serialNumber(row.getSerialNumber())
+                .name(row.getElementName())
+                .unit_code(row.getUnitCode())
+                .unit_name(unitName)  // 设置单位名称
+                .failReason(failReason)
+                .build();
+    }
+
     /**
      * 处理单行数据 - 校验所有条件并收集所有错误信息
      */
-    private ProcessResult processRow(ExcelRowDto row, int rowNumber, 
-                                   Map<String, List<ExcelRowDto>> duplicateGroups,
-                                   Map<String, List<Integer>> conflictGroups,
-                                   int currentIndex) {
+    private ProcessResult processRow(ExcelRowDto row, int rowNumber,
+                                     Map<String, List<ExcelRowDto>> duplicateGroups,
+                                     Map<String, List<Integer>> conflictGroups,
+                                     int currentIndex) {
         log.debug("处理第{}行数据: {}", rowNumber, row);
 
         List<String> errorMessages = new ArrayList<>();
@@ -427,7 +425,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         if (!errorMessages.isEmpty()) {
             String combinedErrorMessage = String.join("\n", errorMessages);
             log.debug("第{}行数据校验失败: {}", rowNumber, combinedErrorMessage);
-            return ProcessResult.failure(row, combinedErrorMessage);
+            return ProcessResult.failure(row, combinedErrorMessage, organizationUnit);
         }
 
         // 所有校验通过，执行更新操作
@@ -542,11 +540,17 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             return new ProcessResult(true, null);
         }
 
-        public static ProcessResult failure(ExcelRowDto row, String reason) {
+        public static ProcessResult failure(ExcelRowDto row, String reason, OrganizationUnit organizationUnit) {
+            String unitName = "";
+            if (organizationUnit != null) {
+                unitName = organizationUnit.getUnitName();
+            }
+
             FailureDetailVo detail = FailureDetailVo.builder()
                     .serialNumber(row.getSerialNumber())
                     .name(row.getElementName())
                     .unit_code(row.getUnitCode())
+                    .unit_name(unitName)  // 设置单位名称
                     .failReason(reason)
                     .build();
             return new ProcessResult(false, detail);
@@ -664,28 +668,18 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
         // 转换为导出DTO列表
         List<ImportFailureExportDTO> exportList = new ArrayList<>();
-        
+
         for (FailureDetailVo failureDetail : failureDetails) {
             ImportFailureExportDTO exportDto = new ImportFailureExportDTO();
             exportDto.setSerialNumber(failureDetail.getSerialNumber());
             exportDto.setName(failureDetail.getName());
             exportDto.setUnitCode(failureDetail.getUnit_code());
-            
-            // 获取单位名称
-            String unitName = "";
-            if (failureDetail.getUnit_code() != null && !failureDetail.getUnit_code().trim().isEmpty()) {
-                try {
-                    OrganizationUnit organizationUnit = commonService.getOrgInfoByOrgCode(failureDetail.getUnit_code());
-                    if (organizationUnit != null) {
-                        unitName = organizationUnit.getUnitName();
-                    }
-                } catch (Exception e) {
-                    log.warn("获取单位名称失败，单位代码：{}, 错误：{}", failureDetail.getUnit_code(), e.getMessage());
-                }
-            }
-            exportDto.setUnitName(unitName);
+
+            // 直接使用 FailureDetailVo 中已经设置好的单位名称
+            // 不需要再次查询，因为在创建 FailureDetailVo 时已经查询并设置了
+            exportDto.setUnitName(failureDetail.getUnit_name() != null ? failureDetail.getUnit_name() : "");
             exportDto.setFailReason(failureDetail.getFailReason());
-            
+
             exportList.add(exportDto);
         }
 

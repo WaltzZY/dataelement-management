@@ -48,9 +48,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -118,7 +120,7 @@ public class NegotiationServiceImpl implements NegotiationService {
                 collectUnitsAndStatus.setTaskStatus(task.getStatus());
                 collectUnitsAndStatus.setTaskStatusDesc(ConfirmationTaskEnums.getDescByCode(task.getStatus()));
 
-                // 添加CollectUnitsAndStatusVO到List<CollectUnitsAndStatusVO>中
+                // 添加 CollectUnitsAndStatusVO到List<CollectUnitsAndStatusVO>中
                 collectUnitsAndStatusList.add(collectUnitsAndStatus);
             }
 
@@ -191,8 +193,6 @@ public class NegotiationServiceImpl implements NegotiationService {
         }
         // 调用BaseDataElementMapper.updateById(BaseDataElement)方法保存BaseDataElement
         baseDataElementMapper.updateById(updateBaseDataElements);
-
-
     }
 
     @Override
@@ -275,14 +275,17 @@ public class NegotiationServiceImpl implements NegotiationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void submitSingleNegotiationResult(SingleNegotiationResultDto dto) {
-        // 1. 创建MAP(string，string) NegResultMap
-        Map<String, String> negResultMap = new HashMap<>();
+        // 创建单条导入数据DTO
+        ImportNegotiationResutDTO resutDTO = new ImportNegotiationResutDTO();
+        resutDTO.setDataElementName(dto.getDataid());
+        resutDTO.setUnitCode(dto.getOrgCode());
 
-        // 2. 在MAP中添加dataid,org_code
-        negResultMap.put(dto.getDataid(), dto.getOrgCode());
+        // 创建List并添加单条数据
+        List<ImportNegotiationResutDTO> dataList = new ArrayList<>();
+        dataList.add(resutDTO);
 
-        // 3. 调用方法7：SubmitNegotiationResult(MAP NegResultMap)
-        submitNegotiationResult(negResultMap, 1L);
+        // 调用新的方法处理
+        submitNegotiationResult(dataList);
     }
 
     @Override
@@ -316,17 +319,8 @@ public class NegotiationServiceImpl implements NegotiationService {
             throw new CustomException("文件内容为空或格式不正确，请检查文件内容");
         }
 
-        // 4. 创建MAP(string,string) negResultMap
-        Map<String, String> negResultMap = new HashMap<>();
-
-        // 5. 循环vdto
-        for (ImportNegotiationResutDTO dto : vdto) {
-            // key为名称,才能校验出不存在这个数据元
-            negResultMap.put(dto.getDataElementName(), dto.getUnitCode());
-        }
-
-        // 5. 以negResultMap为参数，调用SubmitNegotiationResult方法
-        return submitNegotiationResult(negResultMap, (long) vdto.size());
+        // 4. 直接传递List到处理方法
+        return submitNegotiationResult(vdto);
     }
 
     @Override
@@ -351,100 +345,118 @@ public class NegotiationServiceImpl implements NegotiationService {
         }
     }
 
+    /**
+     * 处理协商结果（接收List）
+     */
     @Transactional(rollbackFor = Exception.class)
-    public ImportNegotiationReturnDTO submitNegotiationResult(Map<String, String> negResultMap, Long totalCount) {
+    public ImportNegotiationReturnDTO submitNegotiationResult(List<ImportNegotiationResutDTO> dataList) {
         // 1. 创建ImportNegotiationReturnDTO
         ImportNegotiationReturnDTO result = new ImportNegotiationReturnDTO();
         List<ImportNegotiationFailDetailDTO> failDetails = new ArrayList<>();
         long successCount = 0;
+        long totalCount = dataList.size();
 
-        // 数据完整性检查
-        List<Map.Entry<String, String>> incompleteEntries = negResultMap.entrySet().stream()
-                .filter(entry -> !StringUtils.hasText(entry.getKey()) || !StringUtils.hasText(entry.getValue()))
+        // 2. 数据完整性检查 - 检查数据元名称和单位代码是否都有值
+        List<ImportNegotiationResutDTO> incompleteData = dataList.stream()
+                .filter(dto -> !StringUtils.hasText(dto.getDataElementName()) || !StringUtils.hasText(dto.getUnitCode()))
                 .collect(Collectors.toList());
-        
+
         // 处理数据不完整的情况
-        for (Map.Entry<String, String> entry : incompleteEntries) {
+        for (ImportNegotiationResutDTO dto : incompleteData) {
             ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
-            failDetail.setName(entry.getKey());
-            failDetail.setUnit_code(entry.getValue());
+            failDetail.setName(dto.getDataElementName());
+            failDetail.setUnit_code(dto.getUnitCode());
             failDetail.setFailReason("数据不完整");
             failDetails.add(failDetail);
         }
 
-        // 获取完整数据的条目
-        Map<String, String> completeEntries = negResultMap.entrySet().stream()
-                .filter(entry -> StringUtils.hasText(entry.getKey()) && StringUtils.hasText(entry.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing));
+        // 3. 获取完整数据的条目
+        List<ImportNegotiationResutDTO> completeData = dataList.stream()
+                .filter(dto -> StringUtils.hasText(dto.getDataElementName()) && StringUtils.hasText(dto.getUnitCode()))
+                .collect(Collectors.toList());
 
-        // 冲突检测 - 检测基准数据元与数源单位的组合是否唯一
-        List<String> conflictKeys = new ArrayList<>();
-        Map<String, String> conflictMap = new HashMap<>();
-        
-        for (Map.Entry<String, String> entry : completeEntries.entrySet()) {
-            String dataElementName = entry.getKey();
-            String unitCode = entry.getValue();
-            
-            // 查找是否存在相同数据元名称但不同数源单位的情况
-            for (Map.Entry<String, String> other : completeEntries.entrySet()) {
-                if (!other.equals(entry) && other.getKey().equals(dataElementName) && !other.getValue().equals(unitCode)) {
-                    conflictKeys.add(dataElementName);
-                    conflictMap.put(dataElementName, "数据与其它条目冲突，基准数据元与数源单位的组合必须唯一");
-                    break;
-                }
+        // 4. 冲突检测 - 检测基准数据元与数源单位的组合是否唯一
+        // 使用Map记录每个数据元名称对应的所有单位代码
+        Map<String, Set<String>> dataElementUnitMap = new HashMap<>();
+        Set<String> conflictDataElements = new HashSet<>();
+
+        for (ImportNegotiationResutDTO dto : completeData) {
+            String dataElementName = dto.getDataElementName();
+            String unitCode = dto.getUnitCode();
+
+            dataElementUnitMap.putIfAbsent(dataElementName, new HashSet<>());
+            dataElementUnitMap.get(dataElementName).add(unitCode);
+
+            // 如果同一个数据元有多个不同的单位代码，标记为冲突
+            if (dataElementUnitMap.get(dataElementName).size() > 1) {
+                conflictDataElements.add(dataElementName);
             }
         }
-        
+
         // 处理冲突的条目，全部标记为失败
-        for (Map.Entry<String, String> entry : negResultMap.entrySet()) {
-            if (conflictKeys.contains(entry.getKey())) {
+        for (ImportNegotiationResutDTO dto : completeData) {
+            if (conflictDataElements.contains(dto.getDataElementName())) {
                 ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
-                failDetail.setName(entry.getKey());
-                failDetail.setUnit_code(entry.getValue());
-                failDetail.setFailReason(conflictMap.get(entry.getKey()));
+                failDetail.setName(dto.getDataElementName());
+                failDetail.setUnit_code(dto.getUnitCode());
+
+                // 获取单位名称
+                OrganizationUnit unit = commonService.getOrgInfoByOrgCode(dto.getUnitCode());
+                if (unit != null) {
+                    failDetail.setUnit_name(unit.getUnitName());
+                }
+
+                failDetail.setFailReason("数据与其它条目冲突，基准数据元与数源单位的组合必须唯一");
                 failDetails.add(failDetail);
             }
         }
 
-        // 重复数据检测 - 找出在当前导入批次中重复的数据元名称（排除冲突的条目）
-        Map<String, List<Map.Entry<String, String>>> duplicateGroups = negResultMap.entrySet().stream()
-                .filter(entry -> StringUtils.hasText(entry.getKey()) && StringUtils.hasText(entry.getValue()))
-                .filter(entry -> !conflictKeys.contains(entry.getKey()))
-                .collect(Collectors.groupingBy(Map.Entry::getKey));
-        
-        Map<String, String> validEntries = new HashMap<>();
-        
-        for (Map.Entry<String, List<Map.Entry<String, String>>> group : duplicateGroups.entrySet()) {
-            List<Map.Entry<String, String>> duplicates = group.getValue();
+        // 5. 重复数据检测 - 找出在当前导入批次中重复的数据元名称（排除冲突的条目）
+        // 按照 "数据元名称|单位代码" 组合进行分组
+        Map<String, List<ImportNegotiationResutDTO>> duplicateGroups = completeData.stream()
+                .filter(dto -> !conflictDataElements.contains(dto.getDataElementName()))
+                .collect(Collectors.groupingBy(dto -> dto.getDataElementName() + "|" + dto.getUnitCode()));
+
+        List<ImportNegotiationResutDTO> validData = new ArrayList<>();
+
+        for (Map.Entry<String, List<ImportNegotiationResutDTO>> group : duplicateGroups.entrySet()) {
+            List<ImportNegotiationResutDTO> duplicates = group.getValue();
             if (duplicates.size() > 1) {
                 // 保留第一条，其余标记为重复失败
-                validEntries.put(duplicates.get(0).getKey(), duplicates.get(0).getValue());
+                validData.add(duplicates.get(0));
                 for (int i = 1; i < duplicates.size(); i++) {
                     ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
-                    failDetail.setName(duplicates.get(i).getKey());
-                    failDetail.setUnit_code(duplicates.get(i).getValue());
+                    failDetail.setName(duplicates.get(i).getDataElementName());
+                    failDetail.setUnit_code(duplicates.get(i).getUnitCode());
+
+                    // 获取单位名称
+                    OrganizationUnit unit = commonService.getOrgInfoByOrgCode(duplicates.get(i).getUnitCode());
+                    if (unit != null) {
+                        failDetail.setUnit_name(unit.getUnitName());
+                    }
+
                     failDetail.setFailReason("数据与其它条目重复，系统已保留首次出现的数据");
                     failDetails.add(failDetail);
                 }
             } else {
-                validEntries.put(duplicates.get(0).getKey(), duplicates.get(0).getValue());
+                validData.add(duplicates.get(0));
             }
         }
 
-        // 2. 循环validEntries处理正常数据
-        for (Map.Entry<String, String> entry : validEntries.entrySet()) {
-            String dataid = entry.getKey();
-            String orgCode = entry.getValue();
+        // 6. 循环validData处理正常数据
+        for (ImportNegotiationResutDTO dto : validData) {
+            String dataElementName = dto.getDataElementName();
+            String orgCode = dto.getUnitCode();
 
             try {
                 // 获取当前登录人信息
                 UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
 
-                // 调用baseDataElementMapper中的mybatisPlus的默认方法selectbyId()，查询基准数据元信息BaseDataElement
-                BaseDataElement baseinfo = baseDataElementMapper.selectById(dataid);
+                // 先尝试按ID查询基准数据元信息
+                BaseDataElement baseinfo = baseDataElementMapper.selectById(dataElementName);
                 if (Objects.isNull(baseinfo)) {
-                    // 获取数据元名称为传入map的key的基准数据元信息
-                    baseinfo = baseDataElementMapper.selectFirstByName(dataid);
+                    // 如果按ID查不到，则按名称查询
+                    baseinfo = baseDataElementMapper.selectFirstByName(dataElementName);
                 }
 
                 StringBuilder errorSb = new StringBuilder();
@@ -507,24 +519,26 @@ public class NegotiationServiceImpl implements NegotiationService {
             } catch (Exception e) {
                 // 循环时发现异常则记录在ImportNegotiationFailDetailDTO中
                 ImportNegotiationFailDetailDTO failDetail = new ImportNegotiationFailDetailDTO();
-                BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataid);
+
+                // 尝试获取数据元信息用于失败详情
+                BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataElementName);
                 if (baseDataElement == null) {
-                    baseDataElement = baseDataElementMapper.selectFirstByName(dataid);
+                    baseDataElement = baseDataElementMapper.selectFirstByName(dataElementName);
                 }
                 if (baseDataElement != null) {
-                    failDetail.setDataid(dataid);
+                    failDetail.setDataid(dataElementName);
                     failDetail.setName(baseDataElement.getName());
                 } else {
-                    failDetail.setName(dataid);
+                    failDetail.setName(dataElementName);
                 }
-                
+
                 // 获取单位名称
                 OrganizationUnit unit = commonService.getOrgInfoByOrgCode(orgCode);
                 failDetail.setUnit_code(orgCode);
                 if (unit != null) {
                     failDetail.setUnit_name(unit.getUnitName());
                 }
-                
+
                 failDetail.setFailReason(e.getMessage());
                 failDetails.add(failDetail);
             }
@@ -698,10 +712,10 @@ public class NegotiationServiceImpl implements NegotiationService {
 
         // 调用CommonService.exportExcelData
         try {
-            commonService.exportExcelData(failList, response, "导入失败清单（录入协商结果）", ExportNegotiationFailDTO.class);
+            commonService.exportExcelData(failList, response, "导入失败清单(录入协商结果)", ExportNegotiationFailDTO.class);
         } catch (IOException e) {
-            log.error("导出数据[导入失败清单（录入协商结果）]失败", e);
-            throw new RuntimeException("导出数据[导入失败清单（录入协商结果）]失败");
+            log.error("导出数据[导入失败清单(录入协商结果)]失败", e);
+            throw new RuntimeException("导出数据[导入失败清单(录入协商结果)]失败");
         }
     }
 }
