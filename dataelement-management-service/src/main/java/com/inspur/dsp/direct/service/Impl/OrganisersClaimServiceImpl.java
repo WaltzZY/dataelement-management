@@ -84,7 +84,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
             List<DomainDataElement> domainDataElements = claimDomainDataElementMapper.selectDomainDataElementByBaseDataElementDataId(vo.getDataid());
 
             // 提取所有source_unit_name并用"|"分割组合
-            String collectUnitNames = domainDataElements.stream().map(DomainDataElement::getSourceUnitName).collect(Collectors.joining("|"));
+            String collectUnitNames = domainDataElements.stream().map(DomainDataElement::getSourceUnitName).collect(Collectors.joining(" | "));
 
             // 将组合成的字符串赋值给ClaimDataElementVO.collectunitnames列
             vo.setCollectunitnames(collectUnitNames);
