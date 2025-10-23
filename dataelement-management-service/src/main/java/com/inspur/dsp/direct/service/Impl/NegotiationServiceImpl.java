@@ -32,6 +32,7 @@ import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.enums.NePageSortFieldEnums;
 import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
+import com.inspur.dsp.direct.enums.TemplateTypeEnums;
 import com.inspur.dsp.direct.exception.CustomException;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.NegotiationService;
@@ -44,7 +45,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -717,5 +719,62 @@ public class NegotiationServiceImpl implements NegotiationService {
             log.error("导出数据[导入失败清单(录入协商结果)]失败", e);
             throw new RuntimeException("导出数据[导入失败清单(录入协商结果)]失败");
         }
+    }
+
+    @Override
+    public void downloadImportTemplate(TemplateTypeEnums templateType, HttpServletResponse response) {
+        log.info("开始下载导入模板，模板类型：{}", templateType.getDesc());
+
+        try {
+            switch (templateType) {
+                case IMPORT_DATASOURCE_RESULT:
+                    String templateFileName = "定源结果导入模板.xlsx";
+                    String downloadFileName = "导入定源结果模板.xlsx";
+                    downloadTemplateFile(templateFileName, downloadFileName, response);
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("不支持的模板类型：" + templateType.getDesc());
+            }
+
+            log.info("模板下载完成，模板类型：{}", templateType.getDesc());
+        } catch (Exception e) {
+            log.error("下载模板失败，模板类型：{}", templateType.getDesc(), e);
+            throw new RuntimeException("下载模板失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 从项目根目录下载模板文件
+     */
+    private void downloadTemplateFile(String templateFileName, String downloadFileName, HttpServletResponse response) throws IOException {
+        // 获取项目根目录路径
+        String projectRoot = System.getProperty("user.dir");
+        String templateFilePath = projectRoot + File.separator + templateFileName;
+        
+        File templateFile = new File(templateFilePath);
+        if (!templateFile.exists()) {
+            throw new RuntimeException("模板文件不存在: " + templateFilePath);
+        }
+
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + 
+            URLEncoder.encode(downloadFileName, "UTF-8") + "\"");
+
+        // 读取模板文件并写入响应流
+        try (FileInputStream fis = new FileInputStream(templateFile);
+             OutputStream os = response.getOutputStream()) {
+            
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.flush();
+        }
+        
+        log.info("成功下载模板文件: {}", templateFileName);
     }
 }

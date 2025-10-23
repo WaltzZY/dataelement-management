@@ -14,12 +14,15 @@ import com.inspur.dsp.direct.entity.dto.DataElementPageExportDto;
 import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
 import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.dto.ExcelRowDto;
-import com.inspur.dsp.direct.entity.dto.ImportFailureExportDTO;
+import com.inspur.dsp.direct.entity.dto.DetermineResultExcelRowDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
 import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
 import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
+import com.inspur.dsp.direct.entity.vo.ImportDetermineResultVo;
+import com.inspur.dsp.direct.entity.vo.DetermineResultFailureDetailVo;
 import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
+import com.inspur.dsp.direct.enums.TemplateTypeEnums;
 import com.inspur.dsp.direct.service.AlldataelementinfoService;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -33,7 +36,8 @@ import com.inspur.dsp.direct.enums.AlldataelementSortFieldEnums;
 
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Calendar;
@@ -525,7 +529,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     }
 
     /**
-     * 处理结果封装类
+     * 定源处理结果封装类
      */
     private static class ProcessResult {
         private boolean success;
@@ -586,6 +590,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
      * @param queryDto 查询条件DTO
      * @param response HttpServletResponse对象
      */
+
     @Override
     public void exportDataElementList(DataElementPageQueryDto queryDto, HttpServletResponse response) {
         log.info("开始导出数据元列表，查询条件：{}", queryDto);
@@ -659,37 +664,524 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     }
 
     @Override
-    public void exportImportFailureList(List<FailureDetailVo> failureDetails, HttpServletResponse response) {
-        log.info("开始导出导入失败清单，失败记录数：{}", failureDetails.size());
+    public ImportDetermineResultVo importDetermineResult(MultipartFile file) {
+        log.info("开始处理定数结果导入文件: {}", file.getOriginalFilename());
 
-        if (CollectionUtils.isEmpty(failureDetails)) {
-            throw new IllegalArgumentException("没有失败记录可导出!");
+        // 1. 文件校验
+        validateDetermineResultFile(file);
+
+        // 2. 数据读取
+        List<DetermineResultExcelRowDto> excelData = readDetermineResultExcelData(file);
+
+        // 3. 数据预处理
+        return processDetermineResultData(excelData);
+    }
+
+    /**
+     * 定数结果文件校验
+     */
+    private void validateDetermineResultFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("上传文件不能为空");
         }
 
-        // 转换为导出DTO列表
-        List<ImportFailureExportDTO> exportList = new ArrayList<>();
-
-        for (FailureDetailVo failureDetail : failureDetails) {
-            ImportFailureExportDTO exportDto = new ImportFailureExportDTO();
-            exportDto.setSerialNumber(failureDetail.getSerialNumber());
-            exportDto.setName(failureDetail.getName());
-            exportDto.setUnitCode(failureDetail.getUnit_code());
-
-            // 直接使用 FailureDetailVo 中已经设置好的单位名称
-            // 不需要再次查询，因为在创建 FailureDetailVo 时已经查询并设置了
-            exportDto.setUnitName(failureDetail.getUnit_name() != null ? failureDetail.getUnit_name() : "");
-            exportDto.setFailReason(failureDetail.getFailReason());
-
-            exportList.add(exportDto);
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls"))) {
+            throw new IllegalArgumentException("文件格式不正确，仅支持xlsx和xls格式");
         }
 
-        // 调用通用导出服务
+        if (file.getSize() > 100 * 1024 * 1024) { // 100MB限制
+            throw new IllegalArgumentException("文件大小不能超过100MB");
+        }
+    }
+
+    /**
+     * 读取定数结果Excel数据
+     */
+    private List<DetermineResultExcelRowDto> readDetermineResultExcelData(MultipartFile file) {
         try {
-            commonService.exportExcelData(exportList, response, "导入失败清单（整体定源情况）", ImportFailureExportDTO.class);
-            log.info("导入失败清单导出完成，共导出{}条记录", exportList.size());
-        } catch (IOException e) {
-            log.error("导出导入失败清单失败", e);
-            throw new RuntimeException("导出导入失败清单失败: " + e.getMessage(), e);
+            List<DetermineResultExcelRowDto> excelData = commonService.importExcelData(file, DetermineResultExcelRowDto.class);
+
+            // 检查解析后的数据是否为空
+            if (excelData == null || excelData.isEmpty()) {
+                throw new IllegalArgumentException("文件内容为空或格式不正确，请检查文件内容");
+            }
+
+            return excelData;
+        } catch (Exception e) {
+            log.error("读取Excel文件失败: {}", e.getMessage(), e);
+            throw new IllegalArgumentException("读取Excel文件失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 处理定数结果数据
+     */
+    private ImportDetermineResultVo processDetermineResultData(List<DetermineResultExcelRowDto> excelData) {
+        int totalCount = excelData.size();
+        int successCount = 0;
+        int failureCount = 0;
+        List<DetermineResultFailureDetailVo> failureDetails = new ArrayList<>();
+
+        // 数据类型集合（根据需求中提到的数据类型校验）
+        Set<String> validDataTypes = getValidDataTypes();
+
+        // 预处理：检测数据完整性、重复数据和冲突数据
+        Map<String, List<DetermineResultExcelRowDto>> duplicateGroups = new HashMap<>();
+        Map<String, List<Integer>> conflictGroups = new HashMap<>();
+        Set<Integer> invalidRows = new HashSet<>();
+
+        preprocessDetermineResultData(excelData, duplicateGroups, conflictGroups, invalidRows, failureDetails, validDataTypes);
+
+        // 逐行处理Excel数据
+        for (int i = 0; i < excelData.size(); i++) {
+            DetermineResultExcelRowDto row = excelData.get(i);
+            int rowNumber = i + 1;
+
+            // 如果该行已在预处理中标记为无效，跳过处理
+            if (invalidRows.contains(i)) {
+                failureCount++;
+                continue;
+            }
+
+            try {
+                DetermineResultProcessResult result = processDetermineResultRow(row, rowNumber, duplicateGroups, conflictGroups, i, validDataTypes);
+                if (result.isSuccess()) {
+                    successCount++;
+                } else {
+                    failureCount++;
+                    failureDetails.add(result.getFailureDetail());
+                }
+            } catch (Exception e) {
+                log.error("处理第{}行数据时发生异常: {}", rowNumber, e.getMessage(), e);
+                failureCount++;
+                failureDetails.add(createDetermineResultFailureDetail(row, "系统异常: " + e.getMessage()));
+            }
+        }
+
+        log.info("定数结果文件处理完成, 总数: {}, 成功: {}, 失败: {}",
+                totalCount, successCount, failureCount);
+
+        return ImportDetermineResultVo.builder()
+                .total(totalCount)
+                .successQty(successCount)
+                .failQty(failureCount)
+                .failDetails(failureDetails)
+                .build();
+    }
+
+    /**
+     * 获取有效的数据类型集合
+     */
+    private Set<String> getValidDataTypes() {
+        // 根据需求设置有效的数据类型，这里可以从配置文件或数据库读取
+        Set<String> validTypes = new HashSet<>();
+        validTypes.add("字符型");
+        validTypes.add("数值型");
+        validTypes.add("日期型");
+        validTypes.add("时间型");
+        validTypes.add("时间日期型");
+        validTypes.add("布尔型");
+        validTypes.add("二进制");
+        // 可以根据实际需求添加更多数据类型
+        return validTypes;
+    }
+
+    /**
+     * 预处理定数结果数据：检测数据完整性、重复数据和冲突数据
+     */
+    private void preprocessDetermineResultData(List<DetermineResultExcelRowDto> excelData,
+                                              Map<String, List<DetermineResultExcelRowDto>> duplicateGroups,
+                                              Map<String, List<Integer>> conflictGroups,
+                                              Set<Integer> invalidRows,
+                                              List<DetermineResultFailureDetailVo> failureDetails,
+                                              Set<String> validDataTypes) {
+
+        // 用于记录数据出现位置
+        Map<String, Integer> baseElementFirstOccurrence = new HashMap<>();
+        Map<String, Integer> combinationFirstOccurrence = new HashMap<>();
+
+        for (int i = 0; i < excelData.size(); i++) {
+            DetermineResultExcelRowDto row = excelData.get(i);
+
+            // 1. 数据类型校验
+            if (StringUtils.hasText(row.getDataType()) && !validDataTypes.contains(row.getDataType())) {
+                invalidRows.add(i);
+                failureDetails.add(createDetermineResultFailureDetail(row, "数据类型不规范"));
+                continue;
+            }
+
+            // 2. 前三列（基准数据元信息）是否有空值
+            if (!isBaseElementInfoComplete(row)) {
+                invalidRows.add(i);
+                failureDetails.add(createDetermineResultFailureDetail(row, "基准数据元信息不完整"));
+                continue;
+            }
+
+            // 3. 后三列（领域数据元信息）是否有空值
+            if (!isDomainElementInfoComplete(row)) {
+                invalidRows.add(i);
+                failureDetails.add(createDetermineResultFailureDetail(row, "领域数据元信息不完整"));
+                continue;
+            }
+
+            String baseElementKey = row.getBaseElementName();
+            String combinationKey = row.getBaseElementName() + "|||" + row.getUnitCode();
+
+            // 7&8. 基准数据元各类信息冲突检测
+            if (baseElementFirstOccurrence.containsKey(baseElementKey)) {
+                // 检查是否与之前的基准数据元信息冲突
+                DetermineResultExcelRowDto firstRow = excelData.get(baseElementFirstOccurrence.get(baseElementKey));
+                if (!isBaseElementInfoConsistent(row, firstRow)) {
+                    // 冲突，将两个条目都标记为失败
+                    int firstIndex = baseElementFirstOccurrence.get(baseElementKey);
+
+                    if (!invalidRows.contains(firstIndex)) {
+                        invalidRows.add(firstIndex);
+                        failureDetails.add(createDetermineResultFailureDetail(firstRow,
+                                "数据与其它条目冲突，单条基准数据元的各类信息必须具有唯一性"));
+                    }
+
+                    invalidRows.add(i);
+                    failureDetails.add(createDetermineResultFailureDetail(row,
+                            "数据与其它条目冲突，单条基准数据元的各类信息必须具有唯一性"));
+                    continue;
+                }
+            }
+
+            // 9. 数据与其它条目重复检测
+            if (combinationFirstOccurrence.containsKey(combinationKey)) {
+                // 标记为重复数据失败
+                invalidRows.add(i);
+                failureDetails.add(createDetermineResultFailureDetail(row,
+                        "数据与其它条目重复，系统已保留首次出现的数据"));
+                continue;
+            }
+
+            // 记录首次出现位置
+            baseElementFirstOccurrence.put(baseElementKey, i);
+            combinationFirstOccurrence.put(combinationKey, i);
+        }
+    }
+
+    /**
+     * 检查基准数据元信息是否完整（前三列）
+     */
+    private boolean isBaseElementInfoComplete(DetermineResultExcelRowDto row) {
+        return StringUtils.hasText(row.getBaseElementName()) &&
+                StringUtils.hasText(row.getDataType()) &&
+                StringUtils.hasText(row.getBaseElementDefinition());
+    }
+
+    /**
+     * 检查领域数据元信息是否完整（后三列）
+     */
+    private boolean isDomainElementInfoComplete(DetermineResultExcelRowDto row) {
+        return StringUtils.hasText(row.getDomainElementName()) &&
+                StringUtils.hasText(row.getDomainElementDefinition()) &&
+                StringUtils.hasText(row.getUnitCode());
+    }
+
+    /**
+     * 检查基准数据元信息是否一致
+     */
+    private boolean isBaseElementInfoConsistent(DetermineResultExcelRowDto row1, DetermineResultExcelRowDto row2) {
+        return Objects.equals(row1.getBaseElementName(), row2.getBaseElementName()) &&
+                Objects.equals(row1.getDataType(), row2.getDataType()) &&
+                Objects.equals(row1.getBaseElementDefinition(), row2.getBaseElementDefinition());
+    }
+
+    /**
+     * 处理定数结果单行数据
+     */
+    private DetermineResultProcessResult processDetermineResultRow(DetermineResultExcelRowDto row, int rowNumber,
+                                                                  Map<String, List<DetermineResultExcelRowDto>> duplicateGroups,
+                                                                  Map<String, List<Integer>> conflictGroups,
+                                                                  int currentIndex,
+                                                                  Set<String> validDataTypes) {
+        log.debug("处理第{}行定数结果数据: {}", rowNumber, row);
+
+        List<String> errorMessages = new ArrayList<>();
+
+        // 4. 导入的定数结果的基准数据源是否已存在
+        BaseDataElement existingBaseElement = null;
+        if (StringUtils.hasText(row.getBaseElementName())) {
+            LambdaQueryWrapper<BaseDataElement> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(BaseDataElement::getName, row.getBaseElementName());
+            existingBaseElement = baseDataElementMapper.selectOne(wrapper);
+
+            if (existingBaseElement != null) {
+                errorMessages.add("该基准数据元已存在于系统中");
+            }
+        }
+
+        // 5. 采集单位统一社会信用代码是否存在
+        OrganizationUnit organizationUnit = null;
+        if (StringUtils.hasText(row.getUnitCode())) {
+            organizationUnit = commonService.getOrgInfoByOrgCode(row.getUnitCode());
+            if (organizationUnit == null) {
+                errorMessages.add("系统中未找到采集单位统一社会信用代码对应的组织机构");
+            }
+        }
+
+        // 6. 领域数据元是否已经和基准数据源存在关联
+        if (StringUtils.hasText(row.getDomainElementName()) && organizationUnit != null) {
+            // 查询是否已存在该领域数据元与其他基准数据元的关联
+            if (isDomainElementAlreadyAssociated(row.getDomainElementName(), row.getUnitCode())) {
+                errorMessages.add("领域数据元已与系统中其它的基准数据元关联");
+            }
+        }
+
+        // 10. 导入的领域数据元和基准数据源已有的领域数据元是否重复
+        if (StringUtils.hasText(row.getDomainElementName()) && organizationUnit != null) {
+            if (isDomainElementDuplicate(row.getDomainElementName(), row.getUnitCode())) {
+                errorMessages.add("领域数据元数据元重复");
+            }
+        }
+
+        // 如果有任何错误，返回失败结果
+        if (!errorMessages.isEmpty()) {
+            String combinedErrorMessage = String.join("\n", errorMessages);
+            log.debug("第{}行定数结果数据校验失败: {}", rowNumber, combinedErrorMessage);
+            return DetermineResultProcessResult.failure(row, combinedErrorMessage);
+        }
+
+        // 所有校验通过，执行数据保存操作
+        saveDetermineResult(row, organizationUnit);
+
+        log.debug("成功处理第{}行定数结果数据", rowNumber);
+        return DetermineResultProcessResult.success();
+    }
+
+    /**
+     * 检查领域数据元是否已经与其他基准数据元关联
+     */
+    private boolean isDomainElementAlreadyAssociated(String domainElementName, String unitCode) {
+        // 这里需要根据实际的数据库表结构来查询
+        // 假设有一个关联表记录基准数据元和领域数据元的关系
+        // 具体实现需要根据实际的表结构调整
+        try {
+            // 示例查询逻辑，需要根据实际情况调整
+            LambdaQueryWrapper<DomainDataElement> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(DomainDataElement::getName, domainElementName)
+                    .eq(DomainDataElement::getSourceUnitCode, unitCode);
+            
+            List<DomainDataElement> existingElements = claimDomainDataElementMapper.selectList(wrapper);
+            return !CollectionUtils.isEmpty(existingElements);
+        } catch (Exception e) {
+            log.warn("检查领域数据元关联状态失败: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 检查领域数据元是否重复
+     */
+    private boolean isDomainElementDuplicate(String domainElementName, String unitCode) {
+        // 检查是否存在相同名称和相同采集单位的领域数据元
+        try {
+            LambdaQueryWrapper<DomainDataElement> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(DomainDataElement::getName, domainElementName)
+                    .eq(DomainDataElement::getSourceUnitCode, unitCode);
+            
+            long count = claimDomainDataElementMapper.selectCount(wrapper);
+            return count > 0;
+        } catch (Exception e) {
+            log.warn("检查领域数据元重复状态失败: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 保存定数结果数据
+     */
+
+    private void saveDetermineResult(DetermineResultExcelRowDto row, OrganizationUnit organizationUnit) {
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        if (userInfo == null) {
+            throw new RuntimeException("获取用户信息失败，请确认用户已登录");
+        }
+
+        Date now = new Date();
+
+        // 1. 创建基准数据元
+        BaseDataElement baseElement = new BaseDataElement();
+        baseElement.setDataid(UUID.randomUUID().toString());
+        baseElement.setName(row.getBaseElementName());
+        baseElement.setDefinition(row.getBaseElementDefinition());
+        baseElement.setDatatype(row.getDataType());
+        baseElement.setStatus(StatusEnums.DESIGNATED_SOURCE.getCode());
+        baseElement.setSourceUnitCode(row.getUnitCode());
+        baseElement.setSourceUnitName(organizationUnit.getUnitName());
+        baseElement.setConfirmDate(now);
+        baseElement.setCreateDate(now);
+        baseElement.setLastModifyDate(now);
+        baseElement.setCreateAccount(userInfo.getAccount());
+        baseElement.setLastModifyAccount(userInfo.getAccount());
+
+        int baseResult = baseDataElementMapper.insert(baseElement);
+        if (baseResult <= 0) {
+            throw new RuntimeException("创建基准数据元失败");
+        }
+
+        // 2. 创建领域数据元
+        DomainDataElement domainElement = new DomainDataElement();
+        domainElement.setDataid(UUID.randomUUID().toString());
+        domainElement.setName(row.getDomainElementName());
+        domainElement.setDefinition(row.getDomainElementDefinition());
+        domainElement.setSourceUnitCode(row.getUnitCode());
+        domainElement.setSourceUnitName(organizationUnit.getUnitName());
+        domainElement.setDataElementId(baseElement.getDataid());
+        domainElement.setCreateDate(now);
+        domainElement.setLastModifyDate(now);
+        domainElement.setCreateAccount(userInfo.getAccount());
+        domainElement.setLastModifyAccount(userInfo.getAccount());
+
+        int domainResult = claimDomainDataElementMapper.insert(domainElement);
+        if (domainResult <= 0) {
+            throw new RuntimeException("创建领域数据元失败");
+        }
+
+        // 3. 新增定源记录表
+        OrganizationUnit currentUserOrg = commonService.getOrgInfoByOrgCode(userInfo.getOrgCode());
+        SourceEventRecord record = SourceEventRecord.builder()
+                .recordId(UUID.randomUUID().toString())
+                .dataElementId(baseElement.getDataid())
+                .dataElementName(baseElement.getName())
+                .sourceType(RecordSourceTypeEnums.IMPORT_DETERMINE_RESULT.getCode())
+                .sourceDate(now)
+                .operatorAccount(userInfo.getAccount())
+                .contactPhone(organizationUnit.getContactPhone())
+                .contactName(organizationUnit.getContactName())
+                .sourceUnitCode(row.getUnitCode())
+                .sourceUnitName(organizationUnit.getUnitName())
+                .sendUnitCode(currentUserOrg != null ? currentUserOrg.getUnitCode() : userInfo.getOrgCode())
+                .sendUnitName(currentUserOrg != null ? currentUserOrg.getUnitName() : userInfo.getOrgName())
+                .build();
+
+        int recordResult = sourceEventRecordMapper.insert(record);
+        if (recordResult <= 0) {
+            throw new RuntimeException("插入定源事件记录失败");
+        }
+
+        log.info("成功保存定数结果，基准数据元：{}，领域数据元：{}，采集单位：{}",
+                baseElement.getName(), domainElement.getName(), organizationUnit.getUnitName());
+    }
+
+    /**
+     * 创建定数结果失败详情对象
+     */
+    private DetermineResultFailureDetailVo createDetermineResultFailureDetail(DetermineResultExcelRowDto row, String failReason) {
+        return DetermineResultFailureDetailVo.builder()
+                .serialNumber(String.valueOf(System.nanoTime())) // 使用纳秒时间戳作为序号
+                .baseElementName(row.getBaseElementName())
+                .dataType(row.getDataType())
+                .baseElementDefinition(row.getBaseElementDefinition())
+                .failReason(failReason)
+                .build();
+    }
+
+    /**
+     * 定数结果处理结果封装类
+     */
+    private static class DetermineResultProcessResult {
+        private boolean success;
+        private DetermineResultFailureDetailVo failureDetail;
+
+        private DetermineResultProcessResult(boolean success, DetermineResultFailureDetailVo failureDetail) {
+            this.success = success;
+            this.failureDetail = failureDetail;
+        }
+
+        public static DetermineResultProcessResult success() {
+            return new DetermineResultProcessResult(true, null);
+        }
+
+        public static DetermineResultProcessResult failure(DetermineResultExcelRowDto row, String reason) {
+            DetermineResultFailureDetailVo detail = DetermineResultFailureDetailVo.builder()
+                    .serialNumber(String.valueOf(System.nanoTime()))
+                    .baseElementName(row.getBaseElementName())
+                    .dataType(row.getDataType())
+                    .baseElementDefinition(row.getBaseElementDefinition())
+                    .failReason(reason)
+                    .build();
+            return new DetermineResultProcessResult(false, detail);
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public DetermineResultFailureDetailVo getFailureDetail() {
+            return failureDetail;
+        }
+    }
+
+    @Override
+    public void downloadImportTemplate(TemplateTypeEnums templateType, HttpServletResponse response) {
+        log.info("开始下载导入模板，模板类型：{}", templateType.getDesc());
+
+        try {
+            String templateFileName;
+            String downloadFileName;
+            
+            switch (templateType) {
+                case IMPORT_DETERMINE_RESULT:
+                    templateFileName = "定数结果导入模板.xlsx";
+                    downloadFileName = "导入定数结果模板.xlsx";
+                    break;
+
+                case IMPORT_DATASOURCE_RESULT:
+                    templateFileName = "定源结果导入模板.xlsx";
+                    downloadFileName = "导入定源结果模板.xlsx";
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("不支持的模板类型：" + templateType.getDesc());
+            }
+
+            // 从项目根目录读取模板文件
+            downloadTemplateFile(templateFileName, downloadFileName, response);
+
+            log.info("模板下载完成，模板类型：{}", templateType.getDesc());
+        } catch (Exception e) {
+            log.error("下载模板失败，模板类型：{}", templateType.getDesc(), e);
+            throw new RuntimeException("下载模板失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 从项目根目录下载模板文件
+     */
+    private void downloadTemplateFile(String templateFileName, String downloadFileName, HttpServletResponse response) throws IOException {
+        // 获取项目根目录路径
+        String projectRoot = System.getProperty("user.dir");
+        String templateFilePath = projectRoot + File.separator + templateFileName;
+        
+        File templateFile = new File(templateFilePath);
+        if (!templateFile.exists()) {
+            throw new RuntimeException("模板文件不存在: " + templateFilePath);
+        }
+
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + 
+            URLEncoder.encode(downloadFileName, "UTF-8") + "\"");
+
+        // 读取模板文件并写入响应流
+        try (FileInputStream fis = new FileInputStream(templateFile);
+             OutputStream os = response.getOutputStream()) {
+            
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.flush();
+        }
+        
+        log.info("成功下载模板文件: {}", templateFileName);
     }
 }
