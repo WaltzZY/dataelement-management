@@ -1167,8 +1167,8 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         // 设置响应头
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + 
-            URLEncoder.encode(downloadFileName, "UTF-8") + "\"");
+        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" + 
+            URLEncoder.encode(downloadFileName, "UTF-8"));
 
         // 读取模板文件并写入响应流
         try (FileInputStream fis = new FileInputStream(templateFile);
