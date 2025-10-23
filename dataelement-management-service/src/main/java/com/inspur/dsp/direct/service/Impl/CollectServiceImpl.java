@@ -4,14 +4,17 @@ import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.dao.ConfirmationTaskMapper;
+import com.inspur.dsp.direct.dao.DomainDataElementMapper;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.dbentity.ConfirmationTask;
 import com.inspur.dsp.direct.domain.UserLoginInfo;
+import com.inspur.dsp.direct.entity.bo.DomainSourceUnitInfo;
 import com.inspur.dsp.direct.entity.dto.CollectDataElementPageDto;
 import com.inspur.dsp.direct.entity.dto.RefuseDto;
 import com.inspur.dsp.direct.entity.excel.PendingCollectDataExcel;
 import com.inspur.dsp.direct.entity.excel.ProcessedCollectDataExcel;
 import com.inspur.dsp.direct.entity.vo.CollectDataInfoVo;
+import com.inspur.dsp.direct.entity.vo.CollectUnitVo;
 import com.inspur.dsp.direct.entity.vo.GetCollectDataVo;
 import com.inspur.dsp.direct.enums.CollSortFieldEnums;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
@@ -29,6 +32,7 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -41,6 +45,7 @@ public class CollectServiceImpl implements CollectService {
 
     private final BaseDataElementMapper baseDataElementMapper;
     private final ConfirmationTaskMapper confirmationTaskMapper;
+    private final DomainDataElementMapper domainDataElementMapper;
 
     /**
      * 获取确认数据元列表
@@ -239,5 +244,27 @@ public class CollectServiceImpl implements CollectService {
                 throw new RuntimeException("导出数据元失败", e);
             }
         }
+    }
+
+    /**
+     * 获取采集方列表
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public List<CollectUnitVo> getCollectUnitList(String id) {
+        List<DomainSourceUnitInfo> domainSourceUnitInfos = domainDataElementMapper.selectSourceUnitInfoByBaseDataid(Collections.singleton(id));
+        if (CollectionUtils.isEmpty(domainSourceUnitInfos)) {
+            return Collections.emptyList();
+        }
+        List<CollectUnitVo> collectUnitList = new ArrayList<>();
+        for (DomainSourceUnitInfo domainSourceUnitInfo : domainSourceUnitInfos) {
+            CollectUnitVo vo = new CollectUnitVo();
+            vo.setSourceUnitCode(domainSourceUnitInfo.getSourceUnitCode());
+            vo.setSourceUnitName(domainSourceUnitInfo.getSourceUnitName());
+            collectUnitList.add(vo);
+        }
+        return collectUnitList;
     }
 }

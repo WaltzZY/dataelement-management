@@ -62,10 +62,10 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
         String orderBySql = DeSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
 
         // 查询senddateBegin零点到senddateEnd第二天零点的数据
-        if (dto.getSendDateBegin() != null){
+        if (dto.getSendDateBegin() != null) {
             dto.setSendDateBegin(dto.getSendDateBegin().toLocalDate().atStartOfDay());
         }
-        if (dto.getSendDateEnd() != null){
+        if (dto.getSendDateEnd() != null) {
             dto.setSendDateEnd(dto.getSendDateEnd().toLocalDate().plusDays(1).atStartOfDay());
         }
         if (Objects.nonNull(dto.getGeneratedatetimeBegin())) {
@@ -76,7 +76,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
         }
 
         // 使用ClaimDataElementMapper.selectBaseDataElementByStatus获取数据列表
-        List<ClaimDataElementVO> list = claimDataElementMapper.selectBaseDataElementByStatus(page, dto,orderBySql);
+        List<ClaimDataElementVO> list = claimDataElementMapper.selectBaseDataElementByStatus(page, dto, orderBySql);
         page.setRecords(list);
         // 循环遍历List<ClaimDataElementVO>
         for (ClaimDataElementVO vo : page.getRecords()) {
@@ -84,7 +84,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
             List<DomainDataElement> domainDataElements = claimDomainDataElementMapper.selectDomainDataElementByBaseDataElementDataId(vo.getDataid());
 
             // 提取所有source_unit_name并用"|"分割组合
-            String collectUnitNames = domainDataElements.stream().map(DomainDataElement::getSourceUnitName).collect(Collectors.joining("|"));
+            String collectUnitNames = domainDataElements.stream().map(DomainDataElement::getSourceUnitName).collect(Collectors.joining(" | "));
 
             // 将组合成的字符串赋值给ClaimDataElementVO.collectunitnames列
             vo.setCollectunitnames(collectUnitNames);
@@ -148,7 +148,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
 
 
                 // 查询待定源数据元列表
-                List<ClaimDataElementVO> list_pendingSource = claimDataElementMapper.selectBaseDataElementByStatus(null, dto,orderBySql);
+                List<ClaimDataElementVO> list_pendingSource = claimDataElementMapper.selectBaseDataElementByStatus(null, dto, orderBySql);
 
                 // 循环遍历List<ClaimDataElementVO>
                 for (ClaimDataElementVO vo : list_pendingSource) {
@@ -172,7 +172,7 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
             } else if (dto.getStatus() != null && dto.getStatus().contains("claimed_ing")) {
 
                 // 查询待定源数据元列表
-                List<ClaimDataElementVO> claimDataElementVOS = claimDataElementMapper.selectBaseDataElementByStatus(null, dto,orderBySql);
+                List<ClaimDataElementVO> claimDataElementVOS = claimDataElementMapper.selectBaseDataElementByStatus(null, dto, orderBySql);
 
                 // 循环遍历List<ClaimDataElementVO>
                 for (ClaimDataElementVO vo : claimDataElementVOS) {

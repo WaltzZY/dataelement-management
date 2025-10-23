@@ -5,6 +5,7 @@ import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.entity.dto.CollectDataElementPageDto;
 import com.inspur.dsp.direct.entity.dto.RefuseDto;
 import com.inspur.dsp.direct.entity.vo.CollectDataInfoVo;
+import com.inspur.dsp.direct.entity.vo.CollectUnitVo;
 import com.inspur.dsp.direct.entity.vo.GetCollectDataVo;
 import com.inspur.dsp.direct.service.CollectService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 /**
  * 014-015
  */
@@ -69,4 +71,14 @@ public class CollectController {
     public CollectDataInfoVo info(@PathVariable String id) {
         return collectService.info(id);
     }
+
+    /**
+     * 根据基准数据元id查询采集单位列表
+     */
+    @GetMapping("/getCollectUnitList/{id}")
+    @RespAdvice
+    public List<CollectUnitVo> getCollectUnitList(@PathVariable String id) {
+        return collectService.getCollectUnitList(id);
+    }
+
 }
