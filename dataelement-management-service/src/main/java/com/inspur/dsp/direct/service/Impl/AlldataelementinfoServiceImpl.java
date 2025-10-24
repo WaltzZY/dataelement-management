@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.service.Impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dao.AlldataelementinfoMapper;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
@@ -12,18 +13,20 @@ import com.inspur.dsp.direct.dbentity.SourceEventRecord;
 import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.DataElementPageExportDto;
 import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
-import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
-import com.inspur.dsp.direct.entity.dto.ExcelRowDto;
 import com.inspur.dsp.direct.entity.dto.DetermineResultExcelRowDto;
+import com.inspur.dsp.direct.entity.dto.ExcelRowDto;
+import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
-import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
-import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
-import com.inspur.dsp.direct.entity.vo.ImportDetermineResultVo;
 import com.inspur.dsp.direct.entity.vo.DetermineResultFailureDetailVo;
+import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
+import com.inspur.dsp.direct.entity.vo.ImportDetermineResultVo;
+import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
+import com.inspur.dsp.direct.enums.AlldataelementSortFieldEnums;
 import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.enums.TemplateTypeEnums;
 import com.inspur.dsp.direct.service.AlldataelementinfoService;
+import com.inspur.dsp.direct.service.BaseDataElementService;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -31,18 +34,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import com.inspur.dsp.direct.enums.AlldataelementSortFieldEnums;
-
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
 import java.util.Calendar;
-import org.springframework.util.StringUtils;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 数据元信息相关业务实现类
@@ -68,6 +80,8 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
     @Autowired
     private ClaimDomainDataElementMapper claimDomainDataElementMapper;
+    @Autowired
+    private BaseDataElementService baseDataElementService;
 
     /**
      * 在 Service 层处理日期边界逻辑
@@ -524,6 +538,9 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             throw new RuntimeException("插入定源事件记录失败");
         }
 
+        // 初始化基准数据元联系人信息
+        baseDataElementService.insertDataElementContact(dataElementId);
+
         log.info("成功更新数据源状态，数据元ID：{}，数源单位：{}，定源方式：{}",
                 dataElementId, organizationUnit.getUnitName(), sourceType);
     }
@@ -965,7 +982,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             LambdaQueryWrapper<DomainDataElement> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(DomainDataElement::getName, domainElementName)
                     .eq(DomainDataElement::getSourceUnitCode, unitCode);
-            
+
             List<DomainDataElement> existingElements = claimDomainDataElementMapper.selectList(wrapper);
             return !CollectionUtils.isEmpty(existingElements);
         } catch (Exception e) {
@@ -983,7 +1000,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             LambdaQueryWrapper<DomainDataElement> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(DomainDataElement::getName, domainElementName)
                     .eq(DomainDataElement::getSourceUnitCode, unitCode);
-            
+
             long count = claimDomainDataElementMapper.selectCount(wrapper);
             return count > 0;
         } catch (Exception e) {
@@ -1065,6 +1082,9 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             throw new RuntimeException("插入定源事件记录失败");
         }
 
+        // 4. 保存基准数据元联系人信息
+        baseDataElementService.insertDataElementContact(baseElement.getDataid());
+
         log.info("成功保存定数结果，基准数据元：{}，领域数据元：{}，采集单位：{}",
                 baseElement.getName(), domainElement.getName(), organizationUnit.getUnitName());
     }
@@ -1125,7 +1145,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         try {
             String templateFileName;
             String downloadFileName;
-            
+
             switch (templateType) {
                 case IMPORT_DETERMINE_RESULT:
                     templateFileName = "定数结果导入模板.xlsx";
@@ -1158,7 +1178,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         // 设置响应头
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" + 
+        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" +
             URLEncoder.encode(downloadFileName, "UTF-8"));
 
         // 尝试从classpath读取模板文件（支持jar包运行）
@@ -1167,15 +1187,15 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
                 // 如果classpath中没有，尝试从项目根目录读取（开发环境）
                 String projectRoot = System.getProperty("user.dir");
                 String templateFilePath = projectRoot + File.separator + templateFileName;
-                
+
                 File templateFile = new File(templateFilePath);
                 if (!templateFile.exists()) {
                     throw new RuntimeException("模板文件不存在: " + templateFilePath + " 且在classpath中也未找到: templates/" + templateFileName);
                 }
-                
+
                 try (FileInputStream fis = new FileInputStream(templateFile);
                      OutputStream os = response.getOutputStream()) {
-                    
+
                     byte[] buffer = new byte[8192];
                     int bytesRead;
                     while ((bytesRead = fis.read(buffer)) != -1) {
@@ -1195,7 +1215,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
                 }
             }
         }
-        
+
         log.info("成功下载模板文件: {}", templateFileName);
     }
 }
