@@ -39,7 +39,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             // 采集方相关统计
             homeStatusNumVO.setPendingQty(statisticsMapper.getCommonStatusNumForCollector(orgCode, "pending"));
             homeStatusNumVO.setPendingClaimedQty(statisticsMapper.getCommonStatusNumForCollector(orgCode, "pending_claimed"));
-            homeStatusNumVO.setMyDesignatedSourceQty(statisticsMapper.getCommonStatusNumForCollector(orgCode, "designated_source"));
+            homeStatusNumVO.setMyDesignatedSourceQty(statisticsMapper.getMyDesignatedSourceQty(orgCode));
 
             homeStatusNumVO.setToBeProcessedQty(statisticsMapper.getToBeProcessedQty(orgCode));
             homeStatusNumVO.setProcessedQty(statisticsMapper.getProcessedQty(orgCode));

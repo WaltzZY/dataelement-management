@@ -33,6 +33,14 @@
           and status = #{status}
     </select>
 
+    <!-- getCommonStatusNumForCollector 查询 -->
+    <select id="getMyDesignatedSourceQty" resultType="java.lang.Long">
+        select count(*) as num
+        from base_data_element bde
+        where bde.source_unit_code = #{orgCode}
+          and bde.status = 'designated_source';
+    </select>
+
     <!-- getToBeProcessedQty 查询 -->
     <select id="getToBeProcessedQty" resultType="java.lang.Long">
         select count(*) as toBeProcessedQty

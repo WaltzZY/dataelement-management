@@ -535,4 +535,9 @@
             </if>
         </if>
     </select>
+
+    <select id="getBaseDataForOrgCode" resultType="java.lang.String">
+        SELECT source_unit_code FROM base_data_element WHERE dataid = #{dataid}
+    </select>
+
 </mapper>

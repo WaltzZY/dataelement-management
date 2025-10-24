@@ -77,4 +77,8 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
      * 获取采集方已定源数据元列表（包含所有采集单位）
      */
     List<GetDetermineResultVo> getDetermineResultListForCollector(@Param("orgCode") String orgCode, @Param("dto") BaseDataElementSearchDTO dto);
+
+
+    List<String> getBaseDataForOrgCode(@Param("dataid") String dataid);
+
 }

@@ -108,4 +108,10 @@ public class SourceEventRecord implements Serializable {
     @TableField(value = "send_unit_name")
     @Size(max = 200, message = "确定数据单位的单位数源单位名称最大长度要小于 200")
     private String sendUnitName;
+
+    /**
+     * 确定数据单位的单位数源单位名称
+     */
+    @TableField(exist = false)
+    private String sourceTypeChinese;
 }

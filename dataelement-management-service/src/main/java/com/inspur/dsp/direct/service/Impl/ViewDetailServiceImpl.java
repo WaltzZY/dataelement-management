@@ -13,6 +13,7 @@ import com.inspur.dsp.direct.entity.vo.DomainDataElementVO;
 import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
 import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
+import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
 import com.inspur.dsp.direct.service.ViewDetailService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -163,6 +164,9 @@ public class ViewDetailServiceImpl implements ViewDetailService {
     public SourceEventRecord getSourceEventRecord(String dataId) {
         SourceEventRecord sourceEventRecord = sourceEventRecordMapper.selectFirstByDataElementIdOrderBySourceDateDesc(dataId);
         if (sourceEventRecord != null) {
+            String sourceType = sourceEventRecord.getSourceType();
+            String sourceTypeChinese = RecordSourceTypeEnums.getDescByCode(sourceType);
+            sourceEventRecord.setSourceTypeChinese(sourceTypeChinese);
             return sourceEventRecord;
         }
         return new SourceEventRecord();

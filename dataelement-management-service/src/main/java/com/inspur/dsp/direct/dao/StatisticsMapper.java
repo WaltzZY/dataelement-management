@@ -20,4 +20,8 @@ public interface StatisticsMapper {
     Long getProcessedQty(@Param("orgCode") String orgCode);
     
     Long getCommonStatusNumForCollectorWithTask(@Param("orgCode") String orgCode, @Param("status") String status);
+
+    Long getMyDesignatedSourceQty(@Param("orgCode") String orgCode);
+
+
 }
