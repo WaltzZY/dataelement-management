@@ -1152,34 +1152,48 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     }
 
     /**
-     * 从项目根目录下载模板文件
+     * 下载模板文件（支持jar包运行）
      */
     private void downloadTemplateFile(String templateFileName, String downloadFileName, HttpServletResponse response) throws IOException {
-        // 获取项目根目录路径
-        String projectRoot = System.getProperty("user.dir");
-        String templateFilePath = projectRoot + File.separator + templateFileName;
-        
-        File templateFile = new File(templateFilePath);
-        if (!templateFile.exists()) {
-            throw new RuntimeException("模板文件不存在: " + templateFilePath);
-        }
-
         // 设置响应头
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" + 
             URLEncoder.encode(downloadFileName, "UTF-8"));
 
-        // 读取模板文件并写入响应流
-        try (FileInputStream fis = new FileInputStream(templateFile);
-             OutputStream os = response.getOutputStream()) {
-            
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-            while ((bytesRead = fis.read(buffer)) != -1) {
-                os.write(buffer, 0, bytesRead);
+        // 尝试从classpath读取模板文件（支持jar包运行）
+        try (InputStream templateStream = getClass().getClassLoader().getResourceAsStream("templates/" + templateFileName)) {
+            if (templateStream == null) {
+                // 如果classpath中没有，尝试从项目根目录读取（开发环境）
+                String projectRoot = System.getProperty("user.dir");
+                String templateFilePath = projectRoot + File.separator + templateFileName;
+                
+                File templateFile = new File(templateFilePath);
+                if (!templateFile.exists()) {
+                    throw new RuntimeException("模板文件不存在: " + templateFilePath + " 且在classpath中也未找到: templates/" + templateFileName);
+                }
+                
+                try (FileInputStream fis = new FileInputStream(templateFile);
+                     OutputStream os = response.getOutputStream()) {
+                    
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = fis.read(buffer)) != -1) {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                    os.flush();
+                }
+            } else {
+                // 从classpath读取模板文件
+                try (OutputStream os = response.getOutputStream()) {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = templateStream.read(buffer)) != -1) {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                    os.flush();
+                }
             }
-            os.flush();
         }
         
         log.info("成功下载模板文件: {}", templateFileName);
