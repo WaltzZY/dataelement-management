@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.DataElementCategoryMapper">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.DataElementCategory">
+    <!--@mbg.generated-->
+    <!--@Table data_element_category-->
+    <id column="dataid" jdbcType="VARCHAR" property="dataid" />
+    <result column="base_dataelement_dataid" jdbcType="VARCHAR" property="baseDataelementDataid" />
+    <result column="labelvalue" jdbcType="VARCHAR" property="labelvalue" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    dataid, base_dataelement_dataid, labelvalue
+  </sql>
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.DataElementAttachmentMapper">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.DataElementAttachment">
+    <!--@mbg.generated-->
+    <!--@Table data_element_attachment-->
+    <id column="attachfileid" jdbcType="VARCHAR" property="attachfileid" />
+    <result column="base_dataelement_dataid" jdbcType="VARCHAR" property="baseDataelementDataid" />
+    <result column="attachfiletype" jdbcType="VARCHAR" property="attachfiletype" />
+    <result column="attachfilename" jdbcType="VARCHAR" property="attachfilename" />
+    <result column="attachfileurl" jdbcType="VARCHAR" property="attachfileurl" />
+    <result column="attachfilelocation" jdbcType="VARCHAR" property="attachfilelocation" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    attachfileid, base_dataelement_dataid, attachfiletype, attachfilename, attachfileurl, 
+    attachfilelocation
+  </sql>
+</mapper>

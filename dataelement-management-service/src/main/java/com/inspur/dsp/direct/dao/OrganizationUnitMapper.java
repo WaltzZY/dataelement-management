@@ -13,11 +13,11 @@ import java.util.List;
 
 @Mapper
 public interface OrganizationUnitMapper extends BaseMapper<OrganizationUnit> {
-
-    OrganizationUnit selectFirstByUnitCode(@Param("unitCode")String unitCode);
+    OrganizationUnit selectFirstByUnitCode(@Param("unitCode") String unitCode);
 
     /**
      * 获取部门树
+     *
      * @param dto
      * @return
      */
@@ -25,13 +25,15 @@ public interface OrganizationUnitMapper extends BaseMapper<OrganizationUnit> {
 
     /**
      * 根据部门编码批量查询部门信息
+     *
      * @param unitCodeCollection
      * @return
      */
-    List<OrganizationUnit> selectAllByUnitCodeIn(@Param("unitCodeCollection")Collection<String> unitCodeCollection);
+    List<OrganizationUnit> selectAllByUnitCodeIn(@Param("unitCodeCollection") Collection<String> unitCodeCollection);
 
     /**
      * 获取部门搜索结果
+     *
      * @param page
      * @param dto
      * @return

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.FlowDefinitionMapper">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.FlowDefinition">
+    <!--@mbg.generated-->
+    <!--@Table flow_definition-->
+    <id column="flowid" jdbcType="VARCHAR" property="flowid" />
+    <result column="flowname" jdbcType="VARCHAR" property="flowname" />
+    <result column="flowdescription" jdbcType="VARCHAR" property="flowdescription" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
+    <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate" />
+    <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    flowid, flowname, flowdescription, `status`, create_date, create_account, last_modify_date, 
+    last_modify_account
+  </sql>
+</mapper>
