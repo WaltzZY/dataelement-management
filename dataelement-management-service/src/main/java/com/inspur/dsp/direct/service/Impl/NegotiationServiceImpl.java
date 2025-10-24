@@ -34,6 +34,7 @@ import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.enums.TemplateTypeEnums;
 import com.inspur.dsp.direct.exception.CustomException;
+import com.inspur.dsp.direct.service.BaseDataElementService;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.NegotiationService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -45,7 +46,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -71,6 +76,7 @@ public class NegotiationServiceImpl implements NegotiationService {
     private final DomainDataElementMapper domainDataElementMapper;
     private final SourceEventRecordMapper sourceEventRecordMapper;
     private final CommonService commonService;
+    private final BaseDataElementService baseDataElementService;
 
     @Override
     public Page<NegotiationDataElementVO> getNegotiationDataElementList(NegotiationParmDTO negDTO) {
@@ -516,6 +522,9 @@ public class NegotiationServiceImpl implements NegotiationService {
                 // 执行SourceEventRecordMapper的mybatisPlus框架方法sourceEventRecordMapper.insert()，批量插入定源记录
                 sourceEventRecordMapper.insert(sourceEventRecord);
 
+                // 新增基准数据元联系人信息
+                baseDataElementService.insertDataElementContact(baseinfo.getDataid());
+
                 successCount++;
 
             } catch (Exception e) {
@@ -751,7 +760,7 @@ public class NegotiationServiceImpl implements NegotiationService {
         // 设置响应头
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" + 
+        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" +
             URLEncoder.encode(downloadFileName, "UTF-8"));
 
         // 尝试从classpath读取模板文件（支持jar包运行）
@@ -760,15 +769,15 @@ public class NegotiationServiceImpl implements NegotiationService {
                 // 如果classpath中没有，尝试从项目根目录读取（开发环境）
                 String projectRoot = System.getProperty("user.dir");
                 String templateFilePath = projectRoot + File.separator + templateFileName;
-                
+
                 File templateFile = new File(templateFilePath);
                 if (!templateFile.exists()) {
                     throw new RuntimeException("模板文件不存在: " + templateFilePath + " 且在classpath中也未找到: templates/" + templateFileName);
                 }
-                
+
                 try (FileInputStream fis = new FileInputStream(templateFile);
                      OutputStream os = response.getOutputStream()) {
-                    
+
                     byte[] buffer = new byte[8192];
                     int bytesRead;
                     while ((bytesRead = fis.read(buffer)) != -1) {
@@ -788,7 +797,7 @@ public class NegotiationServiceImpl implements NegotiationService {
                 }
             }
         }
-        
+
         log.info("成功下载模板文件: {}", templateFileName);
     }
 }

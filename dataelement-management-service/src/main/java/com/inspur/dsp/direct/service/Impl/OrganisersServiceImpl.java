@@ -29,6 +29,7 @@ import com.inspur.dsp.direct.enums.NodeStatusEnums;
 import com.inspur.dsp.direct.enums.SortFieldEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.enums.TaskTypeEnums;
+import com.inspur.dsp.direct.service.BaseDataElementService;
 import com.inspur.dsp.direct.service.OrganisersService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,7 @@ public class OrganisersServiceImpl implements OrganisersService {
     private final ConfirmationTaskMapper confirmationTaskMapper;
     private final NegotiationRecordMapper negotiationTaskMapper;
     private final SourceEventRecordMapper sourceEventRecordMapper;
+    private final BaseDataElementService baseDataElementService;
 
     /**
      * 组织方获取数据元分页列表
@@ -425,6 +427,8 @@ public class OrganisersServiceImpl implements OrganisersService {
         baseDataElement.setLastModifyDate(new Date());
         // 更新基准数据元信息
         baseDataElementMapper.updateById(baseDataElement);
+        // 新增基准数据元联系人信息
+        baseDataElementService.insertDataElementContact(dataid);
     }
 
     /**
@@ -623,6 +627,8 @@ public class OrganisersServiceImpl implements OrganisersService {
         baseDataElement.setLastModifyDate(new Date());
         // 更新基准数据元信息
         baseDataElementMapper.updateById(baseDataElement);
+        // 新增基准数据元联系人信息
+        baseDataElementService.insertDataElementContact(dataid);
     }
 }
 
