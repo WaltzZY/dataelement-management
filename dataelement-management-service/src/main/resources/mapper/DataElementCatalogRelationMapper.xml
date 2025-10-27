@@ -29,15 +29,21 @@
     <select id="getAssociatedDataSourceCatalog" resultMap="BaseResultMap">
         SELECT *
         FROM data_element_catalog_relation
-        WHERE catalog_unit_code = #{sourceUnitCode}
-          AND data_element_id = #{baseDataId}
+        WHERE
+            data_element_id = #{baseDataId}
+        <if test="sourceUnitCode != null and sourceUnitCode != ''">
+            AND catalog_unit_code = #{sourceUnitCode}
+        </if>
     </select>
 
     <select id="getAssociatedCollectorCatalog" resultMap="BaseResultMap">
         SELECT *
         FROM data_element_catalog_relation
-        WHERE catalog_unit_code != #{sourceUnitCode}
-          AND data_element_id = #{baseDataId}
+        WHERE
+          data_element_id = #{baseDataId}
+        <if test="sourceUnitCode != null and sourceUnitCode != ''">
+            AND catalog_unit_code != #{sourceUnitCode}
+        </if>
     </select>
 
     <delete id="cancelCatalogAssociation">
