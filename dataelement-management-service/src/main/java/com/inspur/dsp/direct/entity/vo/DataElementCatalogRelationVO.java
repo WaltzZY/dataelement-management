@@ -26,5 +26,6 @@ public class DataElementCatalogRelationVO implements Serializable {
     private Date lastModifyDate;
     private String lastModifyAccount;
     private String detailUrl;
+    private Integer flag;
 
 }

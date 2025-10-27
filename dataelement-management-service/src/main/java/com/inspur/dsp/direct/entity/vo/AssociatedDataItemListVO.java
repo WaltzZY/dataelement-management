@@ -21,4 +21,5 @@ public class AssociatedDataItemListVO implements Serializable {
     private String catalogUnitCode;
     private String catalogUnitName;
     private Integer flag;
+    private String detailUrl;
 }
