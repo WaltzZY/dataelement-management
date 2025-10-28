@@ -8,6 +8,8 @@ public enum NePageSortFieldEnums {
 
     // 发起时间: sendDate
     SEND_DATE("sendDate", "bde.send_date"),
+    // 定源时间: confirmDate
+    CONFIRM_DATE("confirmDate", "bde.confirm_date"),
 
 
     ;

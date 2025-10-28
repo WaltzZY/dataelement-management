@@ -8,7 +8,9 @@ import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.BaseDataElementSearchDTO;
 import com.inspur.dsp.direct.entity.dto.QueryAllSituationForCollectorExportDTO;
 import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
+import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
 import com.inspur.dsp.direct.enums.NePageSortFieldEnums;
+import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.QueryAllSituationForCollectorService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -60,14 +62,57 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         for (DataElementWithTaskVo dataElementWithTaskVo : baseDataElementList) {
             String ctStatus = dataElementWithTaskVo.getCtStatus();
             String bdeStatus = dataElementWithTaskVo.getBdeStatus();
-            String displayStatus = ctStatus;
-            if ("negotiating".equals(bdeStatus) || "designated_source".equals(bdeStatus)) {
-                displayStatus = bdeStatus;
-            }
-            String statusChinese = StatusUtil.getStatusChinese(displayStatus);
-            dataElementWithTaskVo.setDisplaystatus(statusChinese);
+            String displayStatus = getDisplayStatus(bdeStatus, ctStatus);
+            dataElementWithTaskVo.setDisplaystatus(displayStatus);
         }
         return page.setRecords(baseDataElementList);
+    }
+
+    /**
+     * 获取显示状态
+     * @param bdeStatus
+     * @param ctStatus
+     * @return
+     */
+    private static String getDisplayStatus(String bdeStatus, String ctStatus) {
+        String displayStatus = "";
+        // 判断 bdeStatus  negotiating 或  designated_source  displayStatus =  bdeStatus
+        if (StatusEnums.NEGOTIATING.getCode().equals(bdeStatus) || StatusEnums.DESIGNATED_SOURCE.getCode().equals(bdeStatus)) {
+            displayStatus = bdeStatus;
+        } else {
+            // ctStatus = 待确认  displayStatus = 待确认
+            if (ConfirmationTaskEnums.PENDING.getCode().equals(ctStatus)) {
+                displayStatus = ConfirmationTaskEnums.PENDING.getDesc();
+            }
+            // ctStatus = 待认领  displayStatus = 待认领
+            if (ConfirmationTaskEnums.CLAIMED.getCode().equals(ctStatus)) {
+                displayStatus = ConfirmationTaskEnums.CLAIMED.getDesc();
+            }
+            // ctStatus = 已确认 and  bdeStatus = 待核定  displayStatus = 已确认
+            if (ConfirmationTaskEnums.CONFIRMED.getCode().equals(ctStatus) && StatusEnums.PENDING_APPROVAL.getCode().equals(bdeStatus)) {
+                displayStatus = ConfirmationTaskEnums.CONFIRMED.getDesc();
+            }
+            // ctStatus = 已拒绝 and  bdeStatus = 待协商  displayStatus = 已拒绝
+            if (ConfirmationTaskEnums.REJECTED.getCode().equals(ctStatus) && StatusEnums.PENDING_NEGOTIATION.getCode().equals(bdeStatus)) {
+                displayStatus = ConfirmationTaskEnums.REJECTED.getDesc();
+            }
+            // ctStatus = 已认领 and  bdeStatus = 认领中, 待核定, 待协商  displayStatus = 已认领
+            if (ConfirmationTaskEnums.CLAIMED.getCode().equals(ctStatus)
+                    && (StatusEnums.CLAIMED.getCode().equals(bdeStatus)
+                    || StatusEnums.PENDING_APPROVAL.getCode().equals(bdeStatus)
+                    || StatusEnums.PENDING_NEGOTIATION.getCode().equals(bdeStatus))
+            ) {
+                displayStatus = ConfirmationTaskEnums.CLAIMED.getDesc();
+            }
+            // ctStatus = 不认领 and  bdeStatus = 认领中, 待核定, 待协商  displayStatus = 不认领
+            if (ConfirmationTaskEnums.NOT_CLAIMED.getCode().equals(ctStatus)
+                    && (StatusEnums.CLAIMED.getCode().equals(bdeStatus)
+                    || StatusEnums.PENDING_APPROVAL.getCode().equals(bdeStatus)
+                    || StatusEnums.PENDING_NEGOTIATION.getCode().equals(bdeStatus))) {
+                displayStatus = ConfirmationTaskEnums.NOT_CLAIMED.getDesc();
+            }
+        }
+        return displayStatus;
     }
 
 

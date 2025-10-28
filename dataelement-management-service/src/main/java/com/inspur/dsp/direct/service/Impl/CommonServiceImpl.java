@@ -26,6 +26,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,15 @@ public class CommonServiceImpl implements CommonService {
         }
         // 查询部门区划树内部表
         List<OrganizationUnit> organizationUnits = organizationUnitMapper.getCollectionDeptTree(dto);
+        // 遍历organizationUnits将dataid收集为list
+        List<String> parentNodeIdCollection = organizationUnits.stream()
+                .map(OrganizationUnit::getDataid)
+                .collect(Collectors.toList());
+        // 查询每个节点的下级节点数量
+        List<String> parentNodeIds = organizationUnitMapper.selectParentNodeIdByParentNodeIdIn(parentNodeIdCollection);
+        // 将parentNodeIds的每个id分组计算每个id的个数
+        Map<String, Long> parentNodeIdCountMap = parentNodeIds.stream()
+                .collect(Collectors.groupingBy(parentNodeId -> parentNodeId, Collectors.counting()));
         List<CollectionDeptTreeVo> vos = new ArrayList<>();
         if (!CollectionUtils.isEmpty(organizationUnits)) {
             vos = organizationUnits.stream()
@@ -61,6 +71,7 @@ public class CommonServiceImpl implements CommonService {
                                 collectionDeptTreeVo.setId(unit.getDataid());
                                 collectionDeptTreeVo.setName(unit.getUnitName());
                                 collectionDeptTreeVo.setType(unit.getNodeType());
+                                collectionDeptTreeVo.setChildCount(parentNodeIdCountMap.getOrDefault(unit.getDataid(), 0L));
                                 return collectionDeptTreeVo;
                             }
                     ).collect(Collectors.toList());

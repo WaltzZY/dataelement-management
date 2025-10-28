@@ -1036,6 +1036,8 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         baseElement.setLastModifyDate(now);
         baseElement.setCreateAccount(userInfo.getAccount());
         baseElement.setLastModifyAccount(userInfo.getAccount());
+        // 定数时间在导入时默认当前时间
+        baseElement.setGeneratedatetime(now);
 
         int baseResult = baseDataElementMapper.insert(baseElement);
         if (baseResult <= 0) {

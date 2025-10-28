@@ -21,4 +21,8 @@ public class CollectionDeptTreeVo {
      * region:区划，organ：部门
      */
     private String type;
+    /**
+     * 下级节点数量
+     */
+    private Long childCount;
 }

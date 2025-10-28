@@ -27,8 +27,8 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain, 
-    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty, 
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
+    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty,
     generatedatetime, remarks, create_date, create_account, last_modify_date, last_modify_account
   </sql>
 
@@ -279,8 +279,8 @@
                                 <when test="status == 'pending_claimed'">(ct.status = 'pending_claimed')</when>
                                 <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status = 'confirmed')</when>
                                 <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
-                                <when test="status == 'claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
-                                <when test="status == 'not_claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
+                                <when test="status == 'claimed'">(bde.status IN ('claimed_ing','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
+                                <when test="status == 'not_claimed'">(bde.status IN ('claimed_ing','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
                                 <!--&amp;amp;amp;lt;otherwise&amp;amp;amp;gt;&amp;amp;amp;lt;/otherwise&amp;amp;amp;gt;-->
                             </choose>
                         </foreach>
@@ -311,8 +311,8 @@
                             <when test="status == 'pending_claimed'">(ct.status = 'pending_claimed')</when>
                             <when test="status == 'confirmed'">(bde.status = 'pending_approval' AND ct.status = 'confirmed')</when>
                             <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
-                            <when test="status == 'claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
-                            <when test="status == 'not_claimed'">(bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
+                            <when test="status == 'claimed'">(bde.status IN ('claimed_ing','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
+                            <when test="status == 'not_claimed'">(bde.status IN ('claimed_ing','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
                         </choose>
                     </foreach>
                 </when>
@@ -377,8 +377,8 @@
                             <when test="status == 'pending_claimed'">OR (ct.status = 'pending_claimed')</when>
                             <when test="status == 'confirmed'">OR (bde.status = 'pending_approval' AND ct.status = 'confirmed')</when>
                             <when test="status == 'rejected'">OR (bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
-                            <when test="status == 'claimed'">OR (bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
-                            <when test="status == 'not_claimed'">OR (bde.status IN ('claimed','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
+                            <when test="status == 'claimed'">OR (bde.status IN ('claimed_ing','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
+                            <when test="status == 'not_claimed'">OR (bde.status IN ('claimed_ing','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
                             <when test="status == 'negotiating'">OR (bde.status = 'negotiating')</when>
                             <when test="status == 'designated_source'">OR (bde.status = 'designated_source')</when>
                             <otherwise>OR 1=0</otherwise>

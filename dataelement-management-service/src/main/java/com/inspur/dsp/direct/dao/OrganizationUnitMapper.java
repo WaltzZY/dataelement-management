@@ -39,4 +39,12 @@ public interface OrganizationUnitMapper extends BaseMapper<OrganizationUnit> {
      * @return
      */
     List<OrganizationUnit> getCollectionDeptSearch(Page page, @Param("dto") GetDeptSearchDto dto);
+
+    /**
+     * 根据父级部门ID批量查询父级部门ID,为了统计子部门数量
+     * @param parentNodeIdCollection
+     * @return
+     */
+    List<String> selectParentNodeIdByParentNodeIdIn(@Param("parentNodeIdCollection")Collection<String> parentNodeIdCollection);
+
 }

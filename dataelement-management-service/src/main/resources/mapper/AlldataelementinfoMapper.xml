@@ -12,11 +12,9 @@
         bde.collectunitqty,
         bde.source_unit_code AS sourceUnitCode,
         bde.source_unit_name AS sourceUnitName,
-        ct.processing_unit_name AS paUnitName,
         bde.status,
         bde.confirm_date AS confirmDate
         FROM base_data_element bde
-        LEFT JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         WHERE 1=1
 
         <!-- 数源单位社会信用代码精确匹配（多选）-->
