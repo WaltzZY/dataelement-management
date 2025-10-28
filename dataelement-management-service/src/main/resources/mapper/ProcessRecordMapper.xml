@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.inspur.dsp.direct.dao.ProcessRecordMapper">
-  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.ProcessRecord">
-    <!--@mbg.generated-->
-    <!--@Table process_record-->
-    <id column="processid" jdbcType="VARCHAR" property="processid" />
-    <result column="base_dataelement_dataid" jdbcType="VARCHAR" property="baseDataelementDataid" />
-    <result column="flowid" jdbcType="VARCHAR" property="flowid" />
-    <result column="processuserid" jdbcType="VARCHAR" property="processuserid" />
-    <result column="processusername" jdbcType="VARCHAR" property="processusername" />
-    <result column="processunitcode" jdbcType="VARCHAR" property="processunitcode" />
-    <result column="processunitname" jdbcType="VARCHAR" property="processunitname" />
-    <result column="useroperation" jdbcType="VARCHAR" property="useroperation" />
-    <result column="processdatetime" jdbcType="TIMESTAMP" property="processdatetime" />
-    <result column="sourceactivityname" jdbcType="VARCHAR" property="sourceactivityname" />
-    <result column="destactivityname" jdbcType="VARCHAR" property="destactivityname" />
-    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
-    <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
-    <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate" />
-    <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    processid, base_dataelement_dataid, flowid, processuserid, processusername, processunitcode, 
-    processunitname, useroperation, processdatetime, sourceactivityname, destactivityname, 
-    create_date, create_account, last_modify_date, last_modify_account
-  </sql>
+    <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.ProcessRecord">
+        <!--@mbg.generated-->
+        <!--@Table process_record-->
+        <id column="processid" jdbcType="VARCHAR" property="processid"/>
+        <result column="base_dataelement_dataid" jdbcType="VARCHAR" property="baseDataelementDataid"/>
+        <result column="flowid" jdbcType="VARCHAR" property="flowid"/>
+        <result column="processuserid" jdbcType="VARCHAR" property="processuserid"/>
+        <result column="processusername" jdbcType="VARCHAR" property="processusername"/>
+        <result column="processunitcode" jdbcType="VARCHAR" property="processunitcode"/>
+        <result column="processunitname" jdbcType="VARCHAR" property="processunitname"/>
+        <result column="useroperation" jdbcType="VARCHAR" property="useroperation"/>
+        <result column="processdatetime" jdbcType="TIMESTAMP" property="processdatetime"/>
+        <result column="sourceactivityname" jdbcType="VARCHAR" property="sourceactivityname"/>
+        <result column="destactivityname" jdbcType="VARCHAR" property="destactivityname"/>
+        <result column="create_date" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="create_account" jdbcType="VARCHAR" property="createAccount"/>
+        <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate"/>
+        <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        processid, base_dataelement_dataid, flowid, processuserid, processusername, processunitcode,
+        processunitname, useroperation, processdatetime, sourceactivityname, destactivityname,
+        create_date, create_account, last_modify_date, last_modify_account
+    </sql>
+
+    <select id="getProcessRecoderForPublished" resultMap="BaseResultMap">
+        SELECT *
+        FROM process_record pr
+        WHERE pr.base_dataelement_dataid = #{dataid}
+          AND pr.destactivityname = 'PUBLISHED'
+        LIMIT 1
+    </select>
+
 </mapper>
