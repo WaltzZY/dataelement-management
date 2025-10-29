@@ -23,7 +23,7 @@ public class AssociatedCatalogController {
      */
     @GetMapping("/dataSourceList")
     @RespAdvice
-    public List<DataElementCatalogRelationVO> getAssociatedDataSourceCatalog(@RequestParam(value = "sourceUnitCode",required = false) String sourceUnitCode, @RequestParam(value = "baseDataId") String baseDataId) {
+    public List<DataElementCatalogRelationVO> getAssociatedDataSourceCatalog(@RequestParam(value = "sourceUnitCode", required = false) String sourceUnitCode, @RequestParam(value = "baseDataId") String baseDataId) {
         return associatedCatalogService.getAssociatedDataSourceCatalog(sourceUnitCode, baseDataId);
     }
 
@@ -32,7 +32,7 @@ public class AssociatedCatalogController {
      */
     @GetMapping("/collectorList")
     @RespAdvice
-    public List<DataElementCatalogRelationVO> getAssociatedCollectorCatalog(@RequestParam(value = "sourceUnitCode",required = false) String sourceUnitCode, @RequestParam(value = "baseDataId") String baseDataId) {
+    public List<DataElementCatalogRelationVO> getAssociatedCollectorCatalog(@RequestParam(value = "sourceUnitCode", required = false) String sourceUnitCode, @RequestParam(value = "baseDataId") String baseDataId) {
         return associatedCatalogService.getAssociatedCollectorCatalog(sourceUnitCode, baseDataId);
     }
 

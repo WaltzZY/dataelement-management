@@ -15,16 +15,10 @@ public class DataElementCatalogRelationVO implements Serializable {
     private String dataElementId;
     private String catalogId;
     private String catalogName;
-    private String catalogDesc;
     private String infoItemId;
     private String infoItemName;
-    private String infoItemDatatype;
     private String catalogUnitCode;
     private String catalogUnitName;
-    private Date createDate;
-    private String createAccount;
-    private Date lastModifyDate;
-    private String lastModifyAccount;
     private String detailUrl;
     private Integer flag;
 

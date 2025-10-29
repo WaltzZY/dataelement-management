@@ -89,8 +89,11 @@ public class DataSourceFileCardServiceImpl implements DataSourceFileCardService 
             BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataid);
             List<DomainDataElement> resultFromBase = domainDataElementMapper.selectAllByBaseDataelementDataid(dataid);
             List<DomainDataElement> result = new ArrayList<>();
-            if (baseDataElement != null && StringUtils.isNotBlank(baseDataElement.getSourceUnitCode())) {
+            if (baseDataElement != null) {
                 String sourceUnitCodeFromBase = baseDataElement.getSourceUnitCode();
+                if (StringUtils.isBlank(sourceUnitCodeFromBase)) {
+                    return resultFromBase;
+                }
                 for (DomainDataElement domainDataElement : resultFromBase) {
                     String sourceUnitCode = domainDataElement.getSourceUnitCode();
                     if (!sourceUnitCodeFromBase.equals(sourceUnitCode)) {

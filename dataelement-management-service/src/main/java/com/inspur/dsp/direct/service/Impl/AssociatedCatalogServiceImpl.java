@@ -175,9 +175,6 @@ public class AssociatedCatalogServiceImpl implements AssociatedCatalogService {
                     BeanUtils.copyProperties(catalog, newRelation);
                     newRelation.setDataid(UUID.randomUUID().toString());
                     UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-                    // 获取登录人账户
-                    newRelation.setCreateAccount(userInfo.getAccount());
-                    newRelation.setCreateDate(new Date());
                     // 设置创建账号等信息
                     dataElementCatalogRelationMapper.insert(newRelation);
                 } else {
@@ -186,10 +183,6 @@ public class AssociatedCatalogServiceImpl implements AssociatedCatalogService {
 
                     DataElementCatalogRelation newRelation = new DataElementCatalogRelation();
                     BeanUtils.copyProperties(catalog, newRelation);
-                    UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-                    // 获取登录人账户
-                    newRelation.setCreateAccount(userInfo.getAccount());
-                    newRelation.setCreateDate(new Date());
                     newRelation.setDataid(UUID.randomUUID().toString());
                     dataElementCatalogRelationMapper.insert(newRelation);
                 }
