@@ -44,5 +44,5 @@ public interface CollectService {
      * @param id
      * @return
      */
-    List<CollectUnitVo> getCollectUnitList(String id);
+    List<CollectUnitVo> getCollectUnitList(String id, boolean exclude);
 }

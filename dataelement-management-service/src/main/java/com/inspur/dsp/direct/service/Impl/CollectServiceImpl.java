@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dao.BaseDataElementMapper;
 import com.inspur.dsp.direct.dao.ConfirmationTaskMapper;
+import com.inspur.dsp.direct.dao.DataElementCategoryMapper;
 import com.inspur.dsp.direct.dao.DomainDataElementMapper;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.dbentity.ConfirmationTask;
@@ -46,6 +47,7 @@ public class CollectServiceImpl implements CollectService {
     private final BaseDataElementMapper baseDataElementMapper;
     private final ConfirmationTaskMapper confirmationTaskMapper;
     private final DomainDataElementMapper domainDataElementMapper;
+    private final DataElementCategoryMapper dataElementCategoryMapper;
 
     /**
      * 获取确认数据元列表
@@ -253,7 +255,7 @@ public class CollectServiceImpl implements CollectService {
      * @return
      */
     @Override
-    public List<CollectUnitVo> getCollectUnitList(String id) {
+    public List<CollectUnitVo> getCollectUnitList(String id, boolean exclude) {
         List<DomainSourceUnitInfo> domainSourceUnitInfos = domainDataElementMapper.selectSourceUnitInfoByBaseDataid(Collections.singleton(id));
         if (CollectionUtils.isEmpty(domainSourceUnitInfos)) {
             return Collections.emptyList();
@@ -264,6 +266,13 @@ public class CollectServiceImpl implements CollectService {
             vo.setSourceUnitCode(domainSourceUnitInfo.getSourceUnitCode());
             vo.setSourceUnitName(domainSourceUnitInfo.getSourceUnitName());
             collectUnitList.add(vo);
+        }
+        // 排除掉数源单位
+        if (exclude) {
+            BaseDataElement baseDataElement = baseDataElementMapper.selectById(id);
+            if (Objects.nonNull(baseDataElement) && StringUtils.hasText(baseDataElement.getSourceUnitCode())) {
+                collectUnitList.removeIf(vo -> vo.getSourceUnitCode().equals(baseDataElement.getSourceUnitCode()));
+            }
         }
         return collectUnitList;
     }
