@@ -93,3 +93,6 @@ svc:
   url:
     basecatalog: http://10.110.26.178:8443/basecatalog
     overallPortal: http://10.110.26.178:8443/overallPortal
+# 本机文件上传地址
+upload:
+  path: ${user.dir}/file/

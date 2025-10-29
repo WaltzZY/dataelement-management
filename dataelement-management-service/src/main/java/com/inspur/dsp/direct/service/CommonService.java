@@ -66,4 +66,14 @@ public interface CommonService {
      * @throws IOException IO异常
      */
     <T> void exportExcelData(List<T> dataList, HttpServletResponse response, String fileName, Class<T> clazz) throws IOException;
+
+    /**
+     * 文件上传,返回文件上传的保存路径
+     */
+    String uploadFile(MultipartFile file);
+
+    /**
+     * 文件下载,返回文件二进制数据
+     */
+    byte[] downloadFile(String filePath);
 }
