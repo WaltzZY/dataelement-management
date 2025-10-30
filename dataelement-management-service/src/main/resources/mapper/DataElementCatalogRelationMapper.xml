@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.inspur.dsp.direct.dao.DataElementCatalogRelationMapper">
-    <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.DataElementCatalogRelation">
-        <!--@mbg.generated-->
-        <!--@Table data_element_catalog_relation-->
-        <id column="dataid" jdbcType="VARCHAR" property="dataid"/>
-        <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId"/>
-        <result column="catalog_id" jdbcType="VARCHAR" property="catalogId"/>
-        <result column="catalog_name" jdbcType="VARCHAR" property="catalogName"/>
-        <result column="info_item_id" jdbcType="VARCHAR" property="infoItemId"/>
-        <result column="info_item_name" jdbcType="VARCHAR" property="infoItemName"/>
-        <result column="catalog_unit_code" jdbcType="VARCHAR" property="catalogUnitCode"/>
-        <result column="catalog_unit_name" jdbcType="VARCHAR" property="catalogUnitName"/>
-    </resultMap>
-    <sql id="Base_Column_List">
-        <!--@mbg.generated-->
-        dataid, data_element_id, catalog_id, `catalog_name`, info_item_id,
-        info_item_name, info_item_datatype, catalog_unit_code, catalog_unit_name
-    </sql>
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.DataElementCatalogRelation">
+    <!--@mbg.generated-->
+    <!--@Table data_element_catalog_relation-->
+    <id column="dataid" jdbcType="VARCHAR" property="dataid" />
+    <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId" />
+    <result column="catalog_id" jdbcType="VARCHAR" property="catalogId" />
+    <result column="catalog_name" jdbcType="VARCHAR" property="catalogName" />
+    <result column="catalog_desc" jdbcType="VARCHAR" property="catalogDesc" />
+    <result column="info_item_id" jdbcType="VARCHAR" property="infoItemId" />
+    <result column="info_item_name" jdbcType="VARCHAR" property="infoItemName" />
+    <result column="Info_item_datatype" jdbcType="VARCHAR" property="infoItemDatatype" />
+    <result column="catalog_unit_code" jdbcType="VARCHAR" property="catalogUnitCode" />
+    <result column="catalog_unit_name" jdbcType="VARCHAR" property="catalogUnitName" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
+    <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate" />
+    <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    dataid, data_element_id, catalog_id, `catalog_name`, catalog_desc, info_item_id, 
+    info_item_name, Info_item_datatype, catalog_unit_code, catalog_unit_name, create_date, 
+    create_account, last_modify_date, last_modify_account
+  </sql>
 
     <select id="getAssociatedDataSourceCatalog" resultMap="BaseResultMap">
         SELECT *
