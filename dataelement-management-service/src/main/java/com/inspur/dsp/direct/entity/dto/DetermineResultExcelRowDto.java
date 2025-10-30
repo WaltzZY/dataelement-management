@@ -15,16 +15,16 @@ import lombok.Data;
 public class DetermineResultExcelRowDto {
 
     /**
-     * 基准数据元名称
+     * 序号
      */
-    @ExcelProperty(index = 0, value = "基准数据元名称")
-    private String baseElementName;
+    @ExcelProperty(index = 0, value = "序号")
+    private String serialNumber;
 
     /**
-     * 数据类型
+     * 基准数据元名称
      */
-    @ExcelProperty(index = 1, value = "数据类型")
-    private String dataType;
+    @ExcelProperty(index = 1, value = "基准数据元名称")
+    private String baseElementName;
 
     /**
      * 基准数据元定义
@@ -33,20 +33,26 @@ public class DetermineResultExcelRowDto {
     private String baseElementDefinition;
 
     /**
-     * 领域数据元名称
+     * 数据类型
      */
-    @ExcelProperty(index = 3, value = "领域数据元名称")
-    private String domainElementName;
+    @ExcelProperty(index = 3, value = "数据类型")
+    private String dataType;
 
     /**
-     * 领域数据元定义
+     * 领域数据元名称
      */
-    @ExcelProperty(index = 4, value = "领域数据元定义")
-    private String domainElementDefinition;
+    @ExcelProperty(index = 4, value = "领域数据元名称")
+    private String domainElementName;
 
     /**
      * 采集单位统一社会信用代码
      */
     @ExcelProperty(index = 5, value = "采集单位统一社会信用代码")
     private String unitCode;
+
+    /**
+     * 领域数据元定义
+     */
+    @ExcelProperty(index = 6, value = "领域数据元定义")
+    private String domainElementDefinition;
 }
