@@ -25,4 +25,9 @@ public class AssociatedCatalogVo {
     private String sourceOrgCode;
     
     private String sourceOrgName;
+    
+    /**
+     * 目录预览URL
+     */
+    private String previewUrl;
 }

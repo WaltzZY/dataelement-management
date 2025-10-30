@@ -1051,7 +1051,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         domainElement.setDefinition(row.getDomainElementDefinition());
         domainElement.setSourceUnitCode(row.getUnitCode());
         domainElement.setSourceUnitName(organizationUnit.getUnitName());
-        domainElement.setDataElementId(baseElement.getDataid());
+        domainElement.setBaseDataelementDataid(baseElement.getDataid());
         domainElement.setCreateDate(now);
         domainElement.setLastModifyDate(now);
         domainElement.setCreateAccount(userInfo.getAccount());

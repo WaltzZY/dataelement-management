@@ -255,6 +255,20 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             vo.setDataType(relation.getInfoItemDatatype());
             vo.setSourceOrgCode(relation.getCatalogUnitCode());
             vo.setSourceOrgName(relation.getCatalogUnitName());
+            
+            // 生成目录预览URL
+            try {
+                String previewUrl = basecatalogService.getCatalogPreviewUrl(
+                    relation.getCatalogId(), 
+                    relation.getCatalogUnitCode(), 
+                    relation.getCatalogName()
+                );
+                vo.setPreviewUrl(previewUrl);
+            } catch (Exception e) {
+                log.warn("生成目录预览URL失败，catalogId: {}, error: {}", relation.getCatalogId(), e.getMessage());
+                vo.setPreviewUrl("");
+            }
+            
             result.add(vo);
         }
 
