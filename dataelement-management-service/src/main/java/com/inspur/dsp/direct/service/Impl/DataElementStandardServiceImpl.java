@@ -58,7 +58,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         if (dataElement == null) {
             throw new IllegalArgumentException("数据元不存在");
         }
-        if (!"TodoDetermined".equals(dataElement.getStatus())) {
+        if (!"designated_source".equals(dataElement.getStatus())) {
             throw new IllegalArgumentException("当前状态不允许编辑");
         }
 
@@ -475,12 +475,12 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         if (dataElement == null) {
             throw new IllegalArgumentException("数据元不存在");
         }
-        if (!"TodoDetermined".equals(dataElement.getStatus())) {
+        if (!"designated_source".equals(dataElement.getStatus())) {
             throw new IllegalArgumentException("当前状态不允许提交，必须为待定标状态");
         }
 
         // 计算下一状态
-        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus("TodoDetermined", "提交审核");
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus("designated_source", "提交审核");
         if (!nextStatusVo.getIsValid()) {
             throw new RuntimeException("状态流转配置不存在或无效");
         }
@@ -500,7 +500,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         ProcessRecordDto processRecordDto = new ProcessRecordDto();
         processRecordDto.setBaseDataelementDataid(dto.getDataid());
         processRecordDto.setOperation("提交审核");
-        processRecordDto.setSourceStatus("TodoDetermined");
+        processRecordDto.setSourceStatus("designated_source");
         processRecordDto.setDestStatus(nextStatus);
         processRecordDto.setOperatorAccount(userInfo.getAccount());
         processRecordDto.setOperatorName(userInfo.getName());
