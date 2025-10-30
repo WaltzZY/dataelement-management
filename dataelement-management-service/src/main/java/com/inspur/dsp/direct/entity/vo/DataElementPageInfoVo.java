@@ -14,7 +14,6 @@ public class DataElementPageInfoVo {
     /**
      * 发起时间
      */
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date sendDate;
     /**
      * 数据行唯一标识，ID 编号
