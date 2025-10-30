@@ -13,4 +13,13 @@
     <!--@mbg.generated-->
     dataid, base_dataelement_dataid, contactname, contacttel
   </sql>
+
+  <!-- 定标模块专用：根据数据元ID查询联系人信息 -->
+  <select id="selectByDataElementId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from data_element_contact
+    where base_dataelement_dataid = #{baseDataelementDataid,jdbcType=VARCHAR}
+    limit 1
+  </select>
 </mapper>

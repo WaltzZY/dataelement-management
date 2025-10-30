@@ -14,6 +14,15 @@ import java.util.List;
 @Mapper
 public interface OrganizationUnitMapper extends BaseMapper<OrganizationUnit> {
     OrganizationUnit selectFirstByUnitCode(@Param("unitCode") String unitCode);
+    
+    /**
+     * 根据单位编码查询单位信息
+     * 用于定标模块获取数源单位信息
+     *
+     * @param unitCode 统一社会信用代码
+     * @return 单位信息
+     */
+    OrganizationUnit selectByCode(@Param("unitCode") String unitCode);
 
     /**
      * 获取部门树

@@ -174,4 +174,5 @@ public class BaseDataElement implements Serializable {
      */
     @TableField(exist = false)
     private String displayStatus;
+
 }

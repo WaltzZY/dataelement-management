@@ -16,4 +16,14 @@
     attachfileid, base_dataelement_dataid, attachfiletype, attachfilename, attachfileurl, 
     attachfilelocation
   </sql>
+
+  <!-- 定标模块专用：根据数据元ID和文件类型查询文件列表 -->
+  <select id="selectByDataElementIdAndType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from data_element_attachment
+    where base_dataelement_dataid = #{baseDataelementDataid,jdbcType=VARCHAR}
+      and attachfiletype = #{attachfiletype,jdbcType=VARCHAR}
+    order by attachfileid desc
+  </select>
 </mapper>

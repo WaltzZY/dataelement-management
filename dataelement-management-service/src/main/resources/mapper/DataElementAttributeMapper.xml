@@ -13,4 +13,19 @@
     <!--@mbg.generated-->
     dataid, base_dataelement_dataid, attributename, attributevalue
   </sql>
+
+  <!-- 定标模块专用：根据数据元ID查询属性列表 -->
+  <select id="selectByDataElementId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from data_element_attribute
+    where base_dataelement_dataid = #{baseDataelementDataid,jdbcType=VARCHAR}
+    order by dataid
+  </select>
+
+  <!-- 定标模块专用：根据数据元ID删除所有属性 -->
+  <delete id="deleteByDataElementId">
+    delete from data_element_attribute
+    where base_dataelement_dataid = #{baseDataelementDataid,jdbcType=VARCHAR}
+  </delete>
 </mapper>

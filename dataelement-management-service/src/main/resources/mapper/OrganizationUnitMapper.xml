@@ -35,6 +35,14 @@
     where unit_code=#{unitCode,jdbcType=VARCHAR} limit 1
   </select>
 
+  <!-- 定标模块专用：根据单位编码查询单位信息 -->
+  <select id="selectByCode" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from organization_unit
+    where unit_code=#{unitCode,jdbcType=VARCHAR} limit 1
+  </select>
+
   <select id="getCollectionDeptTree" resultMap="BaseResultMap">
     select <include refid="Base_Column_List" />
     from organization_unit

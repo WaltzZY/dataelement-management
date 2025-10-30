@@ -1,0 +1,179 @@
+package com.inspur.dsp.direct.console.controller.business;
+
+import com.inspur.dsp.direct.annotation.RespAdvice;
+import com.inspur.dsp.direct.domain.Resp;
+import com.inspur.dsp.direct.entity.dto.*;
+import com.inspur.dsp.direct.entity.vo.*;
+import com.inspur.dsp.direct.service.DataElementStandardService;
+import com.inspur.dsp.direct.service.FlowProcessService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import java.util.List;
+
+/**
+ * 数据元编制标准Controller
+ * 页面编号：001系列(001-1至001-6)
+ *
+ * @author system
+ * @since 2025
+ */
+@Slf4j
+@RestController
+@RequestMapping("/business/standard")
+public class DataElementStandardController {
+
+    @Autowired
+    private DataElementStandardService dataElementStandardService;
+
+    @Autowired
+    private FlowProcessService flowProcessService;
+
+    /**
+     * 获取编制标准完整信息
+     * 用于前端6个步骤页面的初始化
+     */
+    @GetMapping("/info")
+    @RespAdvice
+    public StandardCompleteInfoVo getStandardCompleteInfo(
+            @RequestParam @NotBlank(message = "数据元ID不能为空") String dataid,
+            @RequestParam @NotBlank(message = "数源单位统一社会信用代码不能为空") String sourceunitcode) {
+        log.info("获取编制标准完整信息 - dataid: {}, sourceunitcode: {}", dataid, sourceunitcode);
+        return dataElementStandardService.getStandardCompleteInfo(dataid, sourceunitcode);
+    }
+
+    /**
+     * 查询可关联的目录数据项
+     * 在"关联共享目录"弹窗中使用
+     */
+    @PostMapping("/catalog/search")
+    @RespAdvice
+    public SearchCatalogItemResultVo searchCatalogItems(@RequestBody @Valid SearchCatalogItemDto dto) {
+        log.info("查询可关联的目录数据项 - dto: {}", dto);
+        return dataElementStandardService.searchCatalogItems(dto);
+    }
+
+    /**
+     * 保存目录-数据元关联
+     * 弹窗中点击"确认"按钮时调用
+     */
+    @PostMapping("/catalog/associate")
+    @RespAdvice
+    public Resp<?> associateCatalog(@RequestBody @Valid AssociateCatalogDto dto) {
+        log.info("保存目录-数据元关联 - dto: {}", dto);
+        dataElementStandardService.associateCatalog(dto);
+        return Resp.success();
+    }
+
+    /**
+     * 查询目录-数据元关联列表
+     * 用于页面刷新或弹窗关闭后的列表展示
+     */
+    @GetMapping("/catalog/list/{dataid}")
+    @RespAdvice
+    public List<AssociatedCatalogVo> getAssociatedCatalogs(
+            @PathVariable @NotBlank(message = "数据元ID不能为空") String dataid,
+            @RequestParam(required = false) String sourceOrgCode) {
+        log.info("查询目录-数据元关联列表 - dataid: {}, sourceOrgCode: {}", dataid, sourceOrgCode);
+        return dataElementStandardService.getAssociatedCatalogs(dataid, sourceOrgCode);
+    }
+
+    /**
+     * 取消关联
+     * 点击"取消关联"按钮时调用
+     */
+    @DeleteMapping("/catalog/{relationid}")
+    @RespAdvice
+    public Resp<?> cancelAssociation(@PathVariable @NotBlank(message = "关联关系ID不能为空") String relationid) {
+        log.info("取消关联 - relationid: {}", relationid);
+        dataElementStandardService.cancelAssociation(relationid);
+        return Resp.success();
+    }
+
+    /**
+     * 上传标准规范文件
+     * 仅接受PDF格式
+     */
+    @PostMapping("/file/standard")
+    @RespAdvice
+    public Resp<?> uploadStandardFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam @NotBlank(message = "数据元ID不能为空") String dataid) {
+        log.info("上传标准规范文件 - dataid: {}, fileName: {}", dataid, file.getOriginalFilename());
+        dataElementStandardService.uploadFile(file, dataid, "standardfile");
+        return Resp.success();
+    }
+
+    /**
+     * 查询标准规范文件列表
+     */
+    @GetMapping("/file/standard/{dataid}")
+    @RespAdvice
+    public List<AttachmentFileVo> getStandardFiles(@PathVariable @NotBlank(message = "数据元ID不能为空") String dataid) {
+        log.info("查询标准规范文件列表 - dataid: {}", dataid);
+        return dataElementStandardService.getFileList(dataid, "standardfile");
+    }
+
+    /**
+     * 删除标准规范文件
+     */
+    @DeleteMapping("/file/standard/{attachFileId}")
+    @RespAdvice
+    public Resp<?> deleteStandardFile(@PathVariable @NotBlank(message = "附件ID不能为空") String attachFileId) {
+        log.info("删除标准规范文件 - attachFileId: {}", attachFileId);
+        dataElementStandardService.deleteFile(attachFileId);
+        return Resp.success();
+    }
+
+    /**
+     * 上传样例文件
+     * 接受任意格式文件
+     */
+    @PostMapping("/file/example")
+    @RespAdvice
+    public Resp<?> uploadExampleFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam @NotBlank(message = "数据元ID不能为空") String dataid) {
+        log.info("上传样例文件 - dataid: {}, fileName: {}", dataid, file.getOriginalFilename());
+        dataElementStandardService.uploadFile(file, dataid, "examplefile");
+        return Resp.success();
+    }
+
+    /**
+     * 查询样例文件列表
+     */
+    @GetMapping("/file/example/{dataid}")
+    @RespAdvice
+    public List<AttachmentFileVo> getExampleFiles(@PathVariable @NotBlank(message = "数据元ID不能为空") String dataid) {
+        log.info("查询样例文件列表 - dataid: {}", dataid);
+        return dataElementStandardService.getFileList(dataid, "examplefile");
+    }
+
+    /**
+     * 保存编制信息
+     * 保存编制标准的基本信息、联系人信息和属性信息，不改变状态
+     */
+    @PostMapping("/save")
+    @RespAdvice
+    public Resp<?> saveStandard(@RequestBody @Valid SaveStandardDto dto) {
+        log.info("保存编制信息 - dto: {}", dto);
+        dataElementStandardService.saveStandard(dto);
+        return Resp.success();
+    }
+
+    /**
+     * 提交审核
+     * 保存所有信息并提交审核，状态流转到下一阶段
+     */
+    @PostMapping("/submit")
+    @RespAdvice
+    public Resp<SubmitResultVo> submitStandard(@RequestBody @Valid SaveStandardDto dto) {
+        log.info("提交审核 - dto: {}", dto);
+        SubmitResultVo result = dataElementStandardService.submitStandard(dto);
+        return Resp.success(result);
+    }
+}
