@@ -46,4 +46,15 @@ public class BasecatalogServiceImpl implements BasecatalogService {
         }
         return Collections.emptyList();
     }
+
+    /**
+     * 获取目录总门户预览地址
+     *
+     * @param catalogId
+     * @return
+     */
+    @Override
+    public String getCatalogPreviewUrl(String catalogId, String catalogUnitCode, String catalogName) {
+        return overallPortalUrl + "/fusionRegionCatalog/dataDirectoryDetail?cataId=" + catalogId + "&org_code=" + catalogUnitCode + "&catalogName=" + catalogName;
+    }
 }
