@@ -8,16 +8,14 @@
         <result column="data_element_id" jdbcType="VARCHAR" property="dataElementId"/>
         <result column="catalog_id" jdbcType="VARCHAR" property="catalogId"/>
         <result column="catalog_name" jdbcType="VARCHAR" property="catalogName"/>
-        <result column="catalog_desc" jdbcType="VARCHAR" property="catalogDesc"/>
         <result column="info_item_id" jdbcType="VARCHAR" property="infoItemId"/>
         <result column="info_item_name" jdbcType="VARCHAR" property="infoItemName"/>
-        <result column="info_item_datatype" jdbcType="VARCHAR" property="infoItemDatatype"/>
         <result column="catalog_unit_code" jdbcType="VARCHAR" property="catalogUnitCode"/>
         <result column="catalog_unit_name" jdbcType="VARCHAR" property="catalogUnitName"/>
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        dataid, data_element_id, catalog_id, `catalog_name`, catalog_desc, info_item_id,
+        dataid, data_element_id, catalog_id, `catalog_name`, info_item_id,
         info_item_name, info_item_datatype, catalog_unit_code, catalog_unit_name
     </sql>
 
@@ -59,21 +57,5 @@
         FROM data_element_catalog_relation
         WHERE dataid = #{dataid}
     </delete>
-
-    <select id="selectAssociatedCatalogs" resultMap="BaseResultMap">
-        SELECT *
-        FROM data_element_catalog_relation
-        WHERE data_element_id = #{dataElementId}
-        <if test="sourceOrgCode != null and sourceOrgCode != ''">
-            AND catalog_unit_code = #{sourceOrgCode}
-        </if>
-    </select>
-
-    <select id="selectRelationByDataElementAndItem" resultMap="BaseResultMap">
-        SELECT *
-        FROM data_element_catalog_relation
-        WHERE data_element_id = #{dataElementId}
-          AND info_item_id = #{catalogitemid}
-    </select>
 
 </mapper>

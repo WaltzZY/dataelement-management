@@ -13,4 +13,13 @@ public interface BasecatalogService {
      * @return
      */
     List<QueryCatalogByColumnNameVo> getRelationCatalogItemLike(QueryCatalogByColumnNameDto dto);
+
+    /**
+     * 获取目录总门户预览地址
+     * @param catalogId 目录id
+     * @param catalogUnitCode 目录部门编码
+     * @param catalogName 目录名称
+     * @return
+     */
+    String getCatalogPreviewUrl(String catalogId, String catalogUnitCode, String catalogName);
 }

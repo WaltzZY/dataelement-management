@@ -54,13 +54,6 @@ public class DataElementCatalogRelation implements Serializable {
     private String catalogName;
 
     /**
-     * 目录描述（摘要）
-     */
-    @TableField(value = "catalog_desc")
-    @Size(max = 500, message = "目录描述最大长度要小于 500")
-    private String catalogDesc;
-
-    /**
      * 信息项ID
      */
     @TableField(value = "info_item_id")
@@ -73,13 +66,6 @@ public class DataElementCatalogRelation implements Serializable {
     @TableField(value = "info_item_name")
     @Size(max = 100, message = "信息项名称最大长度要小于 100")
     private String infoItemName;
-
-    /**
-     * 信息项类型
-     */
-    @TableField(value = "info_item_datatype")
-    @Size(max = 20, message = "信息项类型最大长度要小于 20")
-    private String infoItemDatatype;
 
     /**
      * 目录单位统一社会信用代码
