@@ -22,22 +22,6 @@ public enum StatusEnums {
     NEGOTIATING("negotiating", "协商中"),
     DESIGNATED_SOURCE("designated_source", "已定源"),
 
-    // 定标阶段状态枚举
-    // 待定标: TodoDetermined
-    TODODETERMINED("TodoDetermined", "待定标"),
-    // 待审核: PendingReview
-    PENDINGREVIEW("PendingReview", "待审核"),
-    // 征求意见: SolicitingOpinions
-    SOLICITINGOPINIONS("SolicitingOpinions", "征求意见"),
-    // 待修订: TodoRevised
-    TODOREVISED("TodoRevised", "待修订"),
-    // 待复审: PendingReExamination
-    PENDINGREEXAMINATION("PendingReExamination", "待复审"),
-    // 待发布: Todoreleased
-    TODORELEASED("Todoreleased", "待发布"),
-    // 已发布: Published
-    PUBLISHED("Published", "已发布"),
-
     ;
 
     private final String code;

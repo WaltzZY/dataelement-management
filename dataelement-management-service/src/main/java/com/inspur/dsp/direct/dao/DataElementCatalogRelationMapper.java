@@ -9,7 +9,6 @@ import java.util.List;
 
 @Mapper
 public interface DataElementCatalogRelationMapper extends BaseMapper<DataElementCatalogRelation> {
-
     List<DataElementCatalogRelation> getAssociatedDataSourceCatalog(
             @Param("sourceUnitCode") String sourceUnitCode,
             @Param("baseDataId") String baseDataId);
@@ -26,10 +25,9 @@ public interface DataElementCatalogRelationMapper extends BaseMapper<DataElement
 
     Boolean deleteCatalogAssociation(@Param("dataid") String dataid);
 
-    int insert(DataElementCatalogRelation relation);
-
     /**
      * 查询数据元的关联目录列表(定标模块专用)
+     *
      * @param dataElementId 数据元ID
      * @param sourceOrgCode 数源单位编码(可选)
      * @return 关联目录列表
@@ -40,6 +38,7 @@ public interface DataElementCatalogRelationMapper extends BaseMapper<DataElement
 
     /**
      * 检查目录关联关系是否存在(定标模块专用)
+     *
      * @param dataElementId 数据元ID
      * @param catalogitemid 目录数据项ID
      * @return 关联关系记录
@@ -47,5 +46,4 @@ public interface DataElementCatalogRelationMapper extends BaseMapper<DataElement
     DataElementCatalogRelation selectRelationByDataElementAndItem(
             @Param("dataElementId") String dataElementId,
             @Param("catalogitemid") String catalogitemid);
-
 }

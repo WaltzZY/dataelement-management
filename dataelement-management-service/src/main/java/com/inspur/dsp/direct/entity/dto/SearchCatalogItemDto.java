@@ -10,10 +10,6 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 public class SearchCatalogItemDto {
-
-    @NotBlank(message = "数据元ID不能为空")
-    private String dataid;
-
     private String keyword;
 
     @NotBlank(message = "数源单位编码不能为空")

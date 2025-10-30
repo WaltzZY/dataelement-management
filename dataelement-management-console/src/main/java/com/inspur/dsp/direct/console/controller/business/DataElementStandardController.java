@@ -95,6 +95,18 @@ public class DataElementStandardController {
     }
 
     /**
+     * 取消关联 (POST方法兼容)
+     * 点击"取消关联"按钮时调用，兼容前端POST请求
+     */
+    @PostMapping("/catalog/{relationid}/cancel")
+    @RespAdvice
+    public Resp<?> cancelAssociationPost(@PathVariable @NotBlank(message = "关联关系ID不能为空") String relationid) {
+        log.info("取消关联(POST) - relationid: {}", relationid);
+        dataElementStandardService.cancelAssociation(relationid);
+        return Resp.success();
+    }
+
+    /**
      * 上传标准规范文件
      * 仅接受PDF格式
      */
