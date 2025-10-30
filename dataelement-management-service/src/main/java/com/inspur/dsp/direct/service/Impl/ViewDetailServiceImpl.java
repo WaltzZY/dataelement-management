@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.service.Impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.inspur.dsp.direct.common.StatusUtil;
 import com.inspur.dsp.direct.dao.*;
@@ -8,11 +9,10 @@ import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.bo.DomainSourceUnitInfo;
 import com.inspur.dsp.direct.entity.dto.FlowNodeDTO;
 import com.inspur.dsp.direct.entity.enums.DataElementStatus;
-import com.inspur.dsp.direct.entity.vo.DataElementWithTaskVo;
-import com.inspur.dsp.direct.entity.vo.DomainDataElementVO;
-import com.inspur.dsp.direct.entity.vo.GetCollectUnitVo;
-import com.inspur.dsp.direct.entity.vo.GetDuPontInfoVo;
+import com.inspur.dsp.direct.entity.vo.*;
 import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
+import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
+import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.service.ViewDetailService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -147,22 +148,41 @@ public class ViewDetailServiceImpl implements ViewDetailService {
     }
 
     @Override
-    public ConfirmationTask getConfirmationTask(String dataId) {
-
-        QueryWrapper<ConfirmationTask> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("base_dataelement_dataid", dataId);
-        queryWrapper.orderByDesc("send_date");
-        List<ConfirmationTask> confirmationTasks = confirmationTaskMapper.selectList(queryWrapper);
-        if (!confirmationTasks.isEmpty()) {
-            return confirmationTasks.get(0);
+    public GetConfirmationTaskVo getConfirmationTask(String dataId) {
+        // 查询当前基准数据元信息
+        BaseDataElement baseDataElement = baseDataElementMapper.selectById(dataId);
+        if (Objects.isNull(baseDataElement)) {
+            throw new IllegalArgumentException("数据元不存在");
         }
-        return new ConfirmationTask();
+        // 取当前登录人部门code
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String orgCode = userInfo.getOrgCode();
+        // 使用LambdaQueryWrapper避免硬编码字段名
+        ConfirmationTask latestTask = confirmationTaskMapper.selectOne(
+                new LambdaQueryWrapper<ConfirmationTask>()
+                        .eq(ConfirmationTask::getBaseDataelementDataid, dataId)
+                        .eq(ConfirmationTask::getProcessingUnitCode, orgCode)
+                        .orderByDesc(ConfirmationTask::getSendDate)
+                        .last("LIMIT 1")
+        );
+        if (Objects.nonNull(latestTask)) {
+            GetConfirmationTaskVo vo = GetConfirmationTaskVo.toVo(latestTask);
+            vo.setStatusDesc(ConfirmationTaskEnums.getDescByCode(latestTask.getStatus()));
+            vo.setBaseDataelementStatus(baseDataElement.getStatus());
+            vo.setBaseDataelementStatusDesc(StatusEnums.getDescByCode(baseDataElement.getStatus()));
+            return vo;
+        }
+
+        return new GetConfirmationTaskVo();
     }
 
     @Override
     public SourceEventRecord getSourceEventRecord(String dataId) {
         SourceEventRecord sourceEventRecord = sourceEventRecordMapper.selectFirstByDataElementIdOrderBySourceDateDesc(dataId);
         if (sourceEventRecord != null) {
+            String sourceType = sourceEventRecord.getSourceType();
+            String sourceTypeChinese = RecordSourceTypeEnums.getDescByCode(sourceType);
+            sourceEventRecord.setSourceTypeChinese(sourceTypeChinese);
             return sourceEventRecord;
         }
         return new SourceEventRecord();
@@ -203,9 +223,6 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             for (GetCollectUnitVo collectUnitVo : collectUnitList) {
                 String status = collectUnitVo.getStatus();
                 if (status != null) {
-                    if (ConfirmationTaskEnums.PENDING.getCode().equals(status) || ConfirmationTaskEnums.PENDING_CLAIMED.getCode().equals(status)) {
-                        collectUnitVo.setProcessingDate(collectUnitVo.getSendDate());
-                    }
                     DataElementStatus dataElementStatus = DataElementStatus.fromString(status);
                     collectUnitVo.setStatusChinese(dataElementStatus.getRemark());
                 } else {
@@ -386,8 +403,8 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
 
         List<ConfirmationTask> confirmationTaskList = confirmationTaskMapper.selectAllByStatusAndBaseDataelementDataidIn("pending_claimed", Collections.singleton(dataId));
-        if (confirmationTaskList.size() < 2) {
-            throw new RuntimeException("定源任务丢失!");
+        if (CollectionUtils.isEmpty(confirmationTaskList)) {
+            throw new RuntimeException("认领任务不存在");
         }
 
         List<FlowNodeDTO> flow = new ArrayList<>();

@@ -38,9 +38,7 @@ spring:
     start: 127.
   bsp:
     root-organ-code: 200427114503
-#    url: http://10.110.26.178:8443/bsp
-#    url: http://127.0.0.1:8101/bsp
-    url: http://192.168.3.233:8101/bsp
+    url: http://10.110.26.178:8443/bsp
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -91,3 +89,10 @@ mybatis-plus:
   type-aliases-package: com.inspur.dsp.*.dbentity
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+svc:
+  url:
+    basecatalog: http://10.110.26.178:8443/basecatalog
+    overallPortal: http://10.110.26.178:8443/overallPortal
+# 本机文件上传地址
+upload:
+  path: ${user.dir}/file/

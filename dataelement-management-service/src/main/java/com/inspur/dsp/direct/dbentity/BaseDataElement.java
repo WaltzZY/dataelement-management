@@ -1,20 +1,17 @@
 package com.inspur.dsp.direct.dbentity;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.io.Serializable;
+import java.util.Date;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * 基准数据元表
@@ -43,10 +40,10 @@ public class BaseDataElement implements Serializable {
     private String dataElementId;
 
     /**
-     * 数据元状态
+     * 数据元状态:定标阶段(待定标: TodoDetermined 待审核: PendingReview 征求意见: SolicitingOpinions 待修订: TodoRevised 待复审: PendingReExamination 待发布: Todoreleased 已发布: Published )
      */
     @TableField(value = "`status`")
-    @Size(max = 20, message = "数据元状态最大长度要小于 20")
+    @Size(max = 20, message = "数据元状态:定标阶段(待定标: TodoDetermined 待审核: PendingReview 征求意见: SolicitingOpinions 待修订: TodoRevised 待复审: PendingReExamination 待发布: Todoreleased 已发布: Published )最大长度要小于 20")
     private String status;
 
     /**
@@ -97,29 +94,20 @@ public class BaseDataElement implements Serializable {
     private String sourceUnitName;
 
     /**
-     * 数据元发布日期
+     * 数据元发布日期(即定标时间)
      */
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "publish_date")
     private Date publishDate;
 
     /**
      * 发起定源时间
      */
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "send_date")
     private Date sendDate;
 
     /**
      * 确定数源单位时间
      */
-    @JsonFormat(
-            pattern = "yyyy-MM-dd HH:mm:ss",
-            timezone = "GMT+8"
-    )
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @TableField(value = "confirm_date")
     private Date confirmDate;
 
@@ -132,7 +120,6 @@ public class BaseDataElement implements Serializable {
     /**
      * 定数时间
      */
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @TableField(value = "generatedatetime")
     private Date generatedatetime;
 
@@ -145,8 +132,6 @@ public class BaseDataElement implements Serializable {
     /**
      * 创建日期
      */
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_date")
     private Date createDate;
 
@@ -160,7 +145,6 @@ public class BaseDataElement implements Serializable {
     /**
      * 最后修改日期
      */
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     @TableField(value = "last_modify_date")
     private Date lastModifyDate;
 
@@ -190,4 +174,5 @@ public class BaseDataElement implements Serializable {
      */
     @TableField(exist = false)
     private String displayStatus;
+
 }

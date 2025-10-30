@@ -16,7 +16,8 @@ public enum RecordSourceTypeEnums {
     CLAIM_APPROVAL("claim_approval", "认领型核定"),
     NEGOTIATION_RESULT_ENTRY("negotiation_result_entry", "协商结果录入"),
     MANUAL_SOURCE("manual_source", "手动定源"),
-    IMPORT_SOURCE("import_source", "导入定源");
+    IMPORT_SOURCE("import_source", "导入定源"),
+    IMPORT_DETERMINE_RESULT("import_determine_result", "导入定数");
 
     private final String code;
     private final String desc;

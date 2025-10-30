@@ -10,6 +10,7 @@ import com.inspur.dsp.direct.entity.dto.SingleNegotiationDto;
 import com.inspur.dsp.direct.entity.dto.SingleNegotiationResultDto;
 import com.inspur.dsp.direct.entity.vo.NegotiationDataElementVO;
 import com.inspur.dsp.direct.entity.vo.NegotiationRecordInfoVo;
+import com.inspur.dsp.direct.enums.TemplateTypeEnums;
 import com.inspur.dsp.direct.service.NegotiationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -110,5 +111,16 @@ public class NegotiationController {
     public void exportNegotiationFailList(@RequestBody List<ImportNegotiationFailDetailDTO> failDetails,
                                          HttpServletResponse response) {
         negotiationService.exportNegotiationFailList(failDetails, response);
+    }
+
+    /**
+     * 下载导入定源结果模板
+     * @param response HttpServletResponse对象
+     */
+    @GetMapping("/downloadImportDatasourceResultTemplate")
+    public void downloadImportDatasourceResultTemplate(HttpServletResponse response) {
+        log.info("下载导入定源结果模板开始");
+        negotiationService.downloadImportTemplate(TemplateTypeEnums.IMPORT_DATASOURCE_RESULT, response);
+        log.info("下载导入定源结果模板结束");
     }
 }

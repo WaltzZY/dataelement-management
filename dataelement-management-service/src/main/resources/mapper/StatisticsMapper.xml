@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.StatisticsMapper">
+
+    <!-- getCommonStatusNumForOrganiser 查询 -->
+    <select id="getCommonStatusNumForOrganiser" resultType="java.lang.Long">
+        select count(*) as num
+        from base_data_element bde
+        where bde.status = #{status}
+    </select>
+
+    <!-- getPendingSourceConfirmQty 查询 -->
+    <select id="getPendingSourceConfirmQty" resultType="java.lang.Long">
+        select count(*) as pendingSourceConfirmQty
+        from base_data_element bde
+        where bde.status = #{status}
+          and bde.collectunitqty = 1
+    </select>
+
+    <!-- getPendingSourceClaimQty 查询 -->
+    <select id="getPendingSourceClaimQty" resultType="java.lang.Long">
+        select count(*) as pendingSourceClaimQty
+        from base_data_element bde
+        where bde.status = #{status}
+          and bde.collectunitqty > 1
+    </select>
+
+    <!-- getCommonStatusNumForCollector 查询 -->
+    <select id="getCommonStatusNumForCollector" resultType="java.lang.Long">
+        select count(*) as num
+        from confirmation_task
+        where processing_unit_code = #{orgCode}
+          and status = #{status}
+    </select>
+
+    <!-- getCommonStatusNumForCollector 查询 -->
+    <select id="getMyDesignatedSourceQty" resultType="java.lang.Long">
+        select count(*) as num
+        from base_data_element bde
+        where bde.source_unit_code = #{orgCode}
+          and bde.status = 'designated_source';
+    </select>
+
+    <!-- getToBeProcessedQty 查询 -->
+    <select id="getToBeProcessedQty" resultType="java.lang.Long">
+        select count(*) as toBeProcessedQty
+        from confirmation_task
+        where processing_unit_code = #{orgCode}
+          and status in ('pending_claimed', 'pending')
+    </select>
+
+    <!-- getProcessedQty 查询 -->
+    <select id="getProcessedQty" resultType="java.lang.Long">
+        select count(*) as processedQty
+        from confirmation_task
+        where processing_unit_code = #{orgCode}
+          and status in ('claimed', 'not_claimed', 'confirmed', 'rejected')
+    </select>
+
+    <!-- getCommonStatusNumForCollectorWithTask 查询 -->
+    <select id="getCommonStatusNumForCollectorWithTask" resultType="java.lang.Long">
+        select count(*) as num
+        from base_data_element bde
+                 left join confirmation_task ct on ct.base_dataelement_dataid = bde.dataid
+        where ct.processing_unit_code = #{orgCode}
+          and ct.status = #{status}
+          and bde.status != 'designated_source'
+    </select>
+
+</mapper>

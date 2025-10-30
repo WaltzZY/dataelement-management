@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.DataElementAttributeMapper">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.DataElementAttribute">
+    <!--@mbg.generated-->
+    <!--@Table data_element_attribute-->
+    <id column="dataid" jdbcType="VARCHAR" property="dataid" />
+    <result column="base_dataelement_dataid" jdbcType="VARCHAR" property="baseDataelementDataid" />
+    <result column="attributename" jdbcType="VARCHAR" property="attributename" />
+    <result column="attributevalue" jdbcType="VARCHAR" property="attributevalue" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    dataid, base_dataelement_dataid, attributename, attributevalue
+  </sql>
+
+  <!-- 定标模块专用：根据数据元ID查询属性列表 -->
+  <select id="selectByDataElementId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from data_element_attribute
+    where base_dataelement_dataid = #{baseDataelementDataid,jdbcType=VARCHAR}
+    order by dataid
+  </select>
+
+  <!-- 定标模块专用：根据数据元ID删除所有属性 -->
+  <delete id="deleteByDataElementId">
+    delete from data_element_attribute
+    where base_dataelement_dataid = #{baseDataelementDataid,jdbcType=VARCHAR}
+  </delete>
+</mapper>

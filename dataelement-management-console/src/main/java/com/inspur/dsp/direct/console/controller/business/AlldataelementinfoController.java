@@ -7,6 +7,9 @@ import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
 import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
 import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
+import com.inspur.dsp.direct.entity.vo.ImportDetermineResultVo;
+import com.inspur.dsp.direct.entity.vo.DetermineResultFailureDetailVo;
+import com.inspur.dsp.direct.enums.TemplateTypeEnums;
 import com.inspur.dsp.direct.service.AlldataelementinfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,10 +93,26 @@ public class AlldataelementinfoController {
     }
 
     /**
+     * 导入定数结果
+     * @param file 上传的Excel文件
+     * @return 导入处理结果
+     */
+    @PostMapping("/importDetermineResult")
+    @RespAdvice
+    public ImportDetermineResultVo importDetermineResult(@RequestParam("file") MultipartFile file) {
+        log.info("导入定数结果开始，文件名：{}, 文件大小：{} bytes", file.getOriginalFilename(), file.getSize());
+        ImportDetermineResultVo result = alldataelementinfoService.importDetermineResult(file);
+        log.info("导入定数结果结束，总记录数：{}, 成功：{}, 失败：{}",
+                result.getTotal(), result.getSuccessQty(), result.getFailQty());
+        return result;
+    }
+
+    /**
      * 导出导入失败清单
      * @param failureDetails 失败详情列表
      * @param response HttpServletResponse对象
      */
+    /*
     @PostMapping("/exportImportFailureList")
     public void exportImportFailureList(@RequestBody List<FailureDetailVo> failureDetails, HttpServletResponse response) {
         log.info("导出导入失败清单开始，失败记录数：{}", failureDetails.size());
@@ -105,5 +124,50 @@ public class AlldataelementinfoController {
         } catch (Exception e) {
             throw new RuntimeException("导出导入失败清单失败", e);
         }
+    }
+     */
+
+
+    /**
+     * 导出定数结果导入失败清单
+     * @param failureDetails 定数结果失败详情列表
+     * @param response HttpServletResponse对象
+     */
+    /*
+    @PostMapping("/exportDetermineResultFailureList")
+    public void exportDetermineResultFailureList(@RequestBody List<DetermineResultFailureDetailVo> failureDetails, HttpServletResponse response) {
+        log.info("导出定数结果导入失败清单开始，失败记录数：{}", failureDetails.size());
+        try {
+            alldataelementinfoService.exportDetermineResultFailureList(failureDetails, response);
+            log.info("导出定数结果导入失败清单结束");
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("没有失败记录可导出", e);
+        } catch (Exception e) {
+            throw new RuntimeException("导出定数结果导入失败清单失败", e);
+        }
+    }
+     */
+
+
+    /**
+     * 下载导入定数结果模板
+     * @param response HttpServletResponse对象
+     */
+    @GetMapping("/downloadImportDetermineResultTemplate")
+    public void downloadImportDetermineResultTemplate(HttpServletResponse response) {
+        log.info("下载导入定数结果模板开始");
+        alldataelementinfoService.downloadImportTemplate(TemplateTypeEnums.IMPORT_DETERMINE_RESULT, response);
+        log.info("下载导入定数结果模板结束");
+    }
+
+    /**
+     * 下载导入定源结果模板
+     * @param response HttpServletResponse对象
+     */
+    @GetMapping("/downloadImportDatasourceResultTemplate")
+    public void downloadImportDatasourceResultTemplate(HttpServletResponse response) {
+        log.info("下载导入定源结果模板开始");
+        alldataelementinfoService.downloadImportTemplate(TemplateTypeEnums.IMPORT_DATASOURCE_RESULT, response);
+        log.info("下载导入定源结果模板结束");
     }
 }

@@ -10,4 +10,7 @@ public interface SourceEventRecordMapper extends BaseMapper<SourceEventRecord> {
 
     SourceEventRecord selectFirstByDataElementIdOrderBySourceDateDesc(@Param("dataElementId") String dataElementId);
 
+    SourceEventRecord getProcessMessageForRecord(@Param("dataid") String dataId);
+
+
 }

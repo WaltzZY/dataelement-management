@@ -14,6 +14,7 @@ import com.inspur.dsp.direct.entity.vo.GetOrganInfoVo;
 import com.inspur.dsp.direct.service.CommonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -23,10 +24,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +41,9 @@ import java.util.stream.Collectors;
 public class CommonServiceImpl implements CommonService {
 
     private final OrganizationUnitMapper organizationUnitMapper;
+
+    @Value("${upload.path}")
+    private String uploadFilePath;
 
     /**
      * 获取部门树
@@ -51,6 +60,15 @@ public class CommonServiceImpl implements CommonService {
         }
         // 查询部门区划树内部表
         List<OrganizationUnit> organizationUnits = organizationUnitMapper.getCollectionDeptTree(dto);
+        // 遍历organizationUnits将dataid收集为list
+        List<String> parentNodeIdCollection = organizationUnits.stream()
+                .map(OrganizationUnit::getDataid)
+                .collect(Collectors.toList());
+        // 查询每个节点的下级节点数量
+        List<String> parentNodeIds = organizationUnitMapper.selectParentNodeIdByParentNodeIdIn(parentNodeIdCollection);
+        // 将parentNodeIds的每个id分组计算每个id的个数
+        Map<String, Long> parentNodeIdCountMap = parentNodeIds.stream()
+                .collect(Collectors.groupingBy(parentNodeId -> parentNodeId, Collectors.counting()));
         List<CollectionDeptTreeVo> vos = new ArrayList<>();
         if (!CollectionUtils.isEmpty(organizationUnits)) {
             vos = organizationUnits.stream()
@@ -61,6 +79,7 @@ public class CommonServiceImpl implements CommonService {
                                 collectionDeptTreeVo.setId(unit.getDataid());
                                 collectionDeptTreeVo.setName(unit.getUnitName());
                                 collectionDeptTreeVo.setType(unit.getNodeType());
+                                collectionDeptTreeVo.setChildCount(parentNodeIdCountMap.getOrDefault(unit.getDataid(), 0L));
                                 return collectionDeptTreeVo;
                             }
                     ).collect(Collectors.toList());
@@ -96,6 +115,7 @@ public class CommonServiceImpl implements CommonService {
 
     /**
      * 构建组织单位的全路径
+     *
      * @param unit 组织单位
      * @return 完整路径名称
      */
@@ -214,5 +234,62 @@ public class CommonServiceImpl implements CommonService {
         EasyExcel.write(response.getOutputStream(), clazz)
                 .sheet("数据列表")
                 .doWrite(dataList);
+    }
+
+    /**
+     * 文件上传,返回文件上传的保存路径
+     *
+     * @param file
+     */
+    @Override
+    public String uploadFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("上传文件不能为空");
+        }
+
+        try {
+            Path uploadDir = Paths.get(uploadFilePath);
+            // 生成唯一文件名
+            String originalFilename = file.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String uniqueFileName = UUID.randomUUID().toString().replace("-", "") + fileExtension;
+
+            // 构建完整文件路径
+            Path filePath = uploadDir.resolve(uniqueFileName);
+
+            // 保存文件
+            Files.copy(file.getInputStream(), filePath);
+
+            // 返回文件名（或者根据需要返回完整路径）
+            return filePath.toString();
+        } catch (IOException e) {
+            log.error("文件上传失败", e);
+            throw new RuntimeException("文件上传失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 文件下载,返回文件二进制数据
+     *
+     * @param filePath
+     */
+    @Override
+    public byte[] downloadFile(String filePath) {
+        try {
+            // 构建完整文件路径
+            Path fullPath = Paths.get(filePath);
+            // 检查文件是否存在
+            if (!Files.exists(fullPath)) {
+                throw new RuntimeException("文件不存在: " + filePath);
+            }
+            // 读取文件内容并返回字节数组
+            return Files.readAllBytes(fullPath);
+        } catch (IOException e) {
+            log.error("文件下载失败: {}", filePath, e);
+            throw new RuntimeException("文件下载失败: " + e.getMessage(), e);
+        }
     }
 }

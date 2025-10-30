@@ -11,7 +11,7 @@ public class RefuseDto {
      */
     private List<String> dataid;
     /**
-     * 处理状态  pending_approval 确认, rejected 拒绝
+     * 处理状态  confirmed 确认, rejected 拒绝
      */
     private String handleStatus;
     /**

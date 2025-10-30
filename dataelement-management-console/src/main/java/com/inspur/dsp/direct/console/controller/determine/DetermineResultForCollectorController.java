@@ -53,8 +53,6 @@ public class DetermineResultForCollectorController {
             determineResultForCollectorService.download(baseDataElementSearchDTO, response);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("数据元不存在", e);
-        } catch (Exception e) {
-            throw new RuntimeException("重复发起定源", e);
         }
     }
 }

@@ -9,6 +9,7 @@ import com.inspur.dsp.direct.entity.dto.SingleNegotiationDto;
 import com.inspur.dsp.direct.entity.dto.SingleNegotiationResultDto;
 import com.inspur.dsp.direct.entity.vo.NegotiationDataElementVO;
 import com.inspur.dsp.direct.entity.vo.NegotiationRecordInfoVo;
+import com.inspur.dsp.direct.enums.TemplateTypeEnums;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,4 +32,13 @@ public interface NegotiationService {
     void exportNegotiationList(NegotiationParmDTO dto, HttpServletResponse response);
 
     void exportNegotiationFailList(List<ImportNegotiationFailDetailDTO> failDetails, HttpServletResponse response);
+
+    /**
+     * 下载导入模板
+     * 根据模板类型下载对应的Excel模板文件
+     *
+     * @param templateType 模板类型枚举
+     * @param response HttpServletResponse对象
+     */
+    void downloadImportTemplate(TemplateTypeEnums templateType, HttpServletResponse response);
 }

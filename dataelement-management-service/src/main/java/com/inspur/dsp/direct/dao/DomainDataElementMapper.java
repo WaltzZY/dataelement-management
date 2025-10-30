@@ -20,4 +20,6 @@ public interface DomainDataElementMapper extends BaseMapper<DomainDataElement> {
 
     List<DomainDataElement> selectListByDataId(@Param("dataId") String dataId);
 
+    List<String> getDomainDataForOrgCode(@Param("dataid") String dataid);
+
 }
