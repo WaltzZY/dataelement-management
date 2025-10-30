@@ -1,4 +1,4 @@
-package com.inspur.dsp.direct.service.impl;
+package com.inspur.dsp.direct.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.inspur.dsp.direct.dao.FlowTransferDefinitionMapper;

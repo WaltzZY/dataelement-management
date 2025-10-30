@@ -109,10 +109,10 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             vo.setRelationid(relation.getDataid());
             vo.setCatalogId(relation.getCatalogId());
             vo.setCatalogName(relation.getCatalogName());
-            vo.setCatalogDescription(relation.getCatalogDesc());
+            vo.setCatalogDescription(null); // 表中没有catalog_desc字段
             vo.setCatalogitemid(relation.getInfoItemId());
             vo.setDataItemName(relation.getInfoItemName());
-            vo.setDataType(relation.getInfoItemDatatype());
+            vo.setDataType(null); // 表中没有info_item_datatype字段
             vo.setSourceOrgCode(relation.getCatalogUnitCode());
             vo.setSourceOrgName(relation.getCatalogUnitName());
             catalogVos.add(vo);
@@ -208,11 +208,9 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
                 
                 existingRelation.setCatalogName(relation.getCatalogName());
-                existingRelation.setCatalogDesc(relation.getCatalogDescription());
+                // 表中没有catalog_desc字段，跳过设置
                 existingRelation.setInfoItemName(relation.getDataItemName());
-                existingRelation.setInfoItemDatatype(relation.getDataType());
-                existingRelation.setLastModifyDate(new Date());
-                existingRelation.setLastModifyAccount(userInfo.getAccount());
+                // 表中没有info_item_datatype字段，跳过设置
                 dataElementCatalogRelationMapper.updateById(existingRelation);
             } else {
                 // 插入逻辑
@@ -225,13 +223,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 newRelation.setCatalogId(relation.getCatalogId());
                 newRelation.setInfoItemId(relation.getCatalogitemid());
                 newRelation.setCatalogName(relation.getCatalogName());
-                newRelation.setCatalogDesc(relation.getCatalogDescription());
+                // 表中没有catalog_desc字段，跳过设置
                 newRelation.setInfoItemName(relation.getDataItemName());
-                newRelation.setInfoItemDatatype(relation.getDataType());
+                // 表中没有info_item_datatype字段，跳过设置
                 newRelation.setCatalogUnitCode(relation.getSourceOrgCode());
                 newRelation.setCatalogUnitName(relation.getSourceOrgName());
-                newRelation.setCreateDate(new Date());
-                newRelation.setCreateAccount(userInfo.getAccount());
                 dataElementCatalogRelationMapper.insert(newRelation);
             }
         }
@@ -253,10 +249,10 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             vo.setRelationid(relation.getDataid());
             vo.setCatalogId(relation.getCatalogId());
             vo.setCatalogName(relation.getCatalogName());
-            vo.setCatalogDescription(relation.getCatalogDesc());
+            vo.setCatalogDescription(null); // 表中没有catalog_desc字段
             vo.setCatalogitemid(relation.getInfoItemId());
             vo.setDataItemName(relation.getInfoItemName());
-            vo.setDataType(relation.getInfoItemDatatype());
+            vo.setDataType(null); // 表中没有info_item_datatype字段
             vo.setSourceOrgCode(relation.getCatalogUnitCode());
             vo.setSourceOrgName(relation.getCatalogUnitName());
             result.add(vo);
@@ -396,7 +392,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         if (dataElement == null) {
             throw new IllegalArgumentException("数据元不存在");
         }
-        if (!"TodoDetermined".equals(dataElement.getStatus())) {
+        if (!"designated_source".equals(dataElement.getStatus())) {
             throw new IllegalArgumentException("当前状态不允许编辑");
         }
 
