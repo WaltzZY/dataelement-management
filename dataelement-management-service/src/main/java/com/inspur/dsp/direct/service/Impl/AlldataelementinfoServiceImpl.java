@@ -98,10 +98,31 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         Page<DataElementPageInfoVo> page = new Page<>(queryDto.getPageNum(), queryDto.getPageSize());
         List<DataElementPageInfoVo> data = alldataelementinfoMapper.getAllDataElementPage(page, queryDto);
 
-        // 设置状态描述
+        // 设置状态描述和计算采集单位数量
         if (!CollectionUtils.isEmpty(data)) {
             data.forEach(vo -> {
                 vo.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
+                
+                // 计算采集单位数量：统计该基准数据元关联的领域数据元的不同社会信用代码数量
+                try {
+                    List<DomainDataElement> domainDataElements = 
+                            claimDomainDataElementMapper.selectDomainDataElementByBaseDataElementDataId(vo.getDataid());
+                    
+                    if (!CollectionUtils.isEmpty(domainDataElements)) {
+                        // 统计不同的社会信用代码数量
+                        long distinctUnitCount = domainDataElements.stream()
+                                .map(DomainDataElement::getSourceUnitCode)
+                                .filter(code -> code != null && !code.trim().isEmpty())
+                                .distinct()
+                                .count();
+                        vo.setCollectunitqty((int) distinctUnitCount);
+                    } else {
+                        vo.setCollectunitqty(0);
+                    }
+                } catch (Exception e) {
+                    log.warn("计算数据元{}的采集单位数量失败: {}", vo.getDataid(), e.getMessage());
+                    vo.setCollectunitqty(0);
+                }
             });
         }
 
