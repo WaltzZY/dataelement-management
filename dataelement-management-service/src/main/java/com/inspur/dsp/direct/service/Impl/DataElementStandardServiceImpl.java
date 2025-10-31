@@ -1,6 +1,4 @@
 package com.inspur.dsp.direct.service.Impl;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import com.inspur.dsp.direct.dao.*;
 import com.inspur.dsp.direct.dbentity.*;
