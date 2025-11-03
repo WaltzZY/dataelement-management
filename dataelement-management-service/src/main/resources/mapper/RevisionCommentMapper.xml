@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.RevisionCommentMapper">
+  <resultMap id="BaseResultMap" type="com.inspur.dsp.direct.dbentity.RevisionComment">
+    <!--@mbg.generated-->
+    <!--@Table revision_comment-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="base_dataelement_dataid" jdbcType="VARCHAR" property="baseDataelementDataid" />
+    <result column="comment" jdbcType="LONGVARCHAR" property="comment" />
+    <result column="revision_initiator_account" jdbcType="VARCHAR" property="revisionInitiatorAccount" />
+    <result column="revision_initiator_name" jdbcType="VARCHAR" property="revisionInitiatorName" />
+    <result column="revision_createdate" jdbcType="TIMESTAMP" property="revisionCreatedate" />
+    <result column="revision_initiator_tel" jdbcType="VARCHAR" property="revisionInitiatorTel" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
+    <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate" />
+    <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, base_dataelement_dataid, `comment`, revision_initiator_account, revision_initiator_name, 
+    revision_createdate, revision_initiator_tel, create_date, create_account, last_modify_date, 
+    last_modify_account
+  </sql>
+</mapper>
