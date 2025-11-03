@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动化测试数据生成平台</title>
+
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Element Plus CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <script src="https://unpkg.com/element-plus"></script>
+
+    <!-- Element Plus Icons -->
+    <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+
+    <!-- Axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f7fa;
+        }
+
+        #app {
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header p {
+            margin: 8px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .main-container {
+            padding: 30px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #909399;
+            font-weight: 500;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #303133;
+            margin: 0;
+        }
+
+        .stat-card .subtitle {
+            font-size: 13px;
+            color: #909399;
+            margin-top: 8px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+            color: #303133;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .json-viewer {
+            background-color: #f5f7fa;
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .success-badge {
+            background-color: #67c23a;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .error-badge {
+            background-color: #f56c6c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>🚀 自动化测试数据生成平台</h1>
+            <p>基于真实数据的智能测试用例生成与执行系统</p>
+        </div>
+
+        <div class="main-container">
+            <!-- 统计卡片 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>API接口总数</h3>
+                    <p class="value">{{ statistics.totalApis || 0 }}</p>
+                    <p class="subtitle">已扫描的接口数量</p>
+                </div>
+                <div class="stat-card">
+                    <h3>测试用例总数</h3>
+                    <p class="value">{{ statistics.totalTestCases || 0 }}</p>
+                    <p class="subtitle">已生成的测试用例</p>
+                </div>
+                <div class="stat-card">
+                    <h3>执行次数</h3>
+                    <p class="value">{{ statistics.totalExecutions || 0 }}</p>
+                    <p class="subtitle">总执行次数</p>
+                </div>
+                <div class="stat-card">
+                    <h3>成功率</h3>
+                    <p class="value">{{ (statistics.successRate || 0).toFixed(1) }}%</p>
+                    <p class="subtitle">测试用例通过率</p>
+                </div>
+            </div>
+
+            <!-- 主要功能区 -->
+            <el-tabs v-model="activeTab" type="border-card">
+                <!-- Tab 1: API列表 -->
+                <el-tab-pane label="API接口管理" name="apis">
+                    <div class="section-title">
+                        <span>📋 API接口列表</span>
+                        <el-button type="primary" size="small" @click="scanApis" :loading="loading.scan">
+                            扫描接口
+                        </el-button>
+                        <el-button type="success" size="small" @click="generateAllTestCases" :loading="loading.generateAll">
+                            批量生成用例
+                        </el-button>
+                    </div>
+
+                    <el-table :data="apis" stripe style="width: 100%" height="500">
+                        <el-table-column prop="apiPath" label="API路径" width="400" />
+                        <el-table-column prop="httpMethod" label="HTTP方法" width="100">
+                            <template #default="scope">
+                                <el-tag :type="getHttpMethodType(scope.row.httpMethod)" size="small">
+                                    {{ scope.row.httpMethod }}
+                                </el-tag>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="controllerClass" label="Controller" width="200" />
+                        <el-table-column prop="methodName" label="方法名" width="200" />
+                        <el-table-column label="测试用例" width="120">
+                            <template #default="scope">
+                                <el-tag v-if="scope.row.hasTestCases" type="success" size="small">
+                                    {{ scope.row.testCaseCount }} 个
+                                </el-tag>
+                                <el-tag v-else type="info" size="small">未生成</el-tag>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" width="300">
+                            <template #default="scope">
+                                <el-button size="small" @click="generateTestCase(scope.row)">生成用例</el-button>
+                                <el-button size="small" type="success" @click="executeTestCase(scope.row)" :disabled="!scope.row.hasTestCases">
+                                    执行测试
+                                </el-button>
+                                <el-button size="small" type="primary" @click="viewTestCases(scope.row)" :disabled="!scope.row.hasTestCases">
+                                    查看用例
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-tab-pane>
+
+                <!-- Tab 2: 测试用例 -->
+                <el-tab-pane label="测试用例" name="testcases">
+                    <div class="section-title">
+                        <span>📝 测试用例详情</span>
+                        <el-button size="small" @click="loadAllTestCases">刷新</el-button>
+                    </div>
+
+                    <el-collapse v-if="testCaseCollections.length > 0">
+                        <el-collapse-item v-for="collection in testCaseCollections" :key="collection.apiPath" :name="collection.apiPath">
+                            <template #title>
+                                <span style="font-weight: 600;">{{ collection.apiPath }}</span>
+                                <el-tag type="info" size="small" style="margin-left: 10px;">
+                                    {{ collection.totalCount }} 个用例
+                                </el-tag>
+                            </template>
+
+                            <el-table :data="collection.testCases" stripe>
+                                <el-table-column prop="description" label="用例描述" width="300" />
+                                <el-table-column label="请求参数" min-width="400">
+                                    <template #default="scope">
+                                        <div class="json-viewer" style="max-height: 200px;">
+                                            {{ JSON.stringify(scope.row.requestParams, null, 2) }}
+                                        </div>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column prop="dataSource" label="数据来源" width="200" />
+                                <el-table-column label="状态" width="100">
+                                    <template #default="scope">
+                                        <el-switch v-model="scope.row.enabled" disabled />
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </el-collapse-item>
+                    </el-collapse>
+
+                    <el-empty v-else description="暂无测试用例，请先生成测试用例" />
+                </el-tab-pane>
+
+                <!-- Tab 3: 执行结果 -->
+                <el-tab-pane label="执行结果" name="results">
+                    <div class="section-title">
+                        <span>📊 测试执行结果</span>
+                        <el-button size="small" @click="loadTestResults">刷新</el-button>
+                        <el-button size="small" type="danger" @click="executeAllTestCases" :loading="loading.executeAll">
+                            执行所有测试
+                        </el-button>
+                    </div>
+
+                    <el-table :data="testResults" stripe style="width: 100%" height="500">
+                        <el-table-column prop="apiPath" label="API路径" width="350" />
+                        <el-table-column prop="httpMethod" label="方法" width="80" />
+                        <el-table-column label="执行时间" width="180">
+                            <template #default="scope">
+                                {{ formatDateTime(scope.row.executeTime) }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="状态码" width="100">
+                            <template #default="scope">
+                                <el-tag :type="scope.row.responseStatus === 200 ? 'success' : 'danger'" size="small">
+                                    {{ scope.row.responseStatus }}
+                                </el-tag>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="responseTime" label="响应时间(ms)" width="120" />
+                        <el-table-column label="结果" width="100">
+                            <template #default="scope">
+                                <el-tag :type="scope.row.success ? 'success' : 'danger'" size="small">
+                                    {{ scope.row.success ? '成功' : '失败' }}
+                                </el-tag>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" width="120">
+                            <template #default="scope">
+                                <el-button size="small" @click="showResultDetail(scope.row)">查看详情</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-tab-pane>
+            </el-tabs>
+        </div>
+
+        <!-- 结果详情对话框 -->
+        <el-dialog v-model="resultDetailVisible" title="执行结果详情" width="60%">
+            <div v-if="selectedResult">
+                <h4>基本信息</h4>
+                <p><strong>API路径:</strong> {{ selectedResult.apiPath }}</p>
+                <p><strong>HTTP方法:</strong> {{ selectedResult.httpMethod }}</p>
+                <p><strong>执行时间:</strong> {{ formatDateTime(selectedResult.executeTime) }}</p>
+                <p><strong>响应时间:</strong> {{ selectedResult.responseTime }}ms</p>
+                <p><strong>状态码:</strong> {{ selectedResult.responseStatus }}</p>
+
+                <h4>请求参数</h4>
+                <div class="json-viewer">
+                    {{ JSON.stringify(selectedResult.requestParams, null, 2) }}
+                </div>
+
+                <h4>响应内容</h4>
+                <div class="json-viewer">
+                    {{ JSON.stringify(selectedResult.responseBody, null, 2) }}
+                </div>
+
+                <div v-if="!selectedResult.success && selectedResult.errorMessage">
+                    <h4>错误信息</h4>
+                    <el-alert :title="selectedResult.errorMessage" type="error" :closable="false" />
+                    <div v-if="selectedResult.stackTrace" class="json-viewer" style="margin-top: 10px;">
+                        {{ selectedResult.stackTrace }}
+                    </div>
+                </div>
+            </div>
+        </el-dialog>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'apis',
+                    apis: [],
+                    testCaseCollections: [],
+                    testResults: [],
+                    statistics: {},
+                    loading: {
+                        scan: false,
+                        generateAll: false,
+                        executeAll: false
+                    },
+                    resultDetailVisible: false,
+                    selectedResult: null,
+                    baseUrl: 'http://localhost:10216/baseDataelementManage'
+                };
+            },
+            mounted() {
+                this.loadStatistics();
+                this.scanApis();
+            },
+            methods: {
+                async scanApis() {
+                    this.loading.scan = true;
+                    try {
+                        const response = await axios.get(`${this.baseUrl}/autotest/apis`);
+                        if (response.data.success) {
+                            this.apis = response.data.data;
+                            this.$message.success(`扫描完成，共找到 ${response.data.total} 个接口`);
+                        }
+                    } catch (error) {
+                        this.$message.error('扫描接口失败: ' + error.message);
+                    } finally {
+                        this.loading.scan = false;
+                    }
+                },
+
+                async generateTestCase(apiInfo) {
+                    try {
+                        const response = await axios.post(`${this.baseUrl}/autotest/testcases/generate`, apiInfo);
+                        if (response.data.success) {
+                            this.$message.success(`成功生成 ${response.data.data.totalCount} 个测试用例`);
+                            this.scanApis(); // 刷新列表
+                            this.loadStatistics();
+                        }
+                    } catch (error) {
+                        this.$message.error('生成测试用例失败: ' + error.message);
+                    }
+                },
+
+                async generateAllTestCases() {
+                    this.loading.generateAll = true;
+                    try {
+                        const response = await axios.post(`${this.baseUrl}/autotest/testcases/generate-all`);
+                        if (response.data.success) {
+                            this.$message.success(`批量生成成功，共生成 ${response.data.total} 个API的测试用例`);
+                            this.scanApis();
+                            this.loadStatistics();
+                        }
+                    } catch (error) {
+                        this.$message.error('批量生成失败: ' + error.message);
+                    } finally {
+                        this.loading.generateAll = false;
+                    }
+                },
+
+                async executeTestCase(apiInfo) {
+                    try {
+                        const response = await axios.post(`${this.baseUrl}/autotest/execute?apiPath=${encodeURIComponent(apiInfo.apiPath)}`);
+                        if (response.data.success) {
+                            const successCount = response.data.data.filter(r => r.success).length;
+                            this.$message.success(`执行完成，成功: ${successCount}, 失败: ${response.data.total - successCount}`);
+                            this.loadTestResults();
+                            this.loadStatistics();
+                        }
+                    } catch (error) {
+                        this.$message.error('执行测试用例失败: ' + error.message);
+                    }
+                },
+
+                async executeAllTestCases() {
+                    this.loading.executeAll = true;
+                    try {
+                        const response = await axios.post(`${this.baseUrl}/autotest/execute-all`);
+                        if (response.data.success) {
+                            const successCount = response.data.data.filter(r => r.success).length;
+                            this.$message.success(`执行完成，成功: ${successCount}, 失败: ${response.data.total - successCount}`);
+                            this.loadTestResults();
+                            this.loadStatistics();
+                        }
+                    } catch (error) {
+                        this.$message.error('执行所有测试用例失败: ' + error.message);
+                    } finally {
+                        this.loading.executeAll = false;
+                    }
+                },
+
+                async viewTestCases(apiInfo) {
+                    try {
+                        const response = await axios.get(`${this.baseUrl}/autotest/testcases?apiPath=${encodeURIComponent(apiInfo.apiPath)}`);
+                        if (response.data.success) {
+                            this.activeTab = 'testcases';
+                            this.loadAllTestCases();
+                        }
+                    } catch (error) {
+                        this.$message.error('查看测试用例失败: ' + error.message);
+                    }
+                },
+
+                async loadAllTestCases() {
+                    try {
+                        const response = await axios.get(`${this.baseUrl}/autotest/testcases/all`);
+                        if (response.data.success) {
+                            this.testCaseCollections = response.data.data;
+                        }
+                    } catch (error) {
+                        this.$message.error('加载测试用例失败: ' + error.message);
+                    }
+                },
+
+                async loadTestResults() {
+                    try {
+                        const response = await axios.get(`${this.baseUrl}/autotest/results`);
+                        if (response.data.success) {
+                            this.testResults = response.data.data;
+                        }
+                    } catch (error) {
+                        this.$message.error('加载测试结果失败: ' + error.message);
+                    }
+                },
+
+                async loadStatistics() {
+                    try {
+                        const response = await axios.get(`${this.baseUrl}/autotest/statistics`);
+                        if (response.data.success) {
+                            this.statistics = {
+                                ...response.data.testCaseStatistics,
+                                ...response.data.executionStatistics
+                            };
+                        }
+                    } catch (error) {
+                        console.error('加载统计信息失败:', error);
+                    }
+                },
+
+                showResultDetail(result) {
+                    this.selectedResult = result;
+                    this.resultDetailVisible = true;
+                },
+
+                getHttpMethodType(method) {
+                    const types = {
+                        'GET': 'success',
+                        'POST': 'primary',
+                        'PUT': 'warning',
+                        'DELETE': 'danger'
+                    };
+                    return types[method] || 'info';
+                },
+
+                formatDateTime(dateTimeStr) {
+                    if (!dateTimeStr) return '-';
+                    return new Date(dateTimeStr).toLocaleString('zh-CN');
+                }
+            }
+        }).use(ElementPlus).mount('#app');
+    </script>
+</body>
+</html>
