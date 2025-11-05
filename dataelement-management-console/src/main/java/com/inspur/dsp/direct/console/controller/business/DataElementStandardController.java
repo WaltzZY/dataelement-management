@@ -1,9 +1,11 @@
 package com.inspur.dsp.direct.console.controller.business;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.domain.Resp;
 import com.inspur.dsp.direct.entity.dto.*;
 import com.inspur.dsp.direct.entity.vo.*;
+import com.inspur.dsp.direct.entity.RevisionComment;
 import com.inspur.dsp.direct.service.DataElementStandardService;
 import com.inspur.dsp.direct.service.FlowProcessService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
@@ -187,5 +190,66 @@ public class DataElementStandardController {
         log.info("提交审核 - dto: {}", dto);
         SubmitResultVo result = dataElementStandardService.submitStandard(dto);
         return Resp.success(result);
+    }
+
+    /**
+     * 获取编制标准完整信息
+     * 通过查询条件获取待定标/待修订/已处理的数据元列表
+     */
+    @GetMapping("/getAllStandardListPage")
+    @RespAdvice
+    public Page<StandardDataElementPageInfoVo> getAllStandardListPage(@Valid StandardDataElementPageQueryDto queryDto) {
+        log.info("获取编制标准完整信息 - queryDto: {}", queryDto);
+        return dataElementStandardService.getAllStandardListPage(queryDto);
+    }
+
+    /**
+     * 获取修订意见
+     * 通过数据元ID获取修订意见
+     */
+    @GetMapping("/getRevisionCommentbydataid")
+    @RespAdvice
+    public RevisionComment getRevisionCommentbydataid(@RequestParam @NotBlank(message = "数据元ID不能为空") String dataid) {
+        log.info("获取修订意见 - dataid: {}", dataid);
+        return dataElementStandardService.getRevisionCommentbydataid(dataid);
+    }
+
+    /**
+     * 提交复审
+     * 保存所有信息并提交复审，状态流转到下一阶段
+     */
+    @PostMapping("/submitReExamination")
+    @RespAdvice
+    public Resp<SubmitResultVo> submitReExamination(@RequestBody @Valid SaveStandardDto dto) {
+        log.info("提交复审 - dto: {}", dto);
+        SubmitResultVo result = dataElementStandardService.submitReExamination(dto);
+        return Resp.success(result);
+    }
+
+    /**
+     * 导出待定标数据元列表
+     */
+    @PostMapping("/exportTodoDetermineList")
+    public void exportTodoDetermineList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出待定标数据元列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportTodoDetermineList(queryDto, response);
+    }
+
+    /**
+     * 导出待修订数据元列表
+     */
+    @PostMapping("/exportTodoRevisedList")
+    public void exportTodoRevisedList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出待修订数据元列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportTodoRevisedList(queryDto, response);
+    }
+
+    /**
+     * 导出定标阶段已处理数据元列表
+     */
+    @PostMapping("/exportSourcedoneStandardList")
+    public void exportSourcedoneStandardList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出定标阶段已处理数据元列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportSourcedoneStandardList(queryDto, response);
     }
 }

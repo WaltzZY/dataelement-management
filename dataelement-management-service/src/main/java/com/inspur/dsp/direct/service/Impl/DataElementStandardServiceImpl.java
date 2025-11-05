@@ -1,10 +1,13 @@
 package com.inspur.dsp.direct.service.Impl;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dao.*;
 import com.inspur.dsp.direct.dbentity.*;
 import com.inspur.dsp.direct.domain.UserLoginInfo;
 import com.inspur.dsp.direct.entity.dto.*;
 import com.inspur.dsp.direct.entity.vo.*;
+import com.inspur.dsp.direct.entity.RevisionComment;
+import com.inspur.dsp.direct.enums.CalibrationStatusEnums;
 import com.inspur.dsp.direct.httpService.BasecatalogService;
 import com.inspur.dsp.direct.httpentity.dto.QueryCatalogByColumnNameDto;
 import com.inspur.dsp.direct.httpentity.vo.QueryCatalogByColumnNameVo;
@@ -44,6 +47,8 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     private final FlowProcessService flowProcessService;
     private final BasecatalogService basecatalogService;
     private final CommonService commonService;
+    private final DataElementStandardMapper dataElementStandardMapper;
+    private final RevisionCommentMapper revisionCommentMapper;
 
     private static final Pattern CODE_PATTERN = Pattern.compile("^[a-zA-Z0-9]+$");
 
@@ -525,5 +530,291 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         result.setNextStatus(nextStatus);
 
         return result;
+    }
+
+    @Override
+    public Page<StandardDataElementPageInfoVo> getAllStandardListPage(StandardDataElementPageQueryDto queryDto) {
+        log.info("获取编制标准完整信息 - queryDto: {}", queryDto);
+
+        // 处理日期边界问题
+        normalizeDateRange(queryDto);
+        
+        // 校验并规范化排序参数
+        validateAndNormalizeSortParams(queryDto);
+
+        // 创建分页对象
+        Page<StandardDataElementPageInfoVo> page = new Page<>(queryDto.getPageNum(), queryDto.getPageSize());
+        
+        // 执行查询
+        List<StandardDataElementPageInfoVo> records = dataElementStandardMapper.getAllStandardList(page, queryDto);
+        
+        // 设置状态描述
+        for (StandardDataElementPageInfoVo record : records) {
+            record.setStatusDesc(CalibrationStatusEnums.getDescByCode(record.getStatus()));
+        }
+        
+        page.setRecords(records);
+        return page;
+    }
+
+    @Override
+    public RevisionComment getRevisionCommentbydataid(String dataid) {
+        log.info("获取修订意见 - dataid: {}", dataid);
+        
+        if (dataid == null || dataid.isEmpty()) {
+            throw new IllegalArgumentException("数据元ID不能为空");
+        }
+        
+        BaseDataElement dataElement = baseDataElementMapper.selectById(dataid);
+        if (dataElement == null) {
+            throw new IllegalArgumentException("数据元不存在");
+        }
+        
+        return revisionCommentMapper.selectbydataid(dataid);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public SubmitResultVo submitReExamination(SaveStandardDto dto) {
+        log.info("提交复审 - dto: {}", dto);
+
+        // 调用saveStandard保存信息(包含所有数据校验)
+        this.saveStandard(dto);
+
+        // 查询并校验数据元状态
+        BaseDataElement dataElement = baseDataElementMapper.selectById(dto.getDataid());
+        if (dataElement == null) {
+            throw new IllegalArgumentException("数据元不存在");
+        }
+        if (!"TodoRevised".equals(dataElement.getStatus())) {
+            throw new IllegalArgumentException("当前状态不允许提交复审，必须为待修订状态");
+        }
+
+        // 计算下一状态
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus("TodoRevised", "提交复审");
+        if (!nextStatusVo.getIsValid()) {
+            throw new RuntimeException("状态流转配置不存在或无效");
+        }
+        String nextStatus = nextStatusVo.getNextStatus();
+
+        // 获取当前登录用户信息
+        log.debug("正在获取当前登录用户信息...");
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        
+        // 更新数据元状态
+        dataElement.setStatus(nextStatus);
+        dataElement.setLastModifyDate(new Date());
+        dataElement.setLastModifyAccount(userInfo.getAccount());
+        baseDataElementMapper.updateById(dataElement);
+
+        // 记录流程历史
+        ProcessRecordDto processRecordDto = new ProcessRecordDto();
+        processRecordDto.setBaseDataelementDataid(dto.getDataid());
+        processRecordDto.setOperation("提交复审");
+        processRecordDto.setSourceStatus("TodoRevised");
+        processRecordDto.setDestStatus(nextStatus);
+        processRecordDto.setOperatorAccount(userInfo.getAccount());
+        processRecordDto.setOperatorName(userInfo.getName());
+        processRecordDto.setOperatorUnitCode(userInfo.getOrgCode());
+        processRecordDto.setOperatorUnitName(userInfo.getOrgName());
+        flowProcessService.recordProcessHistory(processRecordDto);
+
+        // 构建返回结果
+        SubmitResultVo result = new SubmitResultVo();
+        result.setNextStatus(nextStatus);
+
+        return result;
+    }
+
+    @Override
+    public void exportTodoDetermineList(StandardDataElementPageQueryDto queryDto, javax.servlet.http.HttpServletResponse response) {
+        log.info("导出待定标数据元列表 - queryDto: {}", queryDto);
+
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
+        
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportTodoDetermineDTO> exportData = new ArrayList<>();
+        for (int i = 0; i < exportList.size(); i++) {
+            StandardDataElementPageInfoVo vo = exportList.get(i);
+            ExportTodoDetermineDTO dto = new ExportTodoDetermineDTO();
+            dto.setSerialNumber(String.valueOf(i + 1));
+            dto.setName(vo.getName());
+            dto.setDataElementId(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "待定标数据元列表", ExportTodoDetermineDTO.class);
+        } catch (Exception e) {
+            log.error("导出待定标数据元列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportTodoRevisedList(StandardDataElementPageQueryDto queryDto, javax.servlet.http.HttpServletResponse response) {
+        log.info("导出待修订数据元列表 - queryDto: {}", queryDto);
+
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
+        
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportTodoRevisedDTO> exportData = new ArrayList<>();
+        for (int i = 0; i < exportList.size(); i++) {
+            StandardDataElementPageInfoVo vo = exportList.get(i);
+            ExportTodoRevisedDTO dto = new ExportTodoRevisedDTO();
+            dto.setSerialNumber(String.valueOf(i + 1));
+            dto.setName(vo.getName());
+            dto.setDataelementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setRevisionCreateDate(vo.getRevisionCreateDate());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "待修订数据元列表", ExportTodoRevisedDTO.class);
+        } catch (Exception e) {
+            log.error("导出待修订数据元列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportSourcedoneStandardList(StandardDataElementPageQueryDto queryDto, javax.servlet.http.HttpServletResponse response) {
+        log.info("导出定标阶段已处理数据元列表 - queryDto: {}", queryDto);
+
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
+        
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportSourcedoneStandardDTO> exportData = new ArrayList<>();
+        for (int i = 0; i < exportList.size(); i++) {
+            StandardDataElementPageInfoVo vo = exportList.get(i);
+            ExportSourcedoneStandardDTO dto = new ExportSourcedoneStandardDTO();
+            dto.setSerialNumber(String.valueOf(i + 1));
+            dto.setName(vo.getName());
+            dto.setDataelementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setPublishDate(vo.getPublishDate());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "定标阶段已处理数据元列表", ExportSourcedoneStandardDTO.class);
+        } catch (Exception e) {
+            log.error("导出定标阶段已处理数据元列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    /**
+     * 处理日期边界问题
+     */
+    private void normalizeDateRange(StandardDataElementPageQueryDto queryDto) {
+        if (queryDto.getConfirmDateBegin() != null) {
+            // 开始时间设置为当天00:00:00.000
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(queryDto.getConfirmDateBegin());
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            cal.set(java.util.Calendar.MINUTE, 0);
+            cal.set(java.util.Calendar.SECOND, 0);
+            cal.set(java.util.Calendar.MILLISECOND, 0);
+            queryDto.setConfirmDateBegin(cal.getTime());
+        }
+        if (queryDto.getConfirmDateEnd() != null) {
+            // 结束时间设置为当天23:59:59.999
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(queryDto.getConfirmDateEnd());
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+            cal.set(java.util.Calendar.MINUTE, 59);
+            cal.set(java.util.Calendar.SECOND, 59);
+            cal.set(java.util.Calendar.MILLISECOND, 999);
+            queryDto.setConfirmDateEnd(cal.getTime());
+        }
+        // 类似处理其他日期字段
+        if (queryDto.getPublishDateBegin() != null) {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(queryDto.getPublishDateBegin());
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            cal.set(java.util.Calendar.MINUTE, 0);
+            cal.set(java.util.Calendar.SECOND, 0);
+            cal.set(java.util.Calendar.MILLISECOND, 0);
+            queryDto.setPublishDateBegin(cal.getTime());
+        }
+        if (queryDto.getPublishDateEnd() != null) {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(queryDto.getPublishDateEnd());
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+            cal.set(java.util.Calendar.MINUTE, 59);
+            cal.set(java.util.Calendar.SECOND, 59);
+            cal.set(java.util.Calendar.MILLISECOND, 999);
+            queryDto.setPublishDateEnd(cal.getTime());
+        }
+        if (queryDto.getRevisionCreateDateBegin() != null) {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(queryDto.getRevisionCreateDateBegin());
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            cal.set(java.util.Calendar.MINUTE, 0);
+            cal.set(java.util.Calendar.SECOND, 0);
+            cal.set(java.util.Calendar.MILLISECOND, 0);
+            queryDto.setRevisionCreateDateBegin(cal.getTime());
+        }
+        if (queryDto.getRevisionCreateDateEnd() != null) {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(queryDto.getRevisionCreateDateEnd());
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+            cal.set(java.util.Calendar.MINUTE, 59);
+            cal.set(java.util.Calendar.SECOND, 59);
+            cal.set(java.util.Calendar.MILLISECOND, 999);
+            queryDto.setRevisionCreateDateEnd(cal.getTime());
+        }
+    }
+
+    /**
+     * 校验并规范化排序参数
+     */
+    private void validateAndNormalizeSortParams(StandardDataElementPageQueryDto queryDto) {
+        // 这里可以根据实际需要校验排序字段是否在允许的枚举中
+        // 如果需要严格校验，可以创建一个排序字段枚举类
+        if (queryDto.getSortField() == null || queryDto.getSortField().isEmpty()) {
+            queryDto.setSortField("create_date");
+            queryDto.setSortOrder("desc");
+        } else {
+            // 规范化排序方向
+            if (queryDto.getSortOrder() == null || queryDto.getSortOrder().isEmpty()) {
+                queryDto.setSortOrder("desc");
+            } else {
+                String order = queryDto.getSortOrder().toLowerCase();
+                if (!"asc".equals(order) && !"desc".equals(order)) {
+                    queryDto.setSortOrder("desc");
+                }
+            }
+        }
     }
 }

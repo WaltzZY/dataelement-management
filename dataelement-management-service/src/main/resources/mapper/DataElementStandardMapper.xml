@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.DataElementStandardMapper">
+
+    <!-- 数据元列表查询 -->
+    <select id="getAllStandardList" resultType="com.inspur.dsp.direct.entity.vo.StandardDataElementPageInfoVo">
+        SELECT 
+            bde.dataid,
+            bde.data_element_code AS dataelementCode,
+            bde.name,
+            bde.definition,
+            bde.datatype,
+            bde.status,
+            bde.confirm_date AS confirmDate,
+            bde.publish_date AS publishDate,
+            rc.revision_createdate AS revisionCreateDate
+        FROM base_data_element bde
+        LEFT JOIN revision_comment rc ON bde.dataid = rc.base_dataelement_dataid
+        WHERE bde.status IN ('designated_source', 'PendingReview', 'SolicitingOpinions', 'TodoRevised', 'PendingReExamination', 'Todoreleased', 'Published')
+        
+        <!-- 动态查询条件 -->
+        <if test="queryDto != null">
+            <!-- 数据元状态精确匹配（支持多选） -->
+            <if test="queryDto.status != null and queryDto.status.size() > 0">
+                AND bde.status IN
+                <foreach collection="queryDto.status" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            
+            <!-- 定源时间范围查询 -->
+            <if test="queryDto.confirmDateBegin != null">
+                AND bde.confirm_date >= #{queryDto.confirmDateBegin}
+            </if>
+            <if test="queryDto.confirmDateEnd != null">
+                AND bde.confirm_date &lt;= #{queryDto.confirmDateEnd}
+            </if>
+            
+            <!-- 发布时间范围查询 -->
+            <if test="queryDto.publishDateBegin != null">
+                AND bde.publish_date >= #{queryDto.publishDateBegin}
+            </if>
+            <if test="queryDto.publishDateEnd != null">
+                AND bde.publish_date &lt;= #{queryDto.publishDateEnd}
+            </if>
+            
+            <!-- 修订时间范围查询 -->
+            <if test="queryDto.revisionCreateDateBegin != null">
+                AND rc.revision_createdate >= #{queryDto.revisionCreateDateBegin}
+            </if>
+            <if test="queryDto.revisionCreateDateEnd != null">
+                AND rc.revision_createdate &lt;= #{queryDto.revisionCreateDateEnd}
+            </if>
+            
+            <!-- 关键字模糊匹配 -->
+            <if test="queryDto.keyword != null and queryDto.keyword != ''">
+                AND (
+                    bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%') 
+                    OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%') 
+                    OR bde.data_element_code LIKE CONCAT('%', #{queryDto.keyword}, '%')
+                )
+            </if>
+        </if>
+        
+        <!-- 排序 -->
+        <choose>
+            <when test="queryDto != null and queryDto.sortField != null and queryDto.sortField != '' and queryDto.sortOrder != null and queryDto.sortOrder != ''">
+                ORDER BY ${queryDto.sortField} ${queryDto.sortOrder}
+            </when>
+            <otherwise>
+                ORDER BY bde.create_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+</mapper>

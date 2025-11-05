@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.dsp.direct.dao.RevisionCommentMapper">
+
+    <!-- 根据数据元ID查询修订意见 -->
+    <select id="selectbydataid" resultType="com.inspur.dsp.direct.entity.RevisionComment">
+        SELECT 
+            id,
+            base_dataelement_dataid AS baseDataelementDataid,
+            revision_content AS revisionContent,
+            revision_createdate AS revisionCreatedate,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            create_account AS createAccount,
+            modify_account AS modifyAccount
+        FROM revision_comment
+        WHERE base_dataelement_dataid = #{dataElementId}
+        ORDER BY create_date DESC
+        LIMIT 1
+    </select>
+
+</mapper>

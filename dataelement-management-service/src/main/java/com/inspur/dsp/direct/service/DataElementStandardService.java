@@ -1,9 +1,12 @@
 package com.inspur.dsp.direct.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.entity.dto.*;
 import com.inspur.dsp.direct.entity.vo.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.inspur.dsp.direct.entity.RevisionComment;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -104,4 +107,55 @@ public interface DataElementStandardService {
      * @return 提交结果VO
      */
     SubmitResultVo submitStandard(SaveStandardDto dto);
+
+    /**
+     * 获取编制标准完整信息
+     * 通过查询条件获取待定标/待修订/已处理的数据元列表
+     *
+     * @param queryDto 查询条件DTO
+     * @return 分页数据元列表查询结果
+     */
+    Page<StandardDataElementPageInfoVo> getAllStandardListPage(StandardDataElementPageQueryDto queryDto);
+
+    /**
+     * 获取修订意见
+     * 通过数据元ID获取修订意见
+     *
+     * @param dataid 数据元ID
+     * @return 修订意见
+     */
+    RevisionComment getRevisionCommentbydataid(String dataid);
+
+    /**
+     * 提交复审
+     * 保存编制标准信息并提交复审，状态流转到下一阶段
+     *
+     * @param dto 提交请求DTO
+     * @return 提交结果VO
+     */
+    SubmitResultVo submitReExamination(SaveStandardDto dto);
+
+    /**
+     * 导出待定标数据元列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportTodoDetermineList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出待修订数据元列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportTodoRevisedList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出定标阶段已处理数据元列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportSourcedoneStandardList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
 }
