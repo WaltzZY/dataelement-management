@@ -70,6 +70,7 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
 
     /**
      * 获取显示状态
+     *
      * @param bdeStatus
      * @param ctStatus
      * @return
@@ -77,8 +78,12 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
     private static String getDisplayStatus(String bdeStatus, String ctStatus) {
         String displayStatus = "";
         // 判断 bdeStatus  negotiating 或  designated_source  displayStatus =  bdeStatus
-        if (StatusEnums.NEGOTIATING.getCode().equals(bdeStatus) || StatusEnums.DESIGNATED_SOURCE.getCode().equals(bdeStatus)) {
-            displayStatus = bdeStatus;
+        if (StatusEnums.NEGOTIATING.getCode().equals(bdeStatus)) {
+            displayStatus = StatusEnums.NEGOTIATING.getDesc();
+        } else if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(bdeStatus)) {
+            displayStatus = StatusEnums.DESIGNATED_SOURCE.getDesc();
+        } else if (ConfirmationTaskEnums.PENDING_CLAIMED.getCode().equals(ctStatus)) {
+            displayStatus = ConfirmationTaskEnums.PENDING_CLAIMED.getDesc();
         } else {
             // ctStatus = 待确认  displayStatus = 待确认
             if (ConfirmationTaskEnums.PENDING.getCode().equals(ctStatus)) {

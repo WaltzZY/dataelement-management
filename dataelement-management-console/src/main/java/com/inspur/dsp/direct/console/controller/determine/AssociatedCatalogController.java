@@ -74,7 +74,7 @@ public class AssociatedCatalogController {
      */
     @PostMapping("/save")
     @RespAdvice
-    public String saveCatalogAssociation(@RequestBody List<CatalogAssociatedDTO> catalogAssociateList) {
-        return associatedCatalogService.saveCatalogAssociation(catalogAssociateList);
+    public void saveCatalogAssociation(@RequestBody List<CatalogAssociatedDTO> catalogAssociateList) {
+        associatedCatalogService.saveCatalogAssociation(catalogAssociateList);
     }
 }

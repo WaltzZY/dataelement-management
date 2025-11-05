@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,10 +66,16 @@ public class CommonServiceImpl implements CommonService {
                 .map(OrganizationUnit::getDataid)
                 .collect(Collectors.toList());
         // 查询每个节点的下级节点数量
-        List<String> parentNodeIds = organizationUnitMapper.selectParentNodeIdByParentNodeIdIn(parentNodeIdCollection);
-        // 将parentNodeIds的每个id分组计算每个id的个数
-        Map<String, Long> parentNodeIdCountMap = parentNodeIds.stream()
-                .collect(Collectors.groupingBy(parentNodeId -> parentNodeId, Collectors.counting()));
+        Map<String, Long> parentNodeIdCountMap;
+        if (!CollectionUtils.isEmpty(parentNodeIdCollection)) {
+            List<String> parentNodeIds = organizationUnitMapper.selectParentNodeIdByParentNodeIdIn(parentNodeIdCollection);
+            // 将parentNodeIds的每个id分组计算每个id的个数
+            parentNodeIdCountMap = parentNodeIds.stream()
+                    .collect(Collectors.groupingBy(parentNodeId -> parentNodeId, Collectors.counting()));
+        } else {
+            parentNodeIdCountMap = new HashMap<>();
+        }
+
         List<CollectionDeptTreeVo> vos = new ArrayList<>();
         if (!CollectionUtils.isEmpty(organizationUnits)) {
             vos = organizationUnits.stream()
