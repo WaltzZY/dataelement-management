@@ -58,4 +58,24 @@
         WHERE dataid = #{dataid}
     </delete>
 
+    <!-- 查询数据元的关联目录列表(定标模块专用) -->
+    <select id="selectAssociatedCatalogs" resultMap="BaseResultMap">
+        SELECT *
+        FROM data_element_catalog_relation
+        WHERE data_element_id = #{dataElementId}
+        <if test="sourceOrgCode != null and sourceOrgCode != ''">
+            AND catalog_unit_code = #{sourceOrgCode}
+        </if>
+        ORDER BY create_date DESC
+    </select>
+
+    <!-- 检查目录关联关系是否存在(定标模块专用) -->
+    <select id="selectRelationByDataElementAndItem" resultMap="BaseResultMap">
+        SELECT *
+        FROM data_element_catalog_relation
+        WHERE data_element_id = #{dataElementId}
+          AND info_item_id = #{catalogitemid}
+        LIMIT 1
+    </select>
+
 </mapper>

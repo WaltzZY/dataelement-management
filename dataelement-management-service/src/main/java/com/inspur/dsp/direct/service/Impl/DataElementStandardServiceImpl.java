@@ -58,10 +58,16 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 查询基本信息
         BaseDataElement dataElement = baseDataElementMapper.selectById(dataid);
+        log.info("查询BaseDataElement结果: {}", dataElement);
+        
         if (dataElement == null) {
+            log.warn("数据元不存在 - dataid: {}", dataid);
             throw new IllegalArgumentException("数据元不存在");
         }
+        
+        log.info("数据元状态检查 - dataid: {}, status: {}", dataid, dataElement.getStatus());
         if (!"designated_source".equals(dataElement.getStatus())) {
+            log.warn("状态不符合要求 - expected: designated_source, actual: {}", dataElement.getStatus());
             throw new IllegalArgumentException("当前状态不允许编辑");
         }
 
