@@ -13,6 +13,8 @@ public class BasicInfoVo {
     private String dataelementcode;
     
     private String name;
+
+    private String status;
     
     private String definition;
     

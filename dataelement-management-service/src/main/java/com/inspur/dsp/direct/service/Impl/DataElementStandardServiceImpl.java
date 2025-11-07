@@ -64,17 +64,12 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             log.warn("数据元不存在 - dataid: {}", dataid);
             throw new IllegalArgumentException("数据元不存在");
         }
-        
-        log.info("数据元状态检查 - dataid: {}, status: {}", dataid, dataElement.getStatus());
-        if (!"designated_source".equals(dataElement.getStatus())) {
-            log.warn("状态不符合要求 - expected: designated_source, actual: {}", dataElement.getStatus());
-            throw new IllegalArgumentException("当前状态不允许编辑");
-        }
 
         BasicInfoVo basicInfo = new BasicInfoVo();
         basicInfo.setDataid(dataElement.getDataid());
         basicInfo.setDataelementcode(dataElement.getDataElementId());
         basicInfo.setName(dataElement.getName());
+        basicInfo.setName(dataElement.getStatus());
         basicInfo.setDefinition(dataElement.getDefinition());
         basicInfo.setDatatype(dataElement.getDatatype());
         basicInfo.setDataFormat(dataElement.getDataFormat());
@@ -124,6 +119,20 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             vo.setDataType(relation.getInfoItemDatatype());
             vo.setSourceOrgCode(relation.getCatalogUnitCode());
             vo.setSourceOrgName(relation.getCatalogUnitName());
+            
+            // 生成目录预览URL
+            try {
+                String previewUrl = basecatalogService.getCatalogPreviewUrl(
+                    relation.getCatalogId(), 
+                    relation.getCatalogUnitCode(), 
+                    relation.getCatalogName()
+                );
+                vo.setPreviewUrl(previewUrl);
+            } catch (Exception e) {
+                log.warn("生成目录预览URL失败，catalogId: {}, error: {}", relation.getCatalogId(), e.getMessage());
+                vo.setPreviewUrl("");
+            }
+            
             catalogVos.add(vo);
         }
 
@@ -359,6 +368,18 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             vo.setAttachFileName(attachment.getAttachfilename());
             vo.setAttachFileLocation(attachment.getAttachfilelocation());
             vo.setAttachFileUrl(attachment.getAttachfileurl());
+            
+            // 获取文件内容
+            try {
+                byte[] fileContent = commonService.downloadFile(attachment.getAttachfilelocation());
+                vo.setFileContent(fileContent);
+                log.info("成功获取文件内容 - fileName: {}, size: {}", attachment.getAttachfilename(), fileContent.length);
+            } catch (Exception e) {
+                log.warn("获取文件内容失败 - fileName: {}, location: {}, error: {}", 
+                    attachment.getAttachfilename(), attachment.getAttachfilelocation(), e.getMessage());
+                vo.setFileContent(null);
+            }
+            
             result.add(vo);
         }
 
@@ -389,14 +410,42 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     @Transactional(rollbackFor = Exception.class)
     public void saveStandard(SaveStandardDto dto) {
         log.info("保存编制信息 - dto: {}", dto);
+        // 保存基本信息、联系人信息和属性信息
+        this.saveBasicInfo(dto);
 
-        // 参数基础校验
-        if (dto == null) {
-            throw new IllegalArgumentException("保存请求不能为空");
+        // 保存关联目录信息到数据库
+        if (dto.getAssociatedCatalogs() != null && !dto.getAssociatedCatalogs().isEmpty()) {
+            log.info("保存关联目录信息，共{}条", dto.getAssociatedCatalogs().size());
+            
+            // 先删除原有的关联关系
+            dataElementCatalogRelationMapper.deleteCatalogAssociation(dto.getDataid());
+            
+            // 批量插入新的关联关系
+            for (CatalogRelationDto catalogDto : dto.getAssociatedCatalogs()) {
+                // 创建新的关联关系
+                DataElementCatalogRelation newRelation = new DataElementCatalogRelation();
+                newRelation.setDataid(UUID.randomUUID().toString());
+                newRelation.setDataElementId(dto.getDataid());
+                newRelation.setInfoItemId(catalogDto.getCatalogitemid());
+                newRelation.setCatalogId(catalogDto.getCatalogId());
+                newRelation.setCatalogName(catalogDto.getCatalogName());
+                newRelation.setInfoItemName(catalogDto.getDataItemName());
+                newRelation.setCatalogUnitCode(catalogDto.getSourceOrgCode());
+                newRelation.setCatalogUnitName(catalogDto.getSourceOrgName());
+                newRelation.setCreateDate(new Date());
+                dataElementCatalogRelationMapper.insert(newRelation);
+            }
         }
-        if (dto.getDataid() == null || dto.getDataid().isEmpty()) {
-            throw new IllegalArgumentException("数据元ID不能为空");
-        }
+        
+        log.info("保存完成 - 关联目录已更新到数据库，基本信息等待提交时更新");
+    }
+
+    /**
+     * 保存基本信息、联系人信息和属性信息
+     */
+    private void saveBasicInfo(SaveStandardDto dto) {
+        log.info("保存基本信息、联系人信息和属性信息 - dto: {}", dto);
+        // 参数校验
         if (dto.getDataelementcode() == null || dto.getDataelementcode().isEmpty()) {
             throw new IllegalArgumentException("数据元编码不能为空");
         }
@@ -414,9 +463,6 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         BaseDataElement dataElement = baseDataElementMapper.selectById(dto.getDataid());
         if (dataElement == null) {
             throw new IllegalArgumentException("数据元不存在");
-        }
-        if (!"designated_source".equals(dataElement.getStatus())) {
-            throw new IllegalArgumentException("当前状态不允许编辑");
         }
 
         // 获取当前登录用户信息
@@ -490,8 +536,8 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     public SubmitResultVo submitStandard(SaveStandardDto dto) {
         log.info("提交审核 - dto: {}", dto);
 
-        // 调用saveStandard保存信息(包含所有数据校验)
-        this.saveStandard(dto);
+        // 保存基本信息、联系人信息和属性信息
+        this.saveBasicInfo(dto);
 
         // 查询并校验数据元状态
         BaseDataElement dataElement = baseDataElementMapper.selectById(dto.getDataid());
@@ -502,8 +548,9 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             throw new IllegalArgumentException("当前状态不允许提交，必须为待定标状态");
         }
 
-        // 计算下一状态
-        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus("designated_source", "提交审核");
+        // 计算下一状态 - 将designated_source映射为TodoDetermined用于查询流程配置
+        String flowStatus = mapStatusForFlow(dataElement.getStatus());
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(flowStatus, "提交审核");
         if (!nextStatusVo.getIsValid()) {
             throw new RuntimeException("状态流转配置不存在或无效");
         }
@@ -523,7 +570,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         ProcessRecordDto processRecordDto = new ProcessRecordDto();
         processRecordDto.setBaseDataelementDataid(dto.getDataid());
         processRecordDto.setOperation("提交审核");
-        processRecordDto.setSourceStatus("designated_source");
+        processRecordDto.setSourceStatus(flowStatus);
         processRecordDto.setDestStatus(nextStatus);
         processRecordDto.setOperatorAccount(userInfo.getAccount());
         processRecordDto.setOperatorName(userInfo.getName());
@@ -584,8 +631,8 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     public SubmitResultVo submitReExamination(SaveStandardDto dto) {
         log.info("提交复审 - dto: {}", dto);
 
-        // 调用saveStandard保存信息(包含所有数据校验)
-        this.saveStandard(dto);
+        // 保存基本信息、联系人信息和属性信息
+        this.saveBasicInfo(dto);
 
         // 查询并校验数据元状态
         BaseDataElement dataElement = baseDataElementMapper.selectById(dto.getDataid());
@@ -822,5 +869,17 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 }
             }
         }
+    }
+
+    /**
+     * 将数据元状态映射为流程配置中使用的状态
+     */
+    private String mapStatusForFlow(String status) {
+        // designated_source 映射为 TodoDetermined，用于查询流程配置
+        if ("designated_source".equals(status)) {
+            return "TodoDetermined";
+        }
+        // 其他状态保持不变
+        return status;
     }
 }

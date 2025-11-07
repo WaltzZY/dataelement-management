@@ -15,4 +15,9 @@ public class AttachmentFileVo {
     private String attachFileLocation;
     
     private String attachFileUrl;
+    
+    /**
+     * 文件内容（字节流）
+     */
+    private byte[] fileContent;
 }

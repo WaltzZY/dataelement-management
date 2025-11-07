@@ -2,8 +2,6 @@ package com.inspur.dsp.direct.entity.dto;
 
 import lombok.Data;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
@@ -12,15 +10,12 @@ import java.util.List;
 @Data
 public class SaveStandardDto {
 
-    @NotBlank(message = "数据元ID不能为空")
     private String dataid;
 
-    @NotBlank(message = "数据元编码不能为空") 
     private String dataelementcode;
 
     private String definition;
 
-    @NotBlank(message = "数据类型不能为空")
     private String datatype;
 
     private String dataFormat;
@@ -29,9 +24,12 @@ public class SaveStandardDto {
 
     private String remarks;
 
-    @Valid
     private ContactInfoDto contactInfo;
 
-    @Valid
     private List<AttributeDto> attributes;
+
+    /**
+     * 关联目录列表（仅用于save接口保存选中的关联目录）
+     */
+    private List<CatalogRelationDto> associatedCatalogs;
 }

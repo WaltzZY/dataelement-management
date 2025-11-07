@@ -110,16 +110,21 @@ public class DataElementStandardController {
     }
 
     /**
-     * 上传标准规范文件
+     * 上传标准规范文件（支持批量上传）
      * 仅接受PDF格式
      */
     @PostMapping("/file/standard")
     @RespAdvice
     public Resp<?> uploadStandardFile(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam("files") MultipartFile[] files,
             @RequestParam @NotBlank(message = "数据元ID不能为空") String dataid) {
-        log.info("上传标准规范文件 - dataid: {}, fileName: {}", dataid, file.getOriginalFilename());
-        dataElementStandardService.uploadFile(file, dataid, "standardfile");
+        log.info("上传标准规范文件 - dataid: {}, 文件数量: {}", dataid, files.length);
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                log.info("处理文件: {}", file.getOriginalFilename());
+                dataElementStandardService.uploadFile(file, dataid, "standardfile");
+            }
+        }
         return Resp.success();
     }
 
@@ -136,7 +141,7 @@ public class DataElementStandardController {
     /**
      * 删除标准规范文件
      */
-    @DeleteMapping("/file/standard/{attachFileId}")
+    @PostMapping("/file/standard/{attachFileId}/delete")
     @RespAdvice
     public Resp<?> deleteStandardFile(@PathVariable @NotBlank(message = "附件ID不能为空") String attachFileId) {
         log.info("删除标准规范文件 - attachFileId: {}", attachFileId);
@@ -144,17 +149,24 @@ public class DataElementStandardController {
         return Resp.success();
     }
 
+
+
     /**
-     * 上传样例文件
+     * 上传样例文件（支持批量上传）
      * 接受任意格式文件
      */
     @PostMapping("/file/example")
     @RespAdvice
     public Resp<?> uploadExampleFile(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam("files") MultipartFile[] files,
             @RequestParam @NotBlank(message = "数据元ID不能为空") String dataid) {
-        log.info("上传样例文件 - dataid: {}, fileName: {}", dataid, file.getOriginalFilename());
-        dataElementStandardService.uploadFile(file, dataid, "examplefile");
+        log.info("上传样例文件 - dataid: {}, 文件数量: {}", dataid, files.length);
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                log.info("处理文件: {}", file.getOriginalFilename());
+                dataElementStandardService.uploadFile(file, dataid, "examplefile");
+            }
+        }
         return Resp.success();
     }
 
@@ -166,6 +178,17 @@ public class DataElementStandardController {
     public List<AttachmentFileVo> getExampleFiles(@PathVariable @NotBlank(message = "数据元ID不能为空") String dataid) {
         log.info("查询样例文件列表 - dataid: {}", dataid);
         return dataElementStandardService.getFileList(dataid, "examplefile");
+    }
+
+    /**
+     * 删除样例文件
+     */
+    @PostMapping("/file/example/{attachFileId}/delete")
+    @RespAdvice
+    public Resp<?> deleteExampleFile(@PathVariable @NotBlank(message = "附件ID不能为空") String attachFileId) {
+        log.info("删除样例文件 - attachFileId: {}", attachFileId);
+        dataElementStandardService.deleteFile(attachFileId);
+        return Resp.success();
     }
 
     /**
