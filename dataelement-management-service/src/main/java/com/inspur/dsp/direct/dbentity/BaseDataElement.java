@@ -154,6 +154,36 @@ public class BaseDataElement implements Serializable {
     @TableField(value = "last_modify_account")
     @Size(max = 30, message = "最后修改人账号最大长度要小于 30")
     private String lastModifyAccount;
+
+    /**
+     * 最后一次提交审核时间
+     */
+    @TableField(value = "last_submit_date")
+    private Date lastSubmitDate;
+
+    /**
+     * 最后一次审核时间
+     */
+    @TableField(value = "last_approve_date")
+    private Date lastApproveDate;
+
+    /**
+     * 最后一次发起修订时间
+     */
+    @TableField(value = "last_initiaterevised_date")
+    private Date lastInitiaterevisedDate;
+
+    /**
+     * 最后一次提交复审时间
+     */
+    @TableField(value = "last_submitreexamination_date")
+    private Date lastSubmitreexaminationDate;
+
+    /**
+     * 最后一次报送领导审阅时间
+     */
+    @TableField(value = "last_submitreleased_date")
+    private Date lastSubmitreleasedDate;
     /**
      * 最后修改人账号
      */
@@ -174,5 +204,4 @@ public class BaseDataElement implements Serializable {
      */
     @TableField(exist = false)
     private String displayStatus;
-
 }

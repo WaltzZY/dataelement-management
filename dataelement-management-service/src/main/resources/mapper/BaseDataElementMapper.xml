@@ -24,12 +24,19 @@
     <result column="create_account" jdbcType="VARCHAR" property="createAccount" />
     <result column="last_modify_date" jdbcType="TIMESTAMP" property="lastModifyDate" />
     <result column="last_modify_account" jdbcType="VARCHAR" property="lastModifyAccount" />
+    <result column="last_submit_date" jdbcType="TIMESTAMP" property="lastSubmitDate" />
+    <result column="last_approve_date" jdbcType="TIMESTAMP" property="lastApproveDate" />
+    <result column="last_initiaterevised_date" jdbcType="TIMESTAMP" property="lastInitiaterevisedDate" />
+    <result column="last_submitreexamination_date" jdbcType="TIMESTAMP" property="lastSubmitreexaminationDate" />
+    <result column="last_submitreleased_date" jdbcType="TIMESTAMP" property="lastSubmitreleasedDate" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
-    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty,
-    generatedatetime, remarks, create_date, create_account, last_modify_date, last_modify_account
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain, 
+    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty, 
+    generatedatetime, remarks, create_date, create_account, last_modify_date, last_modify_account, 
+    last_submit_date, last_approve_date, last_initiaterevised_date, last_submitreexamination_date, 
+    last_submitreleased_date
   </sql>
 
     <resultMap id="DataElementPageInfoVoResultMap" type="com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo">
@@ -283,7 +290,7 @@
                                 <when test="status == 'rejected'">(bde.status = 'pending_negotiation' AND ct.status = 'rejected')</when>
                                 <when test="status == 'claimed'">(bde.status IN ('claimed_ing','pending_approval','pending_negotiation') AND ct.status = 'claimed')</when>
                                 <when test="status == 'not_claimed'">(bde.status IN ('claimed_ing','pending_approval','pending_negotiation') AND ct.status = 'not_claimed')</when>
-                                <!--&amp;amp;amp;lt;otherwise&amp;amp;amp;gt;&amp;amp;amp;lt;/otherwise&amp;amp;amp;gt;-->
+                                <!--&amp;amp;amp;amp;lt;otherwise&amp;amp;amp;amp;gt;&amp;amp;amp;amp;lt;/otherwise&amp;amp;amp;amp;gt;-->
                             </choose>
                         </foreach>
                     </if>
@@ -302,7 +309,7 @@
                             </choose>
                         </foreach>
                     </if>
-                    <!--&amp;amp;amp;lt;if test="base.taskStatusList.size() == 0 and base.baseStatusList.size() == 0"&amp;amp;amp;gt;1=0&amp;amp;amp;lt;/if&amp;amp;amp;gt;-->
+                    <!--&amp;amp;amp;amp;lt;if test="base.taskStatusList.size() == 0 and base.baseStatusList.size() == 0"&amp;amp;amp;amp;gt;1=0&amp;amp;amp;amp;lt;/if&amp;amp;amp;amp;gt;-->
                 </when>
                 <when test="base.taskStatusList != null and base.taskStatusList.size() &gt; 0">
                     <foreach close=")" collection="base.taskStatusList" item="status" open="(" separator=" OR ">
@@ -326,7 +333,7 @@
                             <when test="status == 'confirmed'">(bde.status = 'confirmed')</when>
                             <when test="status == 'designated_source'">(bde.status = 'designated_source')</when>
                             <when test="status == 'negotiating'">(bde.status = 'negotiating')</when>
-                            <!--&amp;amp;amp;lt;otherwise&amp;amp;amp;gt;1=0&amp;amp;amp;lt;/otherwise&amp;amp;amp;gt;-->
+                            <!--&amp;amp;amp;amp;lt;otherwise&amp;amp;amp;amp;gt;1=0&amp;amp;amp;amp;lt;/otherwise&amp;amp;amp;amp;gt;-->
                         </choose>
                     </foreach>
                 </when>

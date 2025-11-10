@@ -78,7 +78,5 @@ public interface BaseDataElementMapper extends BaseMapper<BaseDataElement> {
      */
     List<GetDetermineResultVo> getDetermineResultListForCollector(@Param("orgCode") String orgCode, @Param("dto") BaseDataElementSearchDTO dto);
 
-
     List<String> getBaseDataForOrgCode(@Param("dataid") String dataid);
-
 }
