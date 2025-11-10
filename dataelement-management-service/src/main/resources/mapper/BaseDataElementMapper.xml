@@ -60,6 +60,7 @@
         left join domain_data_element dde on bde.dataid = dde.base_dataelement_dataid
         <where>
             bde.collectunitqty = 1
+            and bde.status in ('pending_source','confirming','claimed_ing','pending_approval','pending_negotiation','negotiating','designated_source')
             <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() != 0">
                 and dde.source_unit_code in
                 <foreach close=")" collection="dto.collectUnitCodeList" item="item" open="(" separator=",">
@@ -116,6 +117,7 @@
         from base_data_element bde
         left join confirmation_task ct on bde.dataid = ct.base_dataelement_dataid
         where ct.processing_unit_code = #{organCode,jdbcType=VARCHAR}
+        and bde.status in ('pending_source','confirming','claimed_ing','pending_approval','pending_negotiation','negotiating','designated_source')
         <if test="dto.auditStatus == 'pending'">
             and ct.status = 'pending'
         </if>
@@ -368,6 +370,7 @@
         <where>
             <!-- 添加保底条件 -->
             1=1
+            and bde.status in ('pending_source','confirming','claimed_ing','pending_approval','pending_negotiation','negotiating','designated_source')
             <if test="base.statusList != null and base.statusList.size() &gt; 0">
                 AND (
                 <trim prefixOverrides="OR">

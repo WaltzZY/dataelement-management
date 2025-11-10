@@ -71,6 +71,7 @@
                 AND (name LIKE CONCAT('%', #{dto.keyword}, '%') OR definition LIKE CONCAT('%', #{dto.keyword}, '%'))
             </if>
             AND collectunitqty > 1
+            and status in ('pending_source','confirming','claimed_ing','pending_approval','pending_negotiation','negotiating','designated_source')
         </where>
         <!-- 动态排序逻辑 -->
         <if test="dto.sortField != null and dto.sortField != '' and dto.sortOrder != null and dto.sortOrder != ''">

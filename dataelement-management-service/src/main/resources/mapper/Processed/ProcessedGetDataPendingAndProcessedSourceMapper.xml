@@ -137,6 +137,7 @@
          JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
             ct.processing_unit_code = #{orgCode}
+            and bde.status in ('pending_source','confirming','claimed_ing','pending_approval','pending_negotiation','negotiating','designated_source')
             <choose>
                 <when test="dto.status != null and dto.status.size() > 0">
                     AND ct.status IN
