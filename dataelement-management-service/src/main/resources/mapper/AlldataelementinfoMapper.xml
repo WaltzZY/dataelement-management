@@ -16,7 +16,7 @@
         bde.confirm_date AS confirmDate
         FROM base_data_element bde
         WHERE 1=1
-
+        and bde.status in ('pending_source','confirming','claimed_ing','pending_approval','pending_negotiation','negotiating','designated_source')
         <!-- 数源单位社会信用代码精确匹配（多选）-->
         <if test="queryDto.collectUnitCodeList != null and queryDto.collectUnitCodeList.size() > 0">
             AND bde.source_unit_code IN

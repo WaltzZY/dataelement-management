@@ -7,8 +7,5 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface ProcessRecordMapper extends BaseMapper<ProcessRecord> {
-
     ProcessRecord getProcessRecoderForPublished(@Param("dataid") String dataId);
-
-
 }

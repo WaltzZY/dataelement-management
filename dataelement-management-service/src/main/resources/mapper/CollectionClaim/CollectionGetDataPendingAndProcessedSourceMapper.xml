@@ -93,6 +93,7 @@
         INNER JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>
             ct.taskType = 'claim_task'
+            and bde.status in ('pending_source','confirming','claimed_ing','pending_approval','pending_negotiation','negotiating','designated_source')
             AND ct.processing_unit_code = #{orgCode}
             <if test="dto.status != null and dto.status.size() > 0">
                 and ct.status in
