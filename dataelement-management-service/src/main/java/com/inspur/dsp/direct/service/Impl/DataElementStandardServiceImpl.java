@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -59,12 +60,12 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 查询基本信息
         BaseDataElement dataElement = baseDataElementMapper.selectById(dataid);
         log.info("查询BaseDataElement结果: {}", dataElement);
-        
+
         if (dataElement == null) {
             log.warn("数据元不存在 - dataid: {}", dataid);
             throw new IllegalArgumentException("数据元不存在");
         }
-        
+
         log.info("数据元状态检查 - dataid: {}, status: {}", dataid, dataElement.getStatus());
         if (!"designated_source".equals(dataElement.getStatus())) {
             log.warn("状态不符合要求 - expected: designated_source, actual: {}", dataElement.getStatus());
@@ -156,9 +157,9 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         List<String> orgCodes = new ArrayList<>();
         orgCodes.add(dto.getSourceOrgCode());
         queryDto.setOrgCodes(orgCodes);
-        
+
         List<QueryCatalogByColumnNameVo> catalogItems = basecatalogService.getRelationCatalogItemLike(queryDto);
-        
+
         // 转换为CatalogItemVo并实现分页
         List<CatalogItemVo> catalogItemVos = new ArrayList<>();
         for (QueryCatalogByColumnNameVo item : catalogItems) {
@@ -173,13 +174,13 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             vo.setSourceOrgName(item.getCatalogUnitName());
             catalogItemVos.add(vo);
         }
-        
+
         // 手动分页
         int startIndex = (dto.getPageNum() - 1) * dto.getPageSize();
         int endIndex = Math.min(startIndex + dto.getPageSize(), catalogItemVos.size());
-        List<CatalogItemVo> pagedItems = startIndex < catalogItemVos.size() ? 
+        List<CatalogItemVo> pagedItems = startIndex < catalogItemVos.size() ?
             catalogItemVos.subList(startIndex, endIndex) : new ArrayList<>();
-        
+
         SearchCatalogItemResultVo result = new SearchCatalogItemResultVo();
         result.setItems(pagedItems);
         result.setPageNum(dto.getPageNum());
@@ -215,7 +216,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 // 更新逻辑
                 log.debug("正在获取当前登录用户信息...");
                 UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-                
+
                 existingRelation.setCatalogName(relation.getCatalogName());
                 existingRelation.setCatalogDesc(relation.getCatalogDescription());
                 existingRelation.setInfoItemName(relation.getDataItemName());
@@ -225,7 +226,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 // 插入逻辑
                 log.debug("正在获取当前登录用户信息...");
                 UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-                
+
                 DataElementCatalogRelation newRelation = new DataElementCatalogRelation();
                 newRelation.setDataid(UUID.randomUUID().toString());
                 newRelation.setDataElementId(dto.getBaseDataelementDataid());
@@ -264,12 +265,12 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             vo.setDataType(relation.getInfoItemDatatype());
             vo.setSourceOrgCode(relation.getCatalogUnitCode());
             vo.setSourceOrgName(relation.getCatalogUnitName());
-            
+
             // 生成目录预览URL
             try {
                 String previewUrl = basecatalogService.getCatalogPreviewUrl(
-                    relation.getCatalogId(), 
-                    relation.getCatalogUnitCode(), 
+                    relation.getCatalogId(),
+                    relation.getCatalogUnitCode(),
                     relation.getCatalogName()
                 );
                 vo.setPreviewUrl(previewUrl);
@@ -277,7 +278,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 log.warn("生成目录预览URL失败，catalogId: {}, error: {}", relation.getCatalogId(), e.getMessage());
                 vo.setPreviewUrl("");
             }
-            
+
             result.add(vo);
         }
 
@@ -422,7 +423,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 获取当前登录用户信息
         log.debug("正在获取当前登录用户信息...");
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-        
+
         // 更新基本信息
         dataElement.setDataElementId(dto.getDataelementcode());
         dataElement.setDefinition(dto.getDefinition());
@@ -512,7 +513,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 获取当前登录用户信息
         log.debug("正在获取当前登录用户信息...");
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-        
+
         // 更新数据元状态
         dataElement.setStatus(nextStatus);
         dataElement.setLastModifyDate(new Date());
@@ -544,21 +545,21 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 处理日期边界问题
         normalizeDateRange(queryDto);
-        
+
         // 校验并规范化排序参数
         validateAndNormalizeSortParams(queryDto);
 
         // 创建分页对象
         Page<StandardDataElementPageInfoVo> page = new Page<>(queryDto.getPageNum(), queryDto.getPageSize());
-        
+
         // 执行查询
         List<StandardDataElementPageInfoVo> records = dataElementStandardMapper.getAllStandardList(page, queryDto);
-        
+
         // 设置状态描述
         for (StandardDataElementPageInfoVo record : records) {
             record.setStatusDesc(CalibrationStatusEnums.getDescByCode(record.getStatus()));
         }
-        
+
         page.setRecords(records);
         return page;
     }
@@ -566,16 +567,16 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     @Override
     public RevisionComment getRevisionCommentbydataid(String dataid) {
         log.info("获取修订意见 - dataid: {}", dataid);
-        
+
         if (dataid == null || dataid.isEmpty()) {
             throw new IllegalArgumentException("数据元ID不能为空");
         }
-        
+
         BaseDataElement dataElement = baseDataElementMapper.selectById(dataid);
         if (dataElement == null) {
             throw new IllegalArgumentException("数据元不存在");
         }
-        
+
         return revisionCommentMapper.selectbydataid(dataid);
     }
 
@@ -606,7 +607,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 获取当前登录用户信息
         log.debug("正在获取当前登录用户信息...");
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-        
+
         // 更新数据元状态
         dataElement.setStatus(nextStatus);
         dataElement.setLastModifyDate(new Date());
@@ -638,9 +639,9 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 查询所有符合条件的数据元记录(不分页)
         List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
-        
-        if (exportList.isEmpty()) {
-            throw new IllegalArgumentException("无数据可导出");
+
+        if (CollectionUtils.isEmpty(exportList)) {
+            exportList = new ArrayList<>();
         }
 
         // 数据转换
@@ -673,9 +674,9 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 查询所有符合条件的数据元记录(不分页)
         List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
-        
-        if (exportList.isEmpty()) {
-            throw new IllegalArgumentException("无数据可导出");
+
+        if (CollectionUtils.isEmpty(exportList)) {
+            exportList = new ArrayList<>();
         }
 
         // 数据转换
@@ -709,7 +710,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 查询所有符合条件的数据元记录(不分页)
         List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
-        
+
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
         }

@@ -42,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -341,6 +342,9 @@ public class NegotiationServiceImpl implements NegotiationService {
         String sortSql = NePageSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
         // 2. 调用NegotiationMapper.GetNegotiationDataElementList方法，获取返回voslist
         List<NegotiationDataElementVO> voslist = negotiationMapper.getNegotiationDataElementList(null, dto, sortSql);
+        if (CollectionUtils.isEmpty(voslist)) {
+            voslist = new ArrayList<>();
+        }
         // 3. 调用collUnits方法，将返回的vos进行处理
         collUnits(voslist);
         // 4. 判断exportFlag，初始化不同的对象
@@ -705,6 +709,10 @@ public class NegotiationServiceImpl implements NegotiationService {
     public void exportNegotiationFailList(List<ImportNegotiationFailDetailDTO> failDetails, HttpServletResponse response) {
         // 初始化List<ExportNegotiationFailDTO> failList
         List<ExportNegotiationFailDTO> failList = new ArrayList<>();
+
+        if (CollectionUtils.isEmpty(failDetails)) {
+            failDetails = new ArrayList<>();
+        }
 
         int seqNo = 1;
         // 遍历failDetails，依次取出failDetail

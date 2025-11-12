@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -78,6 +79,9 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
             if ("pending_approval".equals(dto.getAuditStatus())) {
                 // 查询待核定数据
                 vos = baseDataElementMapper.selectPaPage(null, dto, sortSql);
+                if (CollectionUtils.isEmpty(vos)) {
+                    vos = new ArrayList<>();
+                }
                 // 转为待核定导出对象
                 List<PaExcel> paExcelList = new ArrayList<>();
                 for (int i = 0, vosSize = vos.size(); i < vosSize; i++) {
@@ -97,6 +101,9 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
             } else {
                 // 查询已定源数据
                 vos = baseDataElementMapper.selectConfirmedPage(null, dto, sortSql);
+                if (CollectionUtils.isEmpty(vos)) {
+                    vos = new ArrayList<>();
+                }
                 // 转为已定源导出对象
                 List<ConfirmationExcel> confirmationExcels = new ArrayList<>();
                 for (int i = 0; i < vos.size(); i++) {

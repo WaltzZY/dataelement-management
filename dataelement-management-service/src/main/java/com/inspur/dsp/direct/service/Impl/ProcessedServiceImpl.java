@@ -15,8 +15,10 @@ import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -81,6 +83,9 @@ public class ProcessedServiceImpl implements ProcessedService {
             String orderBySql = PapsSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
 
             List<GetProcessedDataElementVO> processedDataElement = getDataPendingAndProcessedSourceMapper.getProcessedDataElement( dto, orgCode,orderBySql);
+            if (CollectionUtils.isEmpty(processedDataElement)) {
+                processedDataElement = new ArrayList<>();
+            }
 
             AtomicInteger i = new AtomicInteger(0); // 导出列表序号
             List<ProcessedExcel> processedExcelList = processedDataElement.stream().map(vo -> {

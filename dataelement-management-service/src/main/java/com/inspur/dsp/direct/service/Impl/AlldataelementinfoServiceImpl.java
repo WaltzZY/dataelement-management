@@ -102,12 +102,12 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         if (!CollectionUtils.isEmpty(data)) {
             data.forEach(vo -> {
                 vo.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
-                
+
                 // 计算采集单位数量：统计该基准数据元关联的领域数据元的不同社会信用代码数量
                 try {
-                    List<DomainDataElement> domainDataElements = 
+                    List<DomainDataElement> domainDataElements =
                             claimDomainDataElementMapper.selectDomainDataElementByBaseDataElementDataId(vo.getDataid());
-                    
+
                     if (!CollectionUtils.isEmpty(domainDataElements)) {
                         // 统计不同的社会信用代码数量
                         long distinctUnitCount = domainDataElements.stream()
@@ -476,9 +476,10 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
     /**
      * 统一的更新数据源状态方法
+     *
      * @param dataElementId 数据元ID
-     * @param unitCode 单位代码
-     * @param sourceType 定源方式
+     * @param unitCode      单位代码
+     * @param sourceType    定源方式
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateDataElementStatus(String dataElementId, String unitCode, String sourceType) {
@@ -623,8 +624,10 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
             throw new RuntimeException("手动定源操作失败：" + e.getMessage());
         }
     }
+
     /**
      * 导出数据元列表
+     *
      * @param queryDto 查询条件DTO
      * @param response HttpServletResponse对象
      */
@@ -633,62 +636,55 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
     public void exportDataElementList(DataElementPageQueryDto queryDto, HttpServletResponse response) {
         log.info("开始导出数据元列表，查询条件：{}", queryDto);
 
+        // 转换为导出DTO列表
+        List<DataElementPageExportDto> exportList = new ArrayList<>();
+
         // 直接调用Mapper查询，不使用分页
         List<DataElementPageInfoVo> dataList = alldataelementinfoMapper.getAllDataElementPage(null, queryDto);
 
-        if (CollectionUtils.isEmpty(dataList)) {
-            throw new IllegalArgumentException("没有可导出的数据!");
-        }
+        if (!CollectionUtils.isEmpty(dataList)) {
+            log.info("查询到{}条数据需要导出", dataList.size());
+            // 设置状态描述（因为直接调用Mapper，需要手动设置）
+            dataList.forEach(vo -> {
+                vo.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
+            });
+            // 收集采集单位信息
+            for (DataElementPageInfoVo vo : dataList) {
+                try {
+                    // 使用dataid查询关联的DomainDataElement列表
+                    List<DomainDataElement> domainDataElements =
+                            claimDomainDataElementMapper.selectDomainDataElementByBaseDataElementDataId(vo.getDataid());
+                    if (!CollectionUtils.isEmpty(domainDataElements)) {
+                        // 提取所有source_unit_name并用"|"分割组合（根据OrganisersClaimServiceImpl的实现）
+                        String collectUnitNames = domainDataElements.stream()
+                                .map(DomainDataElement::getSourceUnitName)
+                                .filter(name -> name != null && !name.trim().isEmpty())
+                                .collect(Collectors.joining("|"));
 
-        log.info("查询到{}条数据需要导出", dataList.size());
-
-        // 设置状态描述（因为直接调用Mapper，需要手动设置）
-        dataList.forEach(vo -> {
-            vo.setStatusDesc(StatusEnums.getDescByCode(vo.getStatus()));
-        });
-
-        // 收集采集单位信息
-        for (DataElementPageInfoVo vo : dataList) {
-            try {
-                // 使用dataid查询关联的DomainDataElement列表
-                List<DomainDataElement> domainDataElements =
-                        claimDomainDataElementMapper.selectDomainDataElementByBaseDataElementDataId(vo.getDataid());
-
-                if (!CollectionUtils.isEmpty(domainDataElements)) {
-                    // 提取所有source_unit_name并用"|"分割组合（根据OrganisersClaimServiceImpl的实现）
-                    String collectUnitNames = domainDataElements.stream()
-                            .map(DomainDataElement::getSourceUnitName)
-                            .filter(name -> name != null && !name.trim().isEmpty())
-                            .collect(Collectors.joining("|"));
-
-                    // 设置采集单位名称
-                    vo.setCollectDeptName(collectUnitNames);
-                } else {
-                    // 如果没有查询到采集单位信息，设置为空字符串
+                        // 设置采集单位名称
+                        vo.setCollectDeptName(collectUnitNames);
+                    } else {
+                        // 如果没有查询到采集单位信息，设置为空字符串
+                        vo.setCollectDeptName("");
+                    }
+                } catch (Exception e) {
+                    log.warn("查询数据元{}的采集单位信息失败: {}", vo.getDataid(), e.getMessage());
                     vo.setCollectDeptName("");
                 }
-            } catch (Exception e) {
-                log.warn("查询数据元{}的采集单位信息失败: {}", vo.getDataid(), e.getMessage());
-                vo.setCollectDeptName("");
             }
-        }
-
-        // 转换为导出DTO列表
-        List<DataElementPageExportDto> exportList = new ArrayList<>();
-        int serialNumber = 1;
-
-        for (DataElementPageInfoVo vo : dataList) {
-            DataElementPageExportDto exportDto = new DataElementPageExportDto();
-            exportDto.setSerialNumber(String.valueOf(serialNumber++));
-            exportDto.setName(vo.getName());
-            exportDto.setDefinition(vo.getDefinition());
-            exportDto.setStatusDesc(vo.getStatusDesc());
-            exportDto.setSourceUnitName(vo.getSourceUnitName());
-            exportDto.setCollectDeptName(vo.getCollectDeptName()); // 设置采集单位信息
-            exportDto.setSendDate(vo.getSendDate());
-            exportDto.setConfirmDate(vo.getConfirmDate());
-
-            exportList.add(exportDto);
+            int serialNumber = 1;
+            for (DataElementPageInfoVo vo : dataList) {
+                DataElementPageExportDto exportDto = new DataElementPageExportDto();
+                exportDto.setSerialNumber(String.valueOf(serialNumber++));
+                exportDto.setName(vo.getName());
+                exportDto.setDefinition(vo.getDefinition());
+                exportDto.setStatusDesc(vo.getStatusDesc());
+                exportDto.setSourceUnitName(vo.getSourceUnitName());
+                exportDto.setCollectDeptName(vo.getCollectDeptName()); // 设置采集单位信息
+                exportDto.setSendDate(vo.getSendDate());
+                exportDto.setConfirmDate(vo.getConfirmDate());
+                exportList.add(exportDto);
+            }
         }
 
         // 调用通用导出服务
@@ -829,11 +825,11 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
      * 预处理定数结果数据：检测数据完整性、重复数据和冲突数据
      */
     private void preprocessDetermineResultData(List<DetermineResultExcelRowDto> excelData,
-                                              Map<String, List<DetermineResultExcelRowDto>> duplicateGroups,
-                                              Map<String, List<Integer>> conflictGroups,
-                                              Set<Integer> invalidRows,
-                                              List<DetermineResultFailureDetailVo> failureDetails,
-                                              Set<String> validDataTypes) {
+                                               Map<String, List<DetermineResultExcelRowDto>> duplicateGroups,
+                                               Map<String, List<Integer>> conflictGroups,
+                                               Set<Integer> invalidRows,
+                                               List<DetermineResultFailureDetailVo> failureDetails,
+                                               Set<String> validDataTypes) {
 
         // 用于记录数据出现位置
         Map<String, Integer> baseElementFirstOccurrence = new HashMap<>();
@@ -933,10 +929,10 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
      * 处理定数结果单行数据
      */
     private DetermineResultProcessResult processDetermineResultRow(DetermineResultExcelRowDto row, int rowNumber,
-                                                                  Map<String, List<DetermineResultExcelRowDto>> duplicateGroups,
-                                                                  Map<String, List<Integer>> conflictGroups,
-                                                                  int currentIndex,
-                                                                  Set<String> validDataTypes) {
+                                                                   Map<String, List<DetermineResultExcelRowDto>> duplicateGroups,
+                                                                   Map<String, List<Integer>> conflictGroups,
+                                                                   int currentIndex,
+                                                                   Set<String> validDataTypes) {
         log.debug("处理第{}行定数结果数据: {}", rowNumber, row);
 
         List<String> errorMessages = new ArrayList<>();
@@ -1202,7 +1198,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" +
-            URLEncoder.encode(downloadFileName, "UTF-8"));
+                URLEncoder.encode(downloadFileName, "UTF-8"));
 
         // 尝试从classpath读取模板文件（支持jar包运行）
         try (InputStream templateStream = getClass().getClassLoader().getResourceAsStream("templates/" + templateFileName)) {
