@@ -5,10 +5,8 @@ import com.inspur.dsp.direct.annotation.RespAdvice;
 import com.inspur.dsp.direct.entity.dto.DataElementPageQueryDto;
 import com.inspur.dsp.direct.entity.dto.ManualConfirmUnitDto;
 import com.inspur.dsp.direct.entity.vo.DataElementPageInfoVo;
-import com.inspur.dsp.direct.entity.vo.FailureDetailVo;
 import com.inspur.dsp.direct.entity.vo.UploadConfirmResultVo;
 import com.inspur.dsp.direct.entity.vo.ImportDetermineResultVo;
-import com.inspur.dsp.direct.entity.vo.DetermineResultFailureDetailVo;
 import com.inspur.dsp.direct.enums.TemplateTypeEnums;
 import com.inspur.dsp.direct.service.AlldataelementinfoService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * 数据元信息相关控制器
@@ -73,7 +70,7 @@ public class AlldataelementinfoController {
         log.info("上传定源文件开始，文件名：{}, 文件大小：{} bytes", file.getOriginalFilename(), file.getSize());
         UploadConfirmResultVo result = alldataelementinfoService.uploadconfirmunitfile(file);
         log.info("上传定源文件结束，总记录数：{}, 成功：{}, 失败：{}",
-                result.getTotal(), result.getSucessQty(), result.getFailQty());
+                result.getTotal(), result.getSuccessQty(), result.getFailQty());
         return result;
     }
 

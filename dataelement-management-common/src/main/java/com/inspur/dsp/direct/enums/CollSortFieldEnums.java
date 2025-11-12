@@ -10,9 +10,9 @@ public enum CollSortFieldEnums {
     // 状态：status，
     STATUS("status", "bde.status"),
     // 接收时间：receiveTime
-    RECEIVE_TIME("receiveTime", "bde.send_date"),
+    RECEIVE_TIME("sendDate", "bde.send_date"),
     // 处理时间
-    PROCESS_TIME("processTime", "ct.processing_date"),
+    PROCESS_TIME("processingDate", "ct.processing_date"),
 
 
     ;

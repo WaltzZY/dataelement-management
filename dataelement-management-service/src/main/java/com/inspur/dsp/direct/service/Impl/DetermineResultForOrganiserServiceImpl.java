@@ -38,7 +38,7 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
 
     @Override
     public Page<GetDetermineResultVo> getDetermineResultList(GetDetermineResultListDTO dto) {
-        String sortSql = NePageSortFieldEnums.getOrderByField(dto.getSortField(), dto.getSortOrder());
+        String sortSql = NePageSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
         dto.setSortSql(sortSql);
         Page<GetDetermineResultVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         List<GetDetermineResultVo> vos = baseDataElementMapper.getDetermineResultList(page, dto);
@@ -57,6 +57,9 @@ public class DetermineResultForOrganiserServiceImpl implements DetermineResultFo
     public void download(GetDetermineResultListDTO dto, HttpServletResponse response) {
         try {
             List<GetDetermineResultVo> baseDataElements = baseDataElementMapper.getDetermineResultList(null, dto);
+            if (CollectionUtils.isEmpty(baseDataElements)) {
+                baseDataElements = new ArrayList<>();
+            }
             List<DetermineResultForOrganiserExportDTO> exportDTOList = new ArrayList<>();
             for (int i = 0; i < baseDataElements.size(); i++) {
                 DetermineResultForOrganiserExportDTO exportDTO = new DetermineResultForOrganiserExportDTO();

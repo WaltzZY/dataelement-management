@@ -32,10 +32,10 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain, 
-    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty, 
-    generatedatetime, remarks, create_date, create_account, last_modify_date, last_modify_account, 
-    last_submit_date, last_approve_date, last_initiaterevised_date, last_submitreexamination_date, 
+    dataid, data_element_id, `status`, `name`, `definition`, datatype, data_format, value_domain,
+    source_unit_code, source_unit_name, publish_date, send_date, confirm_date, collectunitqty,
+    generatedatetime, remarks, create_date, create_account, last_modify_date, last_modify_account,
+    last_submit_date, last_approve_date, last_initiaterevised_date, last_submitreexamination_date,
     last_submitreleased_date
   </sql>
 
@@ -463,9 +463,9 @@
         from base_data_element bde
         left join domain_data_element dde on bde.dataid = dde.base_dataelement_dataid
         <where>
-            `status` = 'designated_source'
+            bde.`status` = 'designated_source'
             <if test="dto.keyword != null and dto.keyword != ''">
-                and (name like concat('%', #{dto.keyword}, '%') or definition like concat('%', #{dto.keyword}, '%'))
+                and (bde.name like concat('%', #{dto.keyword}, '%') or bde.definition like concat('%', #{dto.keyword}, '%'))
             </if>
             <if test="dto.sendDateBegin != null">
                 and send_date &gt;= #{dto.sendDateBegin}
@@ -480,7 +480,7 @@
                 and confirm_date <![CDATA[<=]]> #{dto.confirmDateEnd}
             </if>
             <if test="dto.collectUnitCodeList != null and dto.collectUnitCodeList.size() != 0">
-                and source_unit_code in
+                and bde.source_unit_code in
                 <foreach close=")" collection="dto.collectUnitCodeList" index="index" item="item" open="(" separator=",">
                     #{item}
                 </foreach>

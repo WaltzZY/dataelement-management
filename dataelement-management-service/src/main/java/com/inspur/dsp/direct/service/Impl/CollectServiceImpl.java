@@ -62,7 +62,7 @@ public class CollectServiceImpl implements CollectService {
         // 拿到当前登录人的部门code
         String organCode = userInfo.getOrgCode();
         // 排序sql
-        String sortSql = CollSortFieldEnums.getSortFieldSql(dto.getSortField());
+        String sortSql = CollSortFieldEnums.getOrderBySql(dto.getSortField(), dto.getSortOrder());
         // 查询 base_data_element 表和 domain_data_element 表和 confirmation_task 确认任务表
         // domain_data_element 表确认要显示的内容, base_data_element 表确认数据元的信息和状态, confirmation_task 表确认任务信息,接收时间,处理时间
         Page<GetCollectDataVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());

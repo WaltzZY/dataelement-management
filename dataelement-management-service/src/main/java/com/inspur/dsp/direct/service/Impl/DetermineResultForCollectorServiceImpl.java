@@ -131,11 +131,10 @@ public class DetermineResultForCollectorServiceImpl implements DetermineResultFo
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         // 获取登录人账户
         String orgCode = userInfo.getOrgCode();
-        
+
         List<GetDetermineResultVo> baseDataElements = baseDataElementMapper.getDetermineResultListForCollector(orgCode, baseDataElementSearchDTO);
-        if (baseDataElements.isEmpty()) {
-            log.error("当前导出数据为空!");
-            return;
+        if (CollectionUtils.isEmpty(baseDataElements)) {
+            baseDataElements = new ArrayList<>();
         }
         List<DetermineResultForCollectorExportDTO> exportDTOList = new ArrayList<>();
         for (int i = 0; i < baseDataElements.size(); i++) {

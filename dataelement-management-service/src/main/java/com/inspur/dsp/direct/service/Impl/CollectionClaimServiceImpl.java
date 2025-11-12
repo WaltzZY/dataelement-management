@@ -20,8 +20,10 @@ import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +125,9 @@ public class CollectionClaimServiceImpl implements CollectionClaimService {
 
             if (dto.getStatus() != null && dto.getStatus().contains("pending_claimed")) {
                 List<GetDataPendingAndProcessedSourceVO> collectionPending = getDataPendingAndProcessedSourceMapper.getDataPendingAndProcessedData(null,dto,orgCode, orderBySql);
-
+                if (CollectionUtils.isEmpty(collectionPending)) {
+                    collectionPending = new ArrayList<>();
+                }
                 AtomicInteger i = new AtomicInteger(0); // 导出列表序号
                 List<CollectionProcessingExcel> processingExcelList = collectionPending.stream().map(vo -> {
                     return CollectionProcessingExcel.builder()
@@ -140,7 +144,9 @@ public class CollectionClaimServiceImpl implements CollectionClaimService {
 
             }else if (dto.getStatus() != null && dto.getStatus().contains("claimed") && dto.getStatus().contains("not_claimed")){
                 List<GetDataPendingAndProcessedSourceVO> collectionProcessed = getDataPendingAndProcessedSourceMapper.getDataPendingAndProcessedData(null,dto,orgCode, orderBySql);
-
+                if (CollectionUtils.isEmpty(collectionProcessed)) {
+                    collectionProcessed = new ArrayList<>();
+                }
                 AtomicInteger j = new AtomicInteger(0); // 导出列表序号
                 List<CollectionProcessedExcel> processedExcelList = collectionProcessed.stream().map(vo -> {
                     return CollectionProcessedExcel.builder()

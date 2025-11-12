@@ -25,8 +25,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -149,6 +151,9 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
 
                 // 查询待定源数据元列表
                 List<ClaimDataElementVO> list_pendingSource = claimDataElementMapper.selectBaseDataElementByStatus(null, dto, orderBySql);
+                if (CollectionUtils.isEmpty(list_pendingSource)) {
+                    list_pendingSource = new ArrayList<>();
+                }
 
                 // 循环遍历List<ClaimDataElementVO>
                 for (ClaimDataElementVO vo : list_pendingSource) {
@@ -173,6 +178,9 @@ public class OrganisersClaimServiceImpl implements OrganisersClaimService {
 
                 // 查询待定源数据元列表
                 List<ClaimDataElementVO> claimDataElementVOS = claimDataElementMapper.selectBaseDataElementByStatus(null, dto, orderBySql);
+                if (CollectionUtils.isEmpty(claimDataElementVOS)) {
+                    claimDataElementVOS = new ArrayList<>();
+                }
 
                 // 循环遍历List<ClaimDataElementVO>
                 for (ClaimDataElementVO vo : claimDataElementVOS) {

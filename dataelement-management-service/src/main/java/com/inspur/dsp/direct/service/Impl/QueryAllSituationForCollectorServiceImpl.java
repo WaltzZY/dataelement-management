@@ -45,7 +45,7 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
      */
     @Override
     public Page<DataElementWithTaskVo> getAllSituationList(BaseDataElementSearchDTO baseDataElementSearchDTO) {
-        String sortSql = NePageSortFieldEnums.getOrderByField(baseDataElementSearchDTO.getSortField(), baseDataElementSearchDTO.getSortOrder());
+        String sortSql = NePageSortFieldEnums.getOrderBySql(baseDataElementSearchDTO.getSortField(), baseDataElementSearchDTO.getSortOrder());
         baseDataElementSearchDTO.setSortSql(sortSql);
         log.warn("getAllSituationList函数接收到的参数为: {}", JSONObject.toJSONString(baseDataElementSearchDTO));
         Page<DataElementWithTaskVo> page = new Page<>(baseDataElementSearchDTO.getPageNum(), baseDataElementSearchDTO.getPageSize());
@@ -126,7 +126,7 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
      */
     @Override
     public void download(BaseDataElementSearchDTO baseDataElementSearchDTO, HttpServletResponse response) {
-        String sortSql = NePageSortFieldEnums.getOrderByField(baseDataElementSearchDTO.getSortField(), baseDataElementSearchDTO.getSortOrder());
+        String sortSql = NePageSortFieldEnums.getOrderBySql(baseDataElementSearchDTO.getSortField(), baseDataElementSearchDTO.getSortOrder());
         baseDataElementSearchDTO.setSortSql(sortSql);
         // 获取当前登录用户信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
@@ -134,11 +134,10 @@ public class QueryAllSituationForCollectorServiceImpl implements QueryAllSituati
         String orgCode = userInfo.getOrgCode();
         baseDataElementSearchDTO.setOrgCode(orgCode);
         List<DataElementWithTaskVo> dataElementWithTaskVoList = baseDataElementMapper.getDetermineResultListWithOrganiser(baseDataElementSearchDTO);
-        // 校验结果
         if (CollectionUtils.isEmpty(dataElementWithTaskVoList)) {
-            log.error("导出错误!");
-            return;
+            dataElementWithTaskVoList = new ArrayList<>();
         }
+        // 校验结果
         List<QueryAllSituationForCollectorExportDTO> exportDTOList = new ArrayList<>();
         for (int i = 0; i < dataElementWithTaskVoList.size(); i++) {
             DataElementWithTaskVo dataElementWithTaskVo = dataElementWithTaskVoList.get(i);
