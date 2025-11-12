@@ -292,7 +292,7 @@ public class AlldataelementinfoServiceImpl implements AlldataelementinfoService 
 
         return UploadConfirmResultVo.builder()
                 .total(totalCount)
-                .sucessQty(successCount)
+                .successQty(successCount)
                 .failQty(failureCount)
                 .failDetails(failureDetails)
                 .build();

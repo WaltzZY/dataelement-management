@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * 上传文件结果VO
  * 封装上传文件处理结果的响应数据
- * 
+ *
  * @author Claude Code
  * @since 2025-09-22
  */
@@ -29,7 +29,7 @@ public class UploadConfirmResultVo {
     /**
      * 成功记录数
      */
-    private Integer sucessQty;
+    private Integer successQty;
 
     /**
      * 失败记录数
