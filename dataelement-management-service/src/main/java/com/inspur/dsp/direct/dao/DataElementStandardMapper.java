@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.dbentity.BaseDataElement;
 import com.inspur.dsp.direct.entity.dto.StandardDataElementPageQueryDto;
+import com.inspur.dsp.direct.entity.dto.AuditDataElementQueryDto;
 import com.inspur.dsp.direct.entity.vo.StandardDataElementPageInfoVo;
+import com.inspur.dsp.direct.entity.vo.AuditDataElementVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -29,4 +31,12 @@ public interface DataElementStandardMapper extends BaseMapper<BaseDataElement> {
     List<StandardDataElementPageInfoVo> getAllStandardList(
             @Param("page") Page<StandardDataElementPageInfoVo> page, 
             @Param("queryDto") StandardDataElementPageQueryDto queryDto);
+
+    /**
+     * 审核标准模块数据元查询
+     * 
+     * @param queryDto 查询条件
+     * @return 数据元列表查询结果
+     */
+    List<AuditDataElementVo> queryAuditDataElementList(@Param("queryDto") AuditDataElementQueryDto queryDto);
 }

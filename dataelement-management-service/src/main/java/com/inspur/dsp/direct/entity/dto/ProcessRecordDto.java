@@ -23,4 +23,6 @@ public class ProcessRecordDto {
     private String operatorUnitCode;
     
     private String operatorUnitName;
+
+    private String Usersuggestion;
 }

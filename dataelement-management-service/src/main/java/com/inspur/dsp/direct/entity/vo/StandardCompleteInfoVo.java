@@ -21,4 +21,8 @@ public class StandardCompleteInfoVo {
     private List<AttachmentFileVo> standardFiles;
     
     private List<AttachmentFileVo> exampleFiles;
+    
+    private List<RejectionInfoVO> rejectionInfo;
+    
+    private List<RevisionCommentVO> revisionComments;
 }

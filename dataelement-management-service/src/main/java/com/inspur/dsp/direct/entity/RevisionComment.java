@@ -56,4 +56,9 @@ public class RevisionComment {
      * 修改人账号
      */
     private String modifyAccount;
+    
+    /**
+     * 联系电话
+     */
+    private String contactTel;
 }

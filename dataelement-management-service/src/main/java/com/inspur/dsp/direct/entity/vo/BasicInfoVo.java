@@ -16,6 +16,8 @@ public class BasicInfoVo {
 
     private String status;
     
+    private String statusDesc;
+    
     private String definition;
     
     private String datatype;

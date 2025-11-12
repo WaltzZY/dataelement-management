@@ -5,6 +5,8 @@ import com.inspur.dsp.direct.entity.RevisionComment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * 修订意见Mapper
  * 
@@ -21,4 +23,12 @@ public interface RevisionCommentMapper extends BaseMapper<RevisionComment> {
      * @return 修订意见（如存在多行，按create_date时间倒序取第一行）
      */
     RevisionComment selectbydataid(@Param("dataElementId") String dataElementId);
+    
+    /**
+     * 根据数据元ID查询所有修订意见
+     * 
+     * @param dataElementId 数据元ID
+     * @return 所有修订意见列表，按create_date时间倒序排列
+     */
+    List<RevisionComment> selectAllByDataId(@Param("dataElementId") String dataElementId);
 }

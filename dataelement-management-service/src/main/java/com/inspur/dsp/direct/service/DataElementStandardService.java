@@ -158,4 +158,62 @@ public interface DataElementStandardService {
      * @param response HttpServletResponse对象
      */
     void exportSourcedoneStandardList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 审核标准模块查询数据元列表
+     * 支持数源单位（可选）、状态（可多选）、起止时间、关键词模糊匹配查询
+     *
+     * @param queryDto 查询条件DTO
+     * @return 数据元列表
+     */
+    List<AuditDataElementVo> auditDataElementList(AuditDataElementQueryDto queryDto);
+
+    /**
+     * 审核标准
+     * 支持单条审核和批量审核
+     *
+     * @param approveDTO 审核信息DTO
+     * @return 审核结果信息
+     */
+    String appvoveStandard(ApproveInfoDTO approveDTO);
+
+    /**
+     * 导出待审核列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportPendingReviewList(AuditDataElementQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出征求意见列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportSolicitingOpinionsList(AuditDataElementQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出待复审列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportPendingReExaminationList(AuditDataElementQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出待发布列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportTodoReleasedList(AuditDataElementQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出组织方已处理列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportDoneOrganizerList(AuditDataElementQueryDto queryDto, HttpServletResponse response);
 }

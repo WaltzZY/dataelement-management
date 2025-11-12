@@ -219,9 +219,9 @@ public class DataElementStandardController {
      * 获取编制标准完整信息
      * 通过查询条件获取待定标/待修订/已处理的数据元列表
      */
-    @GetMapping("/getAllStandardListPage")
+    @PostMapping("/getAllStandardListPage")
     @RespAdvice
-    public Page<StandardDataElementPageInfoVo> getAllStandardListPage(@Valid StandardDataElementPageQueryDto queryDto) {
+    public Page<StandardDataElementPageInfoVo> getAllStandardListPage(@RequestBody @Valid StandardDataElementPageQueryDto queryDto) {
         log.info("获取编制标准完整信息 - queryDto: {}", queryDto);
         return dataElementStandardService.getAllStandardListPage(queryDto);
     }
@@ -274,5 +274,72 @@ public class DataElementStandardController {
     public void exportSourcedoneStandardList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
         log.info("导出定标阶段已处理数据元列表 - queryDto: {}", queryDto);
         dataElementStandardService.exportSourcedoneStandardList(queryDto, response);
+    }
+
+    /**
+     * 审核标准模块查询数据元列表
+     * 支持数源单位（可选）、状态（可多选）、起止时间、关键词模糊匹配查询
+     */
+    @PostMapping("/auditDataElementList")
+    @RespAdvice
+    public List<AuditDataElementVo> auditDataElementList(@RequestBody @Valid AuditDataElementQueryDto queryDto) {
+        log.info("审核标准模块查询数据元列表 - queryDto: {}", queryDto);
+        return dataElementStandardService.auditDataElementList(queryDto);
+    }
+
+    /**
+     * 审核标准
+     * 支持单条审核和批量审核
+     */
+    @PostMapping("/appvoveStandard")
+    @RespAdvice
+    public String appvoveStandard(@RequestBody @Valid ApproveInfoDTO approveDTO) {
+        log.info("审核标准 - approveDTO: {}", approveDTO);
+        return dataElementStandardService.appvoveStandard(approveDTO);
+    }
+
+    /**
+     * 导出待审核列表
+     */
+    @PostMapping("/exportPendingReviewList")
+    public void exportPendingReviewList(@RequestBody @Valid AuditDataElementQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出待审核列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportPendingReviewList(queryDto, response);
+    }
+
+    /**
+     * 导出征求意见列表
+     */
+    @PostMapping("/exportSolicitingOpinionsList")
+    public void exportSolicitingOpinionsList(@RequestBody @Valid AuditDataElementQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出征求意见列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportSolicitingOpinionsList(queryDto, response);
+    }
+
+    /**
+     * 导出待复审列表
+     */
+    @PostMapping("/exportPendingReExaminationList")
+    public void exportPendingReExaminationList(@RequestBody @Valid AuditDataElementQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出待复审列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportPendingReExaminationList(queryDto, response);
+    }
+
+    /**
+     * 导出待发布列表
+     */
+    @PostMapping("/exportTodoReleasedList")
+    public void exportTodoReleasedList(@RequestBody @Valid AuditDataElementQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出待发布列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportTodoReleasedList(queryDto, response);
+    }
+
+    /**
+     * 导出组织方已处理列表
+     */
+    @PostMapping("/exportDoneOrganizerList")
+    public void exportDoneOrganizerList(@RequestBody @Valid AuditDataElementQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方已处理列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportDoneOrganizerList(queryDto, response);
     }
 }
