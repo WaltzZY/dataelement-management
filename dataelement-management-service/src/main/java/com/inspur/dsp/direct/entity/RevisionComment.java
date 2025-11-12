@@ -40,13 +40,13 @@ public class RevisionComment {
     /**
      * 修订发起人姓名
      */
-    private Date revisionCreateName;
+    private String revisionCreateName;
 
 
     /**
      * 修订发起人账号
      */
-    private Date revisionCreateAccount;
+    private String revisionCreateAccount;
     /**
      * 创建时间
      */

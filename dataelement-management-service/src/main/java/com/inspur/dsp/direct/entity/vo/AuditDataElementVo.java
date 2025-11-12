@@ -97,4 +97,14 @@ public class AuditDataElementVo {
      * 发布日期
      */
     private Date publishDate;
+    
+    /**
+     * 审核驳回时间（从流程记录中获取）
+     */
+    private Date rejectTime;
+    
+    /**
+     * 报送时间（对应 lastSubmitReleasedDate）
+     */
+    private Date reportTime;
 }

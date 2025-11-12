@@ -187,8 +187,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 vo.setRevisionContent(content);
                 vo.setRevisionCreatedate(entity.getRevisionCreatedate());
                 vo.setRevisionInitiatorAccount(entity.getCreateAccount());
-                // TODO: 如果需要发起修订人姓名，需要通过createAccount查询用户表
-                vo.setRevisionInitiatorName(entity.ge); // 当前设为空，后续可以添加用户信息查询
+                vo.setRevisionInitiatorName(entity.getRevisionCreateName()); // 当前设为空，后续可以添加用户信息查询
                 vo.setContactTel(entity.getContactTel());
                 
                 revisionComments.add(vo);
@@ -985,25 +984,55 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
      * 处理审核查询的日期边界问题
      */
     private void normalizeAuditDateRange(AuditDataElementQueryDto queryDto) {
-        if (queryDto.getSubmitTimeBegin() != null) {
-            // 开始时间设置为当天00:00:00.000
+        // 处理提交时间
+        normalizeDateField(queryDto.getSubmitTimeBegin(), queryDto::setSubmitTimeBegin, true);
+        normalizeDateField(queryDto.getSubmitTimeEnd(), queryDto::setSubmitTimeEnd, false);
+        
+        // 处理审核时间
+        normalizeDateField(queryDto.getApproveTimeBegin(), queryDto::setApproveTimeBegin, true);
+        normalizeDateField(queryDto.getApproveTimeEnd(), queryDto::setApproveTimeEnd, false);
+        
+        // 处理修订提交时间
+        normalizeDateField(queryDto.getRevisionSubmitTimeBegin(), queryDto::setRevisionSubmitTimeBegin, true);
+        normalizeDateField(queryDto.getRevisionSubmitTimeEnd(), queryDto::setRevisionSubmitTimeEnd, false);
+        
+        // 处理报送时间
+        normalizeDateField(queryDto.getReportTimeBegin(), queryDto::setReportTimeBegin, true);
+        normalizeDateField(queryDto.getReportTimeEnd(), queryDto::setReportTimeEnd, false);
+        
+        // 处理审核驳回时间
+        normalizeDateField(queryDto.getRejectTimeBegin(), queryDto::setRejectTimeBegin, true);
+        normalizeDateField(queryDto.getRejectTimeEnd(), queryDto::setRejectTimeEnd, false);
+        
+        // 处理发起修订时间
+        normalizeDateField(queryDto.getInitiateRevisionTimeBegin(), queryDto::setInitiateRevisionTimeBegin, true);
+        normalizeDateField(queryDto.getInitiateRevisionTimeEnd(), queryDto::setInitiateRevisionTimeEnd, false);
+    }
+    
+    /**
+     * 标准化单个日期字段
+     * @param date 原始日期
+     * @param setter 日期设置器
+     * @param isBeginTime 是否为开始时间（true：设为00:00:00.000，false：设为23:59:59.999）
+     */
+    private void normalizeDateField(Date date, java.util.function.Consumer<Date> setter, boolean isBeginTime) {
+        if (date != null) {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(queryDto.getSubmitTimeBegin());
-            cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
-            cal.set(java.util.Calendar.MINUTE, 0);
-            cal.set(java.util.Calendar.SECOND, 0);
-            cal.set(java.util.Calendar.MILLISECOND, 0);
-            queryDto.setSubmitTimeBegin(cal.getTime());
-        }
-        if (queryDto.getSubmitTimeEnd() != null) {
-            // 结束时间设置为当天23:59:59.999
-            java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(queryDto.getSubmitTimeEnd());
-            cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
-            cal.set(java.util.Calendar.MINUTE, 59);
-            cal.set(java.util.Calendar.SECOND, 59);
-            cal.set(java.util.Calendar.MILLISECOND, 999);
-            queryDto.setSubmitTimeEnd(cal.getTime());
+            cal.setTime(date);
+            if (isBeginTime) {
+                // 开始时间设置为当天00:00:00.000
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                cal.set(java.util.Calendar.MINUTE, 0);
+                cal.set(java.util.Calendar.SECOND, 0);
+                cal.set(java.util.Calendar.MILLISECOND, 0);
+            } else {
+                // 结束时间设置为当天23:59:59.999
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+                cal.set(java.util.Calendar.MINUTE, 59);
+                cal.set(java.util.Calendar.SECOND, 59);
+                cal.set(java.util.Calendar.MILLISECOND, 999);
+            }
+            setter.accept(cal.getTime());
         }
     }
 
@@ -1032,41 +1061,47 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         log.info("审核标准 - approveDTO: {}", approveDTO);
         
         if (approveDTO.getList() == null || approveDTO.getList().isEmpty()) {
-            throw new IllegalArgumentException("审核信息列表不能为空");
+            throw new IllegalArgumentException("数据元ID列表不能为空");
+        }
+        
+        // 驳回时必须提供意见
+        if ("驳回".equals(approveDTO.getUseroperation()) && 
+            (approveDTO.getUsersuggestion() == null || approveDTO.getUsersuggestion().trim().isEmpty())) {
+            throw new IllegalArgumentException("驳回意见不能为空");
         }
         
         int successCount = 0;
         int errorCount = 0;
         StringBuilder errorDetails = new StringBuilder();
         
-        for (ApproveInfoOB approveInfo : approveDTO.getList()) {
+        for (String dataid : approveDTO.getList()) {
             try {
                 // 验证数据元是否存在
-                BaseDataElement dataElement = dataElementStandardMapper.selectById(approveInfo.getDataid());
+                BaseDataElement dataElement = dataElementStandardMapper.selectById(dataid);
                 if (dataElement == null) {
                     errorCount++;
-                    errorDetails.append("数据元[").append(approveInfo.getDataid()).append("]不存在；");
+                    errorDetails.append("数据元[").append(dataid).append("]不存在；");
                     continue;
                 }
                 
                 // 根据审核操作类型处理
-                if ("审核通过".equals(approveInfo.getUseroperation())) {
+                if ("审核通过".equals(approveDTO.getUseroperation())) {
                     // 处理审核通过逻辑
-                    processApprovalPass(dataElement, approveInfo);
+                    processApprovalPass(dataElement, dataid, approveDTO.getUsersuggestion());
                     successCount++;
-                } else if ("驳回".equals(approveInfo.getUseroperation())) {
+                } else if ("驳回".equals(approveDTO.getUseroperation())) {
                     // 处理驳回逻辑
-                    processApprovalReject(dataElement, approveInfo);
+                    processApprovalReject(dataElement, dataid, approveDTO.getUsersuggestion());
                     successCount++;
                 } else {
                     errorCount++;
-                    errorDetails.append("数据元[").append(approveInfo.getDataid()).append("]操作类型无效；");
+                    errorDetails.append("数据元[").append(dataid).append("]操作类型无效；");
                 }
                 
             } catch (Exception e) {
                 errorCount++;
-                errorDetails.append("数据元[").append(approveInfo.getDataid()).append("]处理失败：").append(e.getMessage()).append("；");
-                log.error("审核数据元[{}]时发生异常", approveInfo.getDataid(), e);
+                errorDetails.append("数据元[").append(dataid).append("]处理失败：").append(e.getMessage()).append("；");
+                log.error("审核数据元[{}]时发生异常", dataid, e);
             }
         }
         
@@ -1079,7 +1114,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         return result;
     }
     
-    private void processApprovalPass(BaseDataElement dataElement, ApproveInfoOB approveInfo) {
+    private void processApprovalPass(BaseDataElement dataElement, String dataid, String usersuggestion) {
         // 获取当前登录用户信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         
@@ -1100,7 +1135,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         
         // 记录流程历史到process_record表
         ProcessRecordDto processRecordDto = new ProcessRecordDto();
-        processRecordDto.setBaseDataelementDataid(approveInfo.getDataid());
+        processRecordDto.setBaseDataelementDataid(dataid);
         processRecordDto.setOperation("审核通过");
         processRecordDto.setSourceStatus(originalStatus);
         processRecordDto.setDestStatus(nextStatus);
@@ -1108,18 +1143,14 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         processRecordDto.setOperatorName(userInfo.getName());
         processRecordDto.setOperatorUnitCode(userInfo.getOrgCode());
         processRecordDto.setOperatorUnitName(userInfo.getOrgName());
-        processRecordDto.setUsersuggestion(approveInfo.getUsersuggestion()); // 审核意见写入process_record
+        processRecordDto.setUsersuggestion(usersuggestion); // 审核意见写入process_record（可以为null）
+        processRecordDto.setOperateTime(new Date()); // 确保记录时间，防止时间差
         flowProcessService.recordProcessHistory(processRecordDto);
         
-        log.info("数据元[{}]审核通过，状态变更为：{}", approveInfo.getDataid(), nextStatus);
+        log.info("数据元[{}]审核通过，状态变更为：{}", dataid, nextStatus);
     }
     
-    private void processApprovalReject(BaseDataElement dataElement, ApproveInfoOB approveInfo) {
-        // 驳回操作必须提供驳回意见
-        if (approveInfo.getUsersuggestion() == null || approveInfo.getUsersuggestion().trim().isEmpty()) {
-            throw new IllegalArgumentException("驳回意见不能为空");
-        }
-        
+    private void processApprovalReject(BaseDataElement dataElement, String dataid, String usersuggestion) {
         // 获取当前登录用户信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         
@@ -1140,7 +1171,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         
         // 记录流程历史到process_record表（驳回意见写入usersuggestion字段）
         ProcessRecordDto processRecordDto = new ProcessRecordDto();
-        processRecordDto.setBaseDataelementDataid(approveInfo.getDataid());
+        processRecordDto.setBaseDataelementDataid(dataid);
         processRecordDto.setOperation("驳回");
         processRecordDto.setSourceStatus(originalStatus);
         processRecordDto.setDestStatus(nextStatus);
@@ -1148,10 +1179,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         processRecordDto.setOperatorName(userInfo.getName());
         processRecordDto.setOperatorUnitCode(userInfo.getOrgCode());
         processRecordDto.setOperatorUnitName(userInfo.getOrgName());
-        processRecordDto.setUsersuggestion(approveInfo.getUsersuggestion()); // 驳回意见写入process_record的usersuggestion字段
+        processRecordDto.setUsersuggestion(usersuggestion); // 驳回意见写入process_record的usersuggestion字段
+        processRecordDto.setOperateTime(new Date()); // 确保记录时间，防止时间差
         flowProcessService.recordProcessHistory(processRecordDto);
         
-        log.info("数据元[{}]已驳回，状态变更为：{}，驳回意见：{}", approveInfo.getDataid(), nextStatus, approveInfo.getUsersuggestion());
+        log.info("数据元[{}]已驳回，状态变更为：{}，驳回意见：{}", dataid, nextStatus, usersuggestion);
     }
 
     @Override

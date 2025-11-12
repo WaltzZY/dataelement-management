@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.entity.dto;
 
 import lombok.Data;
+import java.util.Date;
 
 /**
  * 流程记录DTO
@@ -24,5 +25,7 @@ public class ProcessRecordDto {
     
     private String operatorUnitName;
 
-    private String Usersuggestion;
+    private String usersuggestion;
+
+    private Date operateTime;
 }

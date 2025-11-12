@@ -1,8 +1,8 @@
 package com.inspur.dsp.direct.entity.dto;
 
 import lombok.Data;
-import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
@@ -15,9 +15,20 @@ import java.util.List;
 public class ApproveInfoDTO {
     
     /**
-     * 审核信息列表
+     * 数据元ID列表
      */
-    @NotEmpty(message = "审核信息列表不能为空")
-    @Valid
-    private List<ApproveInfoOB> list;
+    @NotEmpty(message = "数据元ID列表不能为空")
+    private List<String> list;
+    
+    /**
+     * 用户操作类型
+     * 可选值：审核通过、驳回
+     */
+    @NotBlank(message = "用户操作类型不能为空")
+    private String useroperation;
+    
+    /**
+     * 用户意见建议
+     */
+    private String usersuggestion;
 }

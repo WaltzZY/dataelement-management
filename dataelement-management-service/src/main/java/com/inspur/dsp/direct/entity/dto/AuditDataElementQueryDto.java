@@ -28,9 +28,9 @@ public class AuditDataElementQueryDto {
     private Integer pageSize;
     
     /**
-     * 数源单位统一社会信用代码（可选）
+     * 数源单位统一社会信用代码列表（支持多选）
      */
-    private String sourceunitCode;
+    private List<String> sourceunitCodeList;
     
     /**
      * 数据元状态列表（支持多选）
@@ -46,6 +46,56 @@ public class AuditDataElementQueryDto {
      * 提交结束时间
      */
     private Date submitTimeEnd;
+    
+    /**
+     * 审核开始时间
+     */
+    private Date approveTimeBegin;
+    
+    /**
+     * 审核结束时间
+     */
+    private Date approveTimeEnd;
+    
+    /**
+     * 修订提交开始时间
+     */
+    private Date revisionSubmitTimeBegin;
+    
+    /**
+     * 修订提交结束时间
+     */
+    private Date revisionSubmitTimeEnd;
+    
+    /**
+     * 报送开始时间
+     */
+    private Date reportTimeBegin;
+    
+    /**
+     * 报送结束时间
+     */
+    private Date reportTimeEnd;
+    
+    /**
+     * 审核驳回开始时间
+     */
+    private Date rejectTimeBegin;
+    
+    /**
+     * 审核驳回结束时间
+     */
+    private Date rejectTimeEnd;
+    
+    /**
+     * 发起修订开始时间
+     */
+    private Date initiateRevisionTimeBegin;
+    
+    /**
+     * 发起修订结束时间
+     */
+    private Date initiateRevisionTimeEnd;
     
     /**
      * 关键词（在数据元名称、数据元编码、定义中模糊匹配）
