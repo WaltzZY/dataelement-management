@@ -301,7 +301,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方-业务员");
+        node1.setNodeHandleUserName("组织方");
         node1.setNodeShowStatus(1);
         flow.add(node1);
 
@@ -359,12 +359,15 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("定源任务数量异常!");
         }
 
+        ConfirmationTask confirmationTask = confirmationTaskList.get(0);
+        String senderName = confirmationTask.getSenderName();
+
         List<FlowNodeDTO> flow = new ArrayList<>();
         // 第一个节点（从确认任务中提取）
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方-业务员");
+        node1.setNodeHandleUserName("组织方-" + senderName);
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
         flow.add(node1);
@@ -409,11 +412,13 @@ public class ViewDetailServiceImpl implements ViewDetailService {
 
         List<FlowNodeDTO> flow = new ArrayList<>();
 
+        String senderName = confirmationTaskList.get(0).getSenderName();
+
         // 第一个节点（从确认任务中提取）
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方-业务员");
+        node1.setNodeHandleUserName("组织方-" + senderName);
         // 获取最晚的发送时间
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
@@ -457,13 +462,15 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("定源任务丢失!");
         }
 
+        String senderName = confirmationTaskList.get(0).getSenderName();
+
         List<FlowNodeDTO> flow = new ArrayList<>();
 
         // 第一个节点（从确认任务中提取）
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方-业务员");
+        node1.setNodeHandleUserName("组织方-" + senderName);
         // 获取最晚的发送时间
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
@@ -531,13 +538,15 @@ public class ViewDetailServiceImpl implements ViewDetailService {
             throw new RuntimeException("定源任务丢失!");
         }
 
+        String senderName = confirmationTaskList.get(0).getSenderName();
+
         List<FlowNodeDTO> flow = new ArrayList<>();
 
         // 第一个节点（从确认任务中提取）
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方-业务员");
+        node1.setNodeHandleUserName("组织方-" + senderName);
         // 获取最晚的发送时间
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
@@ -643,12 +652,13 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         }
 
         List<FlowNodeDTO> flow = new ArrayList<>();
+        String senderName = confirmationTaskList.get(0).getSenderName();
 
         // 第一个节点（从确认任务中提取）
         FlowNodeDTO node1 = new FlowNodeDTO();
         node1.setSeqNo(0);
         node1.setNodeName("发起定源");
-        node1.setNodeHandleUserName("组织方-业务员");
+        node1.setNodeHandleUserName("组织方-" + senderName);
         // 获取最晚的发送时间
         node1.setPassDate(baseDataElement.getSendDate());
         node1.setNodeShowStatus(2);
