@@ -188,7 +188,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 vo.setRevisionCreatedate(entity.getRevisionCreatedate());
                 vo.setRevisionInitiatorAccount(entity.getCreateAccount());
                 // TODO: 如果需要发起修订人姓名，需要通过createAccount查询用户表
-                vo.setRevisionInitiatorName(""); // 当前设为空，后续可以添加用户信息查询
+                vo.setRevisionInitiatorName(entity.ge); // 当前设为空，后续可以添加用户信息查询
                 vo.setContactTel(entity.getContactTel());
                 
                 revisionComments.add(vo);

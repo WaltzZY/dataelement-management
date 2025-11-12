@@ -36,7 +36,17 @@ public class RevisionComment {
      * 修订创建时间
      */
     private Date revisionCreatedate;
-    
+
+    /**
+     * 修订发起人姓名
+     */
+    private Date revisionCreateName;
+
+
+    /**
+     * 修订发起人账号
+     */
+    private Date revisionCreateAccount;
     /**
      * 创建时间
      */
