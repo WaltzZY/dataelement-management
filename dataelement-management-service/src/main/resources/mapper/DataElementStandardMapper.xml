@@ -6,7 +6,7 @@
     <select id="getAllStandardList" resultType="com.inspur.dsp.direct.entity.vo.StandardDataElementPageInfoVo">
         SELECT 
             bde.dataid,
-            bde.data_element_code AS dataelementCode,
+            bde.data_element_id AS dataelementCode,
             bde.name,
             bde.definition,
             bde.datatype,
@@ -57,7 +57,7 @@
                 AND (
                     bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%') 
                     OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%') 
-                    OR bde.data_element_code LIKE CONCAT('%', #{queryDto.keyword}, '%')
+                    OR bde.data_element_id LIKE CONCAT('%', #{queryDto.keyword}, '%')
                 )
             </if>
         </if>
@@ -78,33 +78,33 @@
         SELECT 
             bde.dataid,
             bde.name,
-            bde.data_element_code AS dataelementCode,
+            bde.data_element_id AS dataelementCode,
             bde.definition,
             bde.datatype,
-            bde.sourceunit_code AS sourceunitCode,
+            bde.source_unit_code AS sourceunitCode,
             ou.unit_name AS sourceUnitName,
             bde.status,
             bde.last_submit_date AS lastSubmitDate,
             bde.last_approve_date AS lastApproveDate,
-            bde.last_submit_reexamination_date AS lastSubmitReexaminationDate,
-            bde.last_submit_released_date AS lastSubmitReleasedDate,
-            bde.last_initiate_revised_date AS lastInitiateRevisedDate,
+            bde.last_submitreexamination_date AS lastSubmitReexaminationDate,
+            bde.last_submitreleased_date AS lastSubmitReleasedDate,
+            bde.last_initiaterevised_date AS lastInitiateRevisedDate,
             bde.publish_date AS publishDate,
             bde.last_submit_date AS submitTime,
-            bde.last_submit_released_date AS reportTime,
-            (SELECT MAX(pr.process_datetime) 
+            bde.last_submitreleased_date AS reportTime,
+            (SELECT MAX(pr.processdatetime) 
              FROM process_record pr 
              WHERE pr.base_dataelement_dataid = bde.dataid 
-             AND pr.operation = '驳回') AS rejectTime
+             AND pr.useroperation = '驳回') AS rejectTime
         FROM base_data_element bde
-        LEFT JOIN organization_unit ou ON bde.sourceunit_code = ou.unit_code
+        LEFT JOIN organization_unit ou ON bde.source_unit_code = ou.unit_code
         WHERE 1=1
         
         <!-- 动态查询条件 -->
         <if test="queryDto != null">
             <!-- 数源单位多选条件 -->
             <if test="queryDto.sourceunitCodeList != null and queryDto.sourceunitCodeList.size() > 0">
-                AND bde.sourceunit_code IN
+                AND bde.source_unit_code IN
                 <foreach collection="queryDto.sourceunitCodeList" item="code" open="(" separator="," close=")">
                     #{code}
                 </foreach>
@@ -136,41 +136,41 @@
             
             <!-- 修订提交时间范围查询 -->
             <if test="queryDto.revisionSubmitTimeBegin != null">
-                AND bde.last_submit_reexamination_date >= #{queryDto.revisionSubmitTimeBegin}
+                AND bde.last_submitreexamination_date >= #{queryDto.revisionSubmitTimeBegin}
             </if>
             <if test="queryDto.revisionSubmitTimeEnd != null">
-                AND bde.last_submit_reexamination_date &lt;= #{queryDto.revisionSubmitTimeEnd}
+                AND bde.last_submitreexamination_date &lt;= #{queryDto.revisionSubmitTimeEnd}
             </if>
             
             <!-- 报送时间范围查询 -->
             <if test="queryDto.reportTimeBegin != null">
-                AND bde.last_submit_released_date >= #{queryDto.reportTimeBegin}
+                AND bde.last_submitreleased_date >= #{queryDto.reportTimeBegin}
             </if>
             <if test="queryDto.reportTimeEnd != null">
-                AND bde.last_submit_released_date &lt;= #{queryDto.reportTimeEnd}
+                AND bde.last_submitreleased_date &lt;= #{queryDto.reportTimeEnd}
             </if>
             
             <!-- 审核驳回时间范围查询 (从流程记录表查询驳回时间) -->
             <if test="queryDto.rejectTimeBegin != null or queryDto.rejectTimeEnd != null">
                 AND EXISTS (
                     SELECT 1 FROM process_record pr 
-                    WHERE pr.base_dataelement_dataid = bde.dataid 
-                    AND pr.operation = '驳回'
+                    WHERE pr.base_dataelement_dataid = bde.dataid
+                    AND pr.useroperation = '驳回'
                     <if test="queryDto.rejectTimeBegin != null">
-                        AND pr.process_datetime >= #{queryDto.rejectTimeBegin}
+                        AND pr.processdatetime >= #{queryDto.rejectTimeBegin}
                     </if>
                     <if test="queryDto.rejectTimeEnd != null">
-                        AND pr.process_datetime &lt;= #{queryDto.rejectTimeEnd}
+                        AND pr.processdatetime &lt;= #{queryDto.rejectTimeEnd}
                     </if>
                 )
             </if>
             
             <!-- 发起修订时间范围查询 -->
             <if test="queryDto.initiateRevisionTimeBegin != null">
-                AND bde.last_initiate_revised_date >= #{queryDto.initiateRevisionTimeBegin}
+                AND bde.last_initiaterevised_date >= #{queryDto.initiateRevisionTimeBegin}
             </if>
             <if test="queryDto.initiateRevisionTimeEnd != null">
-                AND bde.last_initiate_revised_date &lt;= #{queryDto.initiateRevisionTimeEnd}
+                AND bde.last_initiaterevised_date &lt;= #{queryDto.initiateRevisionTimeEnd}
             </if>
             
             <!-- 关键词模糊匹配 -->
@@ -178,7 +178,7 @@
                 AND (
                     bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%') 
                     OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%') 
-                    OR bde.data_element_code LIKE CONCAT('%', #{queryDto.keyword}, '%')
+                    OR bde.data_element_id LIKE CONCAT('%', #{queryDto.keyword}, '%')
                 )
             </if>
         </if>

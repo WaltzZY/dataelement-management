@@ -49,11 +49,6 @@ public class AuditDataElementVo {
     private String sourceunitName;
     
     /**
-     * 数源单位名称(审核模块使用)
-     */
-    private String sourceUnitName;
-    
-    /**
      * 数据元状态
      */
     private String status;

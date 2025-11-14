@@ -1041,7 +1041,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
      */
     private void validateAndNormalizeAuditSortParams(AuditDataElementQueryDto queryDto) {
         if (queryDto.getSortField() == null || queryDto.getSortField().isEmpty()) {
-            queryDto.setSortField("submit_time");
+            queryDto.setSortField("submitTime");
             queryDto.setSortOrder("desc");
         } else {
             // 规范化排序方向
@@ -1197,8 +1197,8 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 查询所有符合条件的数据元记录
         List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
         
-        if (exportList.isEmpty()) {
-            throw new IllegalArgumentException("无数据可导出");
+        if (exportList == null) {
+            exportList = new ArrayList<>();
         }
         
         // 数据转换
@@ -1211,7 +1211,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setDataElementId(vo.getDataelementCode());
             dto.setDefinition(vo.getDefinition());
             dto.setDatatype(vo.getDatatype());
-            dto.setSourceUnitName(vo.getSourceUnitName());
+            dto.setSourceUnitName(vo.getSourceunitName());
             dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
             dto.setLastSubmitDate(vo.getLastSubmitDate());
             exportData.add(dto);
@@ -1251,7 +1251,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setDataElementId(vo.getDataelementCode());
             dto.setDefinition(vo.getDefinition());
             dto.setDatatype(vo.getDatatype());
-            dto.setSourceUnitName(vo.getSourceUnitName());
+            dto.setSourceUnitName(vo.getSourceunitName());
             dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
             dto.setLastSubmitDate(vo.getLastSubmitDate());
             dto.setLastApproveDate(vo.getLastApproveDate());
@@ -1292,7 +1292,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setDataElementId(vo.getDataelementCode());
             dto.setDefinition(vo.getDefinition());
             dto.setDatatype(vo.getDatatype());
-            dto.setSourceUnitName(vo.getSourceUnitName());
+            dto.setSourceUnitName(vo.getSourceunitName());
             dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
             dto.setLastSubmitReexaminationDate(vo.getLastSubmitReexaminationDate());
             exportData.add(dto);
@@ -1332,7 +1332,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setDataElementId(vo.getDataelementCode());
             dto.setDefinition(vo.getDefinition());
             dto.setDatatype(vo.getDatatype());
-            dto.setSourceUnitName(vo.getSourceUnitName());
+            dto.setSourceUnitName(vo.getSourceunitName());
             dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
             dto.setLastSubmitReleasedDate(vo.getLastSubmitReleasedDate());
             exportData.add(dto);
@@ -1372,7 +1372,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setDataElementId(vo.getDataelementCode());
             dto.setDefinition(vo.getDefinition());
             dto.setDatatype(vo.getDatatype());
-            dto.setSourceUnitName(vo.getSourceUnitName());
+            dto.setSourceUnitName(vo.getSourceunitName());
             dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
             dto.setLastApproveDate(vo.getLastApproveDate());
             dto.setLastInitiateRevisedDate(vo.getLastInitiateRevisedDate());
