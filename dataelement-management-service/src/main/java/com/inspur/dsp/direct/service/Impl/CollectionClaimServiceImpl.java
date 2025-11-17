@@ -18,6 +18,7 @@ import com.inspur.dsp.direct.service.CollectionClaimService;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CollectionClaimServiceImpl implements CollectionClaimService {
 
     private final CollectionGetDataPendingAndProcessedSourceMapper getDataPendingAndProcessedSourceMapper;
@@ -142,7 +144,7 @@ public class CollectionClaimServiceImpl implements CollectionClaimService {
                 // 使用EasyExcel导出
                 commonService.exportExcelData(processingExcelList, response, "待认领基准数据元清单", CollectionProcessingExcel.class);
 
-            }else if (dto.getStatus() != null && dto.getStatus().contains("claimed") && dto.getStatus().contains("not_claimed")){
+            }else if (dto.getStatus() != null && (dto.getStatus().contains("claimed") || dto.getStatus().contains("not_claimed"))){
                 List<GetDataPendingAndProcessedSourceVO> collectionProcessed = getDataPendingAndProcessedSourceMapper.getDataPendingAndProcessedData(null,dto,orgCode, orderBySql);
                 if (CollectionUtils.isEmpty(collectionProcessed)) {
                     collectionProcessed = new ArrayList<>();
@@ -162,6 +164,9 @@ public class CollectionClaimServiceImpl implements CollectionClaimService {
                 // 使用EasyExcel导出
                 commonService.exportExcelData(processedExcelList, response, "已处理基准数据元（认领型）清单", CollectionProcessedExcel.class);
             }
-        }catch (Exception e) {  throw new RuntimeException("导出数据失败");}
+        }catch (Exception e) {
+            log.error("导出数据失败", e);
+            throw new RuntimeException("导出数据失败");
+        }
     }
 }

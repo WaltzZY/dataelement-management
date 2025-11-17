@@ -206,11 +206,7 @@ public class ViewDetailServiceImpl implements ViewDetailService {
         baseDataElement.setCtStatusChinese(ctStatusChinese);
         String bdeStatusChinese = StatusUtil.getStatusChinese(bdeStatus);
         baseDataElement.setBdeStatusChinese(bdeStatusChinese);
-        String displayStatus = ctStatus;
-        if ("negotiating".equals(bdeStatus) || "designated_source".equals(bdeStatus)) {
-            displayStatus = bdeStatus;
-        }
-        String statusChinese = StatusUtil.getStatusChinese(displayStatus);
+        String statusChinese = StatusUtil.getDisplayStatus(bdeStatus, ctStatus);
         baseDataElement.setDisplaystatus(statusChinese);
         return baseDataElement;
     }

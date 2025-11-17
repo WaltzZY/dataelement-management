@@ -1,6 +1,8 @@
 package com.inspur.dsp.direct.common;
 
 import com.inspur.dsp.direct.entity.enums.DataElementStatus;
+import com.inspur.dsp.direct.enums.ConfirmationTaskEnums;
+import com.inspur.dsp.direct.enums.StatusEnums;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,4 +75,57 @@ public class StatusUtil {
         result[1] = subConditions;
         return result;
     }
+
+    /**
+     * 获取显示状态
+     *
+     * @param bdeStatus
+     * @param ctStatus
+     * @return
+     */
+    public static String getDisplayStatus(String bdeStatus, String ctStatus) {
+        String displayStatus = "";
+        // 判断 bdeStatus  negotiating 或  designated_source  displayStatus =  bdeStatus
+        if (StatusEnums.NEGOTIATING.getCode().equals(bdeStatus)) {
+            displayStatus = StatusEnums.NEGOTIATING.getDesc();
+        } else if (StatusEnums.DESIGNATED_SOURCE.getCode().equals(bdeStatus)) {
+            displayStatus = StatusEnums.DESIGNATED_SOURCE.getDesc();
+        } else if (ConfirmationTaskEnums.PENDING_CLAIMED.getCode().equals(ctStatus)) {
+            displayStatus = ConfirmationTaskEnums.PENDING_CLAIMED.getDesc();
+        } else {
+            // ctStatus = 待确认  displayStatus = 待确认
+            if (ConfirmationTaskEnums.PENDING.getCode().equals(ctStatus)) {
+                displayStatus = ConfirmationTaskEnums.PENDING.getDesc();
+            }
+            // ctStatus = 待认领  displayStatus = 待认领
+            if (ConfirmationTaskEnums.CLAIMED.getCode().equals(ctStatus)) {
+                displayStatus = ConfirmationTaskEnums.CLAIMED.getDesc();
+            }
+            // ctStatus = 已确认 and  bdeStatus = 待核定  displayStatus = 已确认
+            if (ConfirmationTaskEnums.CONFIRMED.getCode().equals(ctStatus) && StatusEnums.PENDING_APPROVAL.getCode().equals(bdeStatus)) {
+                displayStatus = ConfirmationTaskEnums.CONFIRMED.getDesc();
+            }
+            // ctStatus = 已拒绝 and  bdeStatus = 待协商  displayStatus = 已拒绝
+            if (ConfirmationTaskEnums.REJECTED.getCode().equals(ctStatus) && StatusEnums.PENDING_NEGOTIATION.getCode().equals(bdeStatus)) {
+                displayStatus = ConfirmationTaskEnums.REJECTED.getDesc();
+            }
+            // ctStatus = 已认领 and  bdeStatus = 认领中, 待核定, 待协商  displayStatus = 已认领
+            if (ConfirmationTaskEnums.CLAIMED.getCode().equals(ctStatus)
+                    && (StatusEnums.CLAIMED.getCode().equals(bdeStatus)
+                    || StatusEnums.PENDING_APPROVAL.getCode().equals(bdeStatus)
+                    || StatusEnums.PENDING_NEGOTIATION.getCode().equals(bdeStatus))
+            ) {
+                displayStatus = ConfirmationTaskEnums.CLAIMED.getDesc();
+            }
+            // ctStatus = 不认领 and  bdeStatus = 认领中, 待核定, 待协商  displayStatus = 不认领
+            if (ConfirmationTaskEnums.NOT_CLAIMED.getCode().equals(ctStatus)
+                    && (StatusEnums.CLAIMED.getCode().equals(bdeStatus)
+                    || StatusEnums.PENDING_APPROVAL.getCode().equals(bdeStatus)
+                    || StatusEnums.PENDING_NEGOTIATION.getCode().equals(bdeStatus))) {
+                displayStatus = ConfirmationTaskEnums.NOT_CLAIMED.getDesc();
+            }
+        }
+        return displayStatus;
+    }
+
 }

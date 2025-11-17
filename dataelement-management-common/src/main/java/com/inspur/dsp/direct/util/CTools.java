@@ -702,13 +702,9 @@ public class CTools {
             }
         }
         Cookie cookie = new Cookie(name, value);
-        cookie.setSecure(true);
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
         cookie.setMaxAge(maxAge);
         cookie.setPath(path);
-        if (domain != null && !domain.equals("localhost")) {
-            cookie.setDomain(domain);
-        }
         cookie.setSecure(false);// 设置为true，则仅有https请求时，cookie才会被发送。
         response.addCookie(cookie);
         return true;
@@ -760,6 +756,55 @@ public class CTools {
 		System.out.println("15019239901 encrypt password is "+encrypt(email));
 		System.out.println(decrypt(encrypt(email)));
 	}*/
+
+    /**
+     * 写cookie - 确保前端可访问版本
+     *
+     * @param name     Cookie名称
+     * @param value    Cookie值
+     * @param maxAge   Cookie有效期（秒），-1表示会话Cookie
+     * @param path     Cookie路径，默认为"/"
+     * @param response HttpServletResponse对象
+     * @return boolean 设置是否成功
+     */
+    public static boolean setFrontendAccessibleCookie(String name, String value, int maxAge,
+                                                      String path, HttpServletResponse response) {
+        if (name == null || name.isEmpty()) {
+            log.warn("Cookie name is null or empty");
+            return false;
+        }
+
+        try {
+            // URL编码处理
+            if (value != null) {
+                value = URLEncoder.encode(value, "UTF-8");
+            }
+
+            Cookie cookie = new Cookie(name, value);
+
+            // 关键设置：允许前端JavaScript访问
+            cookie.setHttpOnly(false);
+
+            // 设置过期时间
+            cookie.setMaxAge(maxAge);
+
+            // 设置路径，默认为根路径
+            cookie.setPath(path != null && !path.isEmpty() ? path : "/");
+
+            // 根据请求协议设置Secure属性（需要HttpServletRequest参数支持）
+            // cookie.setSecure(request.isSecure());
+            cookie.setSecure(false); // 默认设为false以支持HTTP环境
+
+            // 不显式设置Domain，让浏览器使用当前域名
+
+            response.addCookie(cookie);
+            return true;
+
+        } catch (UnsupportedEncodingException e) {
+            log.error("设置Cookie时URL编码失败: {}", name, e);
+            return false;
+        }
+    }
 
 }
 

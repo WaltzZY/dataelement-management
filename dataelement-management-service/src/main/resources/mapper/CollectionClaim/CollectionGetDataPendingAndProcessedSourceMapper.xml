@@ -65,30 +65,22 @@
         bde.send_date,
         bde.confirm_date,
         bde.collectunitqty,
-<!--        bde.remarks,-->
         bde.create_date,
         bde.create_account,
         bde.last_modify_date,
         bde.last_modify_account,
         ct.task_id,
         ct.base_dataelement_dataid,
-<!--        ct.tasktype,-->
-<!--        ct.send_unit_code,-->
         ct.sender_name,
         ct.send_date as task_send_date,
         ct.sender_account,
-<!--        ct.sender_name,-->
         ct.status as task_status,
         ct.processing_unit_code,
         ct.processing_unit_name,
         ct.processing_date,
         ct.processing_result,
-        ct.processing_opinion,
         ct.processor_account,
         ct.processor_name
-<!--        ct.approval_date,-->
-<!--        ct.approval_account,-->
-<!--        ct.approval_name-->
         FROM base_data_element bde
         INNER JOIN confirmation_task ct ON bde.dataid = ct.base_dataelement_dataid
         <where>

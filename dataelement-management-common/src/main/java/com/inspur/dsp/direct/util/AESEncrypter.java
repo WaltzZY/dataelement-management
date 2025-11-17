@@ -1,21 +1,17 @@
 package com.inspur.dsp.direct.util;
 
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.Charset;
-import java.security.InvalidKeyException;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * AES工具类，提供加密解密、生成Key等方法
@@ -23,99 +19,81 @@ import java.util.Map;
  * @author jolestar
  */
 public class AESEncrypter {
-    /**
-     * 日志信息
-     */
     private static final Logger logger = LoggerFactory.getLogger(AESEncrypter.class);
 
-    private static final String AESKEYSTR = "ZTZjZGVjZDcxNmMwMWQzZTIzOWE4ZjNkZjk3ZTJiZTM=";
+    /**
+     * 这个值必须是 16/24/32 字节长度！下面给你一个正确的 128bit 密钥（16 字节）
+     * 你也可以用 generateAesKey() 重新生成
+     */
+    private static final String AES_KEY_HEX = "0333d8f9e92822f5bc02887c7eeb210a"; // 16字节
+
+    /**
+     * 固定 16 字节 IV（前端必须一致）
+     */
+    private static final String AES_IV = "abcdef9876543210";
 
     private final SecretKey aesKey;
+    private final IvParameterSpec ivSpec;
 
     private AESEncrypter() {
-        aesKey = loadAesKey();
+        this.aesKey = loadHexKey(AES_KEY_HEX);
+        this.ivSpec = new IvParameterSpec(AES_IV.getBytes(StandardCharsets.UTF_8));
     }
 
-    private AESEncrypter(String aes) {
-        aesKey = loadAesKey(aes);
-    }
-
-    // 私有的静态实例，在类加载时就完成了实例化
     private static final AESEncrypter INSTANCE = new AESEncrypter();
-
-    private static final Map<String, AESEncrypter> INSTANCES = new HashMap<>();
 
     public static AESEncrypter getInstance() {
         return INSTANCE;
     }
 
-    public synchronized static AESEncrypter getInstance(String aes) {
-        if (INSTANCES.getOrDefault(aes, null) == null) {
-            INSTANCES.put(aes, new AESEncrypter(aes));
-        }
-        return INSTANCES.get(aes);
-    }
-
-    public String encrypt(String msg) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    /** 加密（前端 crypto-js 可以解密） */
+    public String encrypt(String msg) {
         try {
-            Cipher ecipher = Cipher.getInstance("AES/GCM/NoPadding");
-            ecipher.init(Cipher.ENCRYPT_MODE, aesKey);
-            return Hex.encodeHexString(ecipher.doFinal(msg.getBytes()));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
-                 IllegalBlockSizeException | BadPaddingException e) {
-            String errMsg = "decrypt error, data:" + msg;
-            logger.error(errMsg);
-            throw e;
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivSpec);
+            byte[] encrypted = cipher.doFinal(msg.getBytes(StandardCharsets.UTF_8));
+            return Hex.encodeHexString(encrypted);
+        } catch (Exception e) {
+            logger.error("AES 加密失败", e);
+            throw new RuntimeException(e);
         }
-
-
     }
 
-    public byte[] decrypt(char[] msgCharArray) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DecoderException {
+    /** 解密 */
+    public String decryptAsString(String hexCipher) {
         try {
-            Cipher dcipher = Cipher.getInstance("AES/GCM/NoPadding");
-            dcipher.init(Cipher.ENCRYPT_MODE, aesKey);
-            return dcipher.doFinal(Hex.decodeHex(msgCharArray));
-        } catch (NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
-                 BadPaddingException | DecoderException e) {
-            String errMsg = "decrypt error, data:" + Arrays.toString(msgCharArray);
-            logger.error(errMsg);
-            throw e;
+            byte[] cipherBytes = Hex.decodeHex(hexCipher.toCharArray());
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, aesKey, ivSpec);
+            byte[] decrypted = cipher.doFinal(cipherBytes);
+            return new String(decrypted, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            logger.error("AES 解密失败", e);
+            throw new RuntimeException(e);
         }
-
-
     }
 
-    public String decryptAsString(char[] msgCharArray) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DecoderException {
-        return new String(this.decrypt(msgCharArray), Charset.defaultCharset());
-    }
-
-    private static SecretKey loadAesKey() {
-        return loadAesKey(AESKEYSTR);
-    }
-
-    private static SecretKey loadAesKey(String aesKeyStr) {
-        String buffer = new String(Base64.decodeBase64(aesKeyStr));
-        byte[] keyStr = new byte[0];
+    /** 加载 Hex 密钥 */
+    private SecretKey loadHexKey(String hexStr) {
         try {
-            keyStr = Hex.decodeHex(buffer.toCharArray());
+            byte[] keyBytes = Hex.decodeHex(hexStr.toCharArray());
+            return new SecretKeySpec(keyBytes, "AES");
         } catch (DecoderException e) {
-            logger.error("初始化aes加密工具失败:", e);
+            logger.error("加载 AES Key 失败", e);
+            throw new RuntimeException(e);
         }
-        return new SecretKeySpec(keyStr, "AES");
     }
 
-//	private static String generateAesKey() throws Exception {
-//        try {
-//            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-//            keyGenerator.init(128);
-//            // 产生密钥
-//            SecretKey secretKey = keyGenerator.generateKey();
-//            // 获取密钥
-//            byte[] keyBytes = secretKey.getEncoded();
-//            return Base64.encodeBase64String(Hex.encodeHexString(keyBytes).getBytes());
-//        } catch (NoSuchAlgorithmException e) {
-//            throw new Exception(e);
-//        }
-//    }
+    /** 生成新的 AES Key（Hex 格式） */
+    public static String generateAesKey() {
+        try {
+            KeyGenerator kg = KeyGenerator.getInstance("AES");
+            kg.init(128); // 16 字节 Key
+            SecretKey key = kg.generateKey();
+            return Hex.encodeHexString(key.getEncoded());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

@@ -64,7 +64,6 @@
                  left join confirmation_task ct on ct.base_dataelement_dataid = bde.dataid
         where ct.processing_unit_code = #{orgCode}
           and ct.status = #{status}
-          and bde.status != 'designated_source'
     </select>
 
 </mapper>

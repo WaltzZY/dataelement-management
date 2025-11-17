@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -21,5 +20,5 @@ public class DataElementCatalogRelationVO implements Serializable {
     private String catalogUnitName;
     private String detailUrl;
     private Integer flag;
-
+    private String catalogDesc;
 }

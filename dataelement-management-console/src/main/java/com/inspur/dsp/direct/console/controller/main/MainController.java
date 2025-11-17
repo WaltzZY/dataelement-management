@@ -20,9 +20,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -32,9 +29,6 @@ import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -173,11 +167,12 @@ public class MainController extends BaseController {
             String ACCOUNT = user.getString("ACCOUNT");
             String ID = user.getString("ID");
             try {
-                CTools.setCookie("sso_token", AESEncrypter.getInstance().encrypt(ID), -1, "/", "", reponse);
-                CTools.setCookie("sso_token_account", AESEncrypter.getInstance().encrypt(ACCOUNT), -1, "/", "", reponse);
-            }catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | InvalidKeyException |
-                    IllegalBlockSizeException | BadPaddingException e) {
-                log.error("cookie设置出现异常: ");
+//                CTools.setCookie("sso_token", AESEncrypter.getInstance().encrypt(ID), -1, "/", "", reponse);
+//                CTools.setCookie("sso_token_account", AESEncrypter.getInstance().encrypt(ACCOUNT), -1, "/", "", reponse);
+                CTools.setFrontendAccessibleCookie("sso_token", AESEncrypter.getInstance().encrypt(ID), -1, "/", reponse);
+                CTools.setFrontendAccessibleCookie("sso_token_account", AESEncrypter.getInstance().encrypt(ACCOUNT), -1, "/", reponse);
+            }catch (Exception e) {
+                log.error("cookie设置出现异常: ", e);
             }
             // cookie设置结束-----------------------------
             session.setAttribute(ServiceConstant.USER_TOCKEN, user);
@@ -460,10 +455,11 @@ public class MainController extends BaseController {
             String ACCOUNT = user.getString("ACCOUNT");
             String ID = user.getString("ID");
             try {
-                CTools.setCookie("sso_token", AESEncrypter.getInstance().encrypt(ID), -1, "/", "", reponse);
-                CTools.setCookie("sso_token_account", AESEncrypter.getInstance().encrypt(ACCOUNT), -1, "/", "", reponse);
-            } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | InvalidKeyException |
-                    IllegalBlockSizeException | BadPaddingException e) {
+//                CTools.setCookie("sso_token", AESEncrypter.getInstance().encrypt(ID), -1, "/", "", reponse);
+//                CTools.setCookie("sso_token_account", AESEncrypter.getInstance().encrypt(ACCOUNT), -1, "/", "", reponse);
+                CTools.setFrontendAccessibleCookie("sso_token", AESEncrypter.getInstance().encrypt(ID), -1, "/", reponse);
+                CTools.setFrontendAccessibleCookie("sso_token_account", AESEncrypter.getInstance().encrypt(ACCOUNT), -1, "/", reponse);
+            } catch (Exception e) {
                 log.error("loginHandler method set cookie error: ");
             }
             // 设置cookie结束--------------------------------
