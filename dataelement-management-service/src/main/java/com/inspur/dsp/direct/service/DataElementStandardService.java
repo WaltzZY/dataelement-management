@@ -164,18 +164,18 @@ public interface DataElementStandardService {
      * 支持数源单位（可选）、状态（可多选）、起止时间、关键词模糊匹配查询
      *
      * @param queryDto 查询条件DTO
-     * @return 数据元列表
+     * @return 分页数据元列表
      */
-    List<AuditDataElementVo> auditDataElementList(AuditDataElementQueryDto queryDto);
+    Page<AuditDataElementVo> auditDataElementList(AuditDataElementQueryDto queryDto);
 
     /**
      * 审核标准
      * 支持单条审核和批量审核
      *
      * @param approveDTO 审核信息DTO
-     * @return 审核结果信息
+     * @return 审核结果VO
      */
-    String appvoveStandard(ApproveInfoDTO approveDTO);
+    ApproveResultVo appvoveStandard(ApproveInfoDTO approveDTO);
 
     /**
      * 导出待审核列表

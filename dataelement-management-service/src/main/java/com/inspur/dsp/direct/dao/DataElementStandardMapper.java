@@ -39,4 +39,13 @@ public interface DataElementStandardMapper extends BaseMapper<BaseDataElement> {
      * @return 数据元列表查询结果
      */
     List<AuditDataElementVo> queryAuditDataElementList(@Param("queryDto") AuditDataElementQueryDto queryDto);
+
+    /**
+     * 审核标准模块数据元分页查询
+     * 
+     * @param page 分页对象
+     * @param queryDto 查询条件
+     * @return 分页数据元列表查询结果
+     */
+    Page<AuditDataElementVo> queryAuditDataElementListPage(@Param("page") Page<AuditDataElementVo> page, @Param("queryDto") AuditDataElementQueryDto queryDto);
 }

@@ -286,7 +286,7 @@ public class DataElementStandardController {
      */
     @PostMapping("/auditDataElementList")
     @RespAdvice
-    public List<AuditDataElementVo> auditDataElementList(@RequestBody @Valid AuditDataElementQueryDto queryDto) {
+    public Page<AuditDataElementVo> auditDataElementList(@RequestBody @Valid AuditDataElementQueryDto queryDto) {
         log.info("审核标准模块查询数据元列表 - queryDto: {}", queryDto);
         return dataElementStandardService.auditDataElementList(queryDto);
     }
@@ -297,7 +297,7 @@ public class DataElementStandardController {
      */
     @PostMapping("/appvoveStandard")
     @RespAdvice
-    public String appvoveStandard(@RequestBody @Valid ApproveInfoDTO approveDTO) {
+    public ApproveResultVo appvoveStandard(@RequestBody @Valid ApproveInfoDTO approveDTO) {
         log.info("审核标准 - approveDTO: {}", approveDTO);
         return dataElementStandardService.appvoveStandard(approveDTO);
     }

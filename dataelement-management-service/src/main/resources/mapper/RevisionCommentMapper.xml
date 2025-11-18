@@ -7,16 +7,32 @@
         SELECT 
             id,
             base_dataelement_dataid AS baseDataelementDataid,
-            revision_content AS revisionContent,
+            comment AS revisionContent,
             revision_createdate AS revisionCreatedate,
             create_date AS createDate,
-            modify_date AS modifyDate,
+            last_modify_date AS modifyDate,
             create_account AS createAccount,
-            modify_account AS modifyAccount
+            last_modify_account AS modifyAccount
         FROM revision_comment
         WHERE base_dataelement_dataid = #{dataElementId}
         ORDER BY create_date DESC
         LIMIT 1
+    </select>
+
+    <!-- 根据数据元ID查询所有修订意见 -->
+    <select id="selectAllByDataId" resultType="com.inspur.dsp.direct.entity.RevisionComment">
+        SELECT 
+            id,
+            base_dataelement_dataid AS baseDataelementDataid,
+            comment AS revisionContent,
+            revision_createdate AS revisionCreatedate,
+            create_date AS createDate,
+            last_modify_date AS modifyDate,
+            create_account AS createAccount,
+            last_modify_account AS modifyAccount
+        FROM revision_comment
+        WHERE base_dataelement_dataid = #{dataElementId}
+        ORDER BY create_date DESC
     </select>
 
 </mapper>

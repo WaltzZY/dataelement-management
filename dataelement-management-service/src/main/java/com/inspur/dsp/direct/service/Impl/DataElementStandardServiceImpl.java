@@ -959,7 +959,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     }
 
     @Override
-    public List<AuditDataElementVo> auditDataElementList(AuditDataElementQueryDto queryDto) {
+    public Page<AuditDataElementVo> auditDataElementList(AuditDataElementQueryDto queryDto) {
         log.info("执行审核标准模块数据元查询 - queryDto: {}", queryDto);
         
         // 规范化日期范围
@@ -968,16 +968,19 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 校验并规范化排序参数
         validateAndNormalizeAuditSortParams(queryDto);
         
-        // 执行查询
-        List<AuditDataElementVo> resultList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
+        // 创建分页对象
+        Page<AuditDataElementVo> page = new Page<>(queryDto.getPageNum(), queryDto.getPageSize());
+        
+        // 执行分页查询
+        Page<AuditDataElementVo> resultPage = dataElementStandardMapper.queryAuditDataElementListPage(page, queryDto);
         
         // 补充状态描述
-        for (AuditDataElementVo vo : resultList) {
+        for (AuditDataElementVo vo : resultPage.getRecords()) {
             vo.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
         }
         
-        log.info("查询完成，共返回{}条记录", resultList.size());
-        return resultList;
+        log.info("查询完成，共返回{}条记录，总数：{}", resultPage.getRecords().size(), resultPage.getTotal());
+        return resultPage;
     }
 
     /**
@@ -1057,7 +1060,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     }
 
     @Override
-    public String appvoveStandard(ApproveInfoDTO approveDTO) {
+    public ApproveResultVo appvoveStandard(ApproveInfoDTO approveDTO) {
         log.info("审核标准 - approveDTO: {}", approveDTO);
         
         if (approveDTO.getList() == null || approveDTO.getList().isEmpty()) {
@@ -1105,12 +1108,22 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             }
         }
         
-        String result = String.format("审核完成：成功%d条，失败%d条", successCount, errorCount);
+        // 构建返回结果
+        ApproveResultVo result = new ApproveResultVo();
+        result.setSuccessCount(successCount);
+        result.setErrorCount(errorCount);
+        result.setTotalCount(approveDTO.getList().size());
+        result.setOperationType(approveDTO.getUseroperation());
+        result.setIsSuccess(errorCount == 0);
+        
+        String resultMessage = String.format("审核完成：成功%d条，失败%d条", successCount, errorCount);
+        result.setResultMessage(resultMessage);
+        
         if (errorCount > 0) {
-            result += "。失败详情：" + errorDetails;
+            result.setErrorDetails(errorDetails.toString());
         }
         
-        log.info("审核结果：{}", result);
+        log.info("审核结果：{}", resultMessage);
         return result;
     }
     

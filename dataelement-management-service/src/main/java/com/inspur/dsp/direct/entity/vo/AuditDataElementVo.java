@@ -1,6 +1,7 @@
 package com.inspur.dsp.direct.entity.vo;
 
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
@@ -61,45 +62,54 @@ public class AuditDataElementVo {
     /**
      * 提交时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date submitTime;
     
     /**
      * 最后提交日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date lastSubmitDate;
     
     /**
      * 最后审批日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date lastApproveDate;
     
     /**
      * 最后提交复审日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date lastSubmitReexaminationDate;
     
     /**
      * 最后提交发布日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date lastSubmitReleasedDate;
     
     /**
      * 最后发起修订日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date lastInitiateRevisedDate;
     
     /**
      * 发布日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date publishDate;
     
     /**
      * 审核驳回时间（从流程记录中获取）
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date rejectTime;
     
     /**
      * 报送时间（对应 lastSubmitReleasedDate）
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date reportTime;
 }
