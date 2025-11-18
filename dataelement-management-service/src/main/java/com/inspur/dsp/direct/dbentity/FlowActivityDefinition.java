@@ -14,51 +14,44 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 流程迁移配置表
+ * 节点配置表
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "flow_transfer_definition")
-public class FlowTransferDefinition implements Serializable {
+@TableName(value = "flow_activity_definition")
+public class FlowActivityDefinition implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
      * 行唯一标识
      */
-    @TableId(value = "transferid", type = IdType.INPUT)
-    @Size(max = 36, message = "行唯一标识最大长度要小于 36")
+    @TableId(value = "activityid", type = IdType.INPUT)
+    @Size(max = 36,message = "行唯一标识最大长度要小于 36")
     @NotBlank(message = "行唯一标识不能为空")
-    private String transferid;
+    private String activityid;
 
     /**
-     * flow_definition表主键
+     * 行唯一标识, 对应表flow_definition主键
      */
     @TableField(value = "flowid")
-    @Size(max = 36, message = "flow_definition表主键最大长度要小于 36")
+    @Size(max = 36,message = "行唯一标识, 对应表flow_definition主键最大长度要小于 36")
+    @NotBlank(message = "行唯一标识, 对应表flow_definition主键不能为空")
     private String flowid;
 
     /**
-     * 迁移源环节名称
+     * 环节名称
      */
-    @TableField(value = "sourceactivityname")
-    @Size(max = 100, message = "迁移源环节名称最大长度要小于 100")
-    private String sourceactivityname;
+    @TableField(value = "activityname")
+    @Size(max = 100,message = "环节名称最大长度要小于 100")
+    private String activityname;
 
     /**
-     * 迁移条件
+     * 环节顺序
      */
-    @TableField(value = "transfercondition")
-    @Size(max = 100, message = "迁移条件最大长度要小于 100")
-    private String transfercondition;
-
-    /**
-     * 迁移目标环节名称
-     */
-    @TableField(value = "destactivityname")
-    @Size(max = 100, message = "迁移目标环节名称最大长度要小于 100")
-    private String destactivityname;
+    @TableField(value = "activityorder")
+    private Integer activityorder;
 
     /**
      * 创建日期
@@ -70,7 +63,7 @@ public class FlowTransferDefinition implements Serializable {
      * 创建人账号
      */
     @TableField(value = "create_account")
-    @Size(max = 30, message = "创建人账号最大长度要小于 30")
+    @Size(max = 30,message = "创建人账号最大长度要小于 30")
     private String createAccount;
 
     /**
@@ -83,6 +76,6 @@ public class FlowTransferDefinition implements Serializable {
      * 最后修改人
      */
     @TableField(value = "last_modify_account")
-    @Size(max = 30, message = "最后修改人最大长度要小于 30")
+    @Size(max = 30,message = "最后修改人最大长度要小于 30")
     private String lastModifyAccount;
 }

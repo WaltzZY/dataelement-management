@@ -3,7 +3,13 @@ package com.inspur.dsp.direct.service.Impl;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.inspur.dsp.direct.constant.Constants;
+import com.inspur.dsp.direct.dao.FlowActivityDefinitionMapper;
+import com.inspur.dsp.direct.dao.FlowDefinitionMapper;
+import com.inspur.dsp.direct.dao.FlowTransferDefinitionMapper;
 import com.inspur.dsp.direct.dao.OrganizationUnitMapper;
+import com.inspur.dsp.direct.dbentity.FlowActivityDefinition;
+import com.inspur.dsp.direct.dbentity.FlowDefinition;
+import com.inspur.dsp.direct.dbentity.FlowTransferDefinition;
 import com.inspur.dsp.direct.dbentity.OrganizationUnit;
 import com.inspur.dsp.direct.entity.dto.GetCollectionDeptTreeDto;
 import com.inspur.dsp.direct.entity.dto.GetDeptSearchDto;
@@ -42,6 +48,9 @@ import java.util.stream.Collectors;
 public class CommonServiceImpl implements CommonService {
 
     private final OrganizationUnitMapper organizationUnitMapper;
+    private final FlowDefinitionMapper flowDefinitionMapper;
+    private final FlowTransferDefinitionMapper flowTransferDefinitionMapper;
+    private final FlowActivityDefinitionMapper flowActivityDefinitionMapper;
 
     @Value("${upload.path}")
     private String uploadFilePath;
@@ -298,5 +307,25 @@ public class CommonServiceImpl implements CommonService {
             log.error("文件下载失败: {}", filePath, e);
             throw new RuntimeException("文件下载失败: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * 根据流程编号查询流程定义及关联的流程步骤,节点信息
+     *
+     * @param code 流程编号
+     * @return
+     */
+    @Override
+    public FlowDefinition selectFlowDefinitionByCode(String code) {
+        FlowDefinition flowDefinition = flowDefinitionMapper.selectFirstByFlowcode(code);
+        if (Objects.isNull(flowDefinition)) {
+            log.warn("无流程定义信息,退出方法[selectFlowDefinitionByCode],查询流程code为:{}", code);
+            return null;
+        }
+        List<FlowTransferDefinition> flowTransferDefinitions = flowTransferDefinitionMapper.selectAllByFlowid(flowDefinition.getFlowid());
+        List<FlowActivityDefinition> flowActivityDefinitions = flowActivityDefinitionMapper.selectAllByFlowidOrderByActivityorder(flowDefinition.getFlowid());
+        flowDefinition.setFlowTransferDefinitions(flowTransferDefinitions);
+        flowDefinition.setFlowActivityDefinitions(flowActivityDefinitions);
+        return flowDefinition;
     }
 }

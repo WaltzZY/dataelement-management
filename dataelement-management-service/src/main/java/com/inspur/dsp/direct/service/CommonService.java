@@ -1,5 +1,6 @@
 package com.inspur.dsp.direct.service;
 
+import com.inspur.dsp.direct.dbentity.FlowDefinition;
 import com.inspur.dsp.direct.dbentity.OrganizationUnit;
 import com.inspur.dsp.direct.entity.dto.GetCollectionDeptTreeDto;
 import com.inspur.dsp.direct.entity.dto.GetDeptSearchDto;
@@ -76,4 +77,11 @@ public interface CommonService {
      * 文件下载,返回文件二进制数据
      */
     byte[] downloadFile(String filePath);
+
+    /**
+     * 根据流程编号查询流程定义及关联的流程步骤,节点信息
+     * @param code 流程编号
+     * @return
+     */
+    FlowDefinition selectFlowDefinitionByCode(String code);
 }
