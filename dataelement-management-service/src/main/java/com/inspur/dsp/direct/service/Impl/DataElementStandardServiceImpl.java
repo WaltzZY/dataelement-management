@@ -23,7 +23,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -51,6 +55,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     private final DataElementStandardMapper dataElementStandardMapper;
     private final RevisionCommentMapper revisionCommentMapper;
     private final ProcessRecordMapper processRecordMapper;
+    private final FlowActivityDefinitionMapper flowActivityDefinitionMapper;
 
     private static final Pattern CODE_PATTERN = Pattern.compile("^[a-zA-Z0-9]+$");
 
@@ -147,15 +152,15 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 查询驳回信息列表（从流程记录表获取）
         List<RejectionInfoVO> rejectionInfo = new ArrayList<>();
-        List<ProcessRecord> processRecords = processRecordMapper.getAllRevisionRecordsByDataId(dataid);
-        if (processRecords != null && !processRecords.isEmpty()) {
-            for (int i = 0; i < processRecords.size(); i++) {
-                ProcessRecord processRecord = processRecords.get(i);
+        List<ProcessRecord> revisionProcessRecords = processRecordMapper.getAllRevisionRecordsByDataId(dataid);
+        if (revisionProcessRecords != null && !revisionProcessRecords.isEmpty()) {
+            for (int i = 0; i < revisionProcessRecords.size(); i++) {
+                ProcessRecord processRecord = revisionProcessRecords.get(i);
                 RejectionInfoVO vo = new RejectionInfoVO();
                 
                 // 如果是多条记录，添加序号到驳回内容中
                 String content = processRecord.getUsersuggestion();
-                if (processRecords.size() > 1) {
+                if (revisionProcessRecords.size() > 1) {
                     content = (i + 1) + ". " + content;
                 }
                 vo.setRevisionContent(content);
@@ -194,6 +199,9 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             }
         }
 
+        // 查询流程记录列表
+        List<ProcessVO> processRecords = getProcessRecords(dataid);
+
         // 封装完整VO
         StandardCompleteInfoVo result = new StandardCompleteInfoVo();
         result.setBasicInfo(basicInfo);
@@ -204,6 +212,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         result.setExampleFiles(exampleFiles);
         result.setRejectionInfo(rejectionInfo);
         result.setRevisionComments(revisionComments);
+        result.setProcessRecords(processRecords);
 
         return result;
     }
@@ -639,15 +648,19 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 处理日期边界问题
         normalizeDateRange(queryDto);
-        
+
         // 校验并规范化排序参数
         validateAndNormalizeSortParams(queryDto);
 
         // 创建分页对象
         Page<StandardDataElementPageInfoVo> page = new Page<>(queryDto.getPageNum(), queryDto.getPageSize());
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
         
         // 执行查询
-        List<StandardDataElementPageInfoVo> records = dataElementStandardMapper.getAllStandardList(page, queryDto);
+        List<StandardDataElementPageInfoVo> records = dataElementStandardMapper.getAllStandardList(page, queryDto, userOrgCode);
         
         // 设置状态描述
         for (StandardDataElementPageInfoVo record : records) {
@@ -731,9 +744,13 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     public void exportTodoDetermineList(StandardDataElementPageQueryDto queryDto, javax.servlet.http.HttpServletResponse response) {
         log.info("导出待定标数据元列表 - queryDto: {}", queryDto);
 
-        // 查询所有符合条件的数据元记录(不分页)
-        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
         
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
         }
@@ -766,9 +783,13 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     public void exportTodoRevisedList(StandardDataElementPageQueryDto queryDto, javax.servlet.http.HttpServletResponse response) {
         log.info("导出待修订数据元列表 - queryDto: {}", queryDto);
 
-        // 查询所有符合条件的数据元记录(不分页)
-        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
         
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
         }
@@ -802,8 +823,12 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     public void exportSourcedoneStandardList(StandardDataElementPageQueryDto queryDto, javax.servlet.http.HttpServletResponse response) {
         log.info("导出定标阶段已处理数据元列表 - queryDto: {}", queryDto);
 
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
         // 查询所有符合条件的数据元记录(不分页)
-        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto);
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
         
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
@@ -1399,6 +1424,106 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         } catch (Exception e) {
             log.error("导出组织方已处理数据元列表失败", e);
             throw new RuntimeException("导出失败");
+        }
+    }
+    
+    /**
+     * 查询流程记录列表
+     * 只有一个dataid参数，先去base_data_element [基准数据元表]查询数据元状态，
+     * 去flow_activity_definition [节点配置表]中查出对应的状态+小于当前状态所有的，
+     * 再用dataid去process_record [流程记录表]查询，保留当前+小于保留的流程，list[processVO]返回给前端
+     * @param dataid 数据元ID
+     * @return ProcessVO列表
+     */
+    private List<ProcessVO> getProcessRecords(String dataid) {
+        log.info("查询流程记录 - dataid: {}", dataid);
+        
+        List<ProcessVO> result = new ArrayList<>();
+        
+        try {
+            // 1. 先去base_data_element [基准数据元表]查询数据元状态
+            BaseDataElement dataElement = baseDataElementMapper.selectById(dataid);
+            if (dataElement == null) {
+                log.warn("数据元不存在 - dataid: {}", dataid);
+                return result;
+            }
+            String currentStatus = dataElement.getStatus();
+            log.info("查询到数据元状态: {}", currentStatus);
+            
+            // 2. 查询flow_activity_definition表，获取所有节点并按顺序排序（不使用flowid过滤）
+            List<FlowActivityDefinition> allActivities = flowActivityDefinitionMapper.selectAll();
+            
+            // 3. 将数据元状态直接当做activityname，找到当前状态对应的activityorder
+            Integer currentOrder = null;
+            for (FlowActivityDefinition activity : allActivities) {
+                if (currentStatus.equals(activity.getActivityname())) {
+                    currentOrder = activity.getActivityorder();
+                    break;
+                }
+            }
+            
+            if (currentOrder == null) {
+                log.warn("未找到当前状态[{}]对应的流程节点", currentStatus);
+                return result;
+            }
+            
+            // 4. 获取当前状态及小于当前状态的所有节点名称
+            Set<String> allowedActivityNames = new HashSet<>();
+            for (FlowActivityDefinition activity : allActivities) {
+                if (activity.getActivityorder() != null && activity.getActivityorder() <= currentOrder) {
+                    allowedActivityNames.add(activity.getActivityname());
+                }
+            }
+            
+            log.info("当前状态[{}]，当前order[{}]，允许的流程节点: {}", currentStatus, currentOrder, allowedActivityNames);
+            
+            // 5. 查询process_record表中的所有记录
+            List<ProcessRecord> dbRecords = processRecordMapper.getProcessRecordsByDataId(dataid);
+            
+            // 6. 过滤出目标状态在允许列表中的记录，并转换为ProcessVO
+            for (ProcessRecord record : dbRecords) {
+                if (record.getDestactivityname() != null && allowedActivityNames.contains(record.getDestactivityname())) {
+                    ProcessVO processVO = new ProcessVO();
+                    processVO.setSourceactivityname(record.getSourceactivityname());
+                    processVO.setProcessusername(record.getProcessusername());
+                    processVO.setProcessunitname(record.getProcessunitname());
+                    processVO.setProcessdatetime(record.getProcessdatetime());
+                    result.add(processVO);
+                }
+            }
+            
+            log.info("查询到{}条符合条件的流程记录", result.size());
+            
+        } catch (Exception e) {
+            log.error("查询流程记录失败 - dataid: {}", dataid, e);
+        }
+        
+        return result;
+    }
+    
+    /**
+     * 将数据元状态映射为flow_activity_definition表中的activityname
+     * @param status 数据元状态
+     * @return activityname
+     */
+    private String mapStatusToActivityName(String status) {
+        switch (status) {
+            case "designated_source":
+                return "待定标";
+            case "PendingReview":
+                return "待审核";
+            case "SolicitingOpinions":
+                return "征求意见";
+            case "TodoRevised":
+                return "待修订";
+            case "PendingReExamination":
+                return "待复审";
+            case "Todoreleased":
+                return "待发布";
+            case "Published":
+                return "已发布";
+            default:
+                return status;
         }
     }
 }

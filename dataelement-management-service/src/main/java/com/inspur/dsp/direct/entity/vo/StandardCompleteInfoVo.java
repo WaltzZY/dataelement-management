@@ -25,4 +25,6 @@ public class StandardCompleteInfoVo {
     private List<RejectionInfoVO> rejectionInfo;
     
     private List<RevisionCommentVO> revisionComments;
+    
+    private List<ProcessVO> processRecords;
 }

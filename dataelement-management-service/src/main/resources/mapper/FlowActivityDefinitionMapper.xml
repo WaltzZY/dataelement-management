@@ -26,4 +26,11 @@
         from flow_activity_definition
         where flowid=#{flowid,jdbcType=VARCHAR} order by activityorder
     </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from flow_activity_definition
+        order by activityorder
+    </select>
 </mapper>

@@ -53,4 +53,11 @@
         ORDER BY pr.processdatetime DESC
     </select>
 
+    <select id="getProcessRecordsByDataId" resultMap="BaseResultMap">
+        SELECT *
+        FROM process_record pr
+        WHERE pr.base_dataelement_dataid = #{dataid}
+        ORDER BY pr.processdatetime ASC
+    </select>
+
 </mapper>

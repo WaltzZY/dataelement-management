@@ -26,11 +26,13 @@ public interface DataElementStandardMapper extends BaseMapper<BaseDataElement> {
      * 
      * @param page 分页对象（可为null，null时查询全部）
      * @param queryDto 查询条件
+     * @param userOrgCode 用户组织机构编码（用于过滤数据源单位）
      * @return 数据元列表查询结果
      */
     List<StandardDataElementPageInfoVo> getAllStandardList(
             @Param("page") Page<StandardDataElementPageInfoVo> page, 
-            @Param("queryDto") StandardDataElementPageQueryDto queryDto);
+            @Param("queryDto") StandardDataElementPageQueryDto queryDto,
+            @Param("userOrgCode") String userOrgCode);
 
     /**
      * 审核标准模块数据元查询

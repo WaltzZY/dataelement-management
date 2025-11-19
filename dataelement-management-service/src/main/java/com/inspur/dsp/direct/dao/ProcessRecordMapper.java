@@ -14,4 +14,6 @@ public interface ProcessRecordMapper extends BaseMapper<ProcessRecord> {
     ProcessRecord getRevisionRecordByDataId(@Param("dataid") String dataId);
     
     List<ProcessRecord> getAllRevisionRecordsByDataId(@Param("dataid") String dataId);
+    
+    List<ProcessRecord> getProcessRecordsByDataId(@Param("dataid") String dataId);
 }

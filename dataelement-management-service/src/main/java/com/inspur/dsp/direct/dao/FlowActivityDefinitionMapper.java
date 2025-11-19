@@ -12,4 +12,5 @@ public interface FlowActivityDefinitionMapper extends BaseMapper<FlowActivityDef
 
     List<FlowActivityDefinition> selectAllByFlowidOrderByActivityorder(@Param("flowid")String flowid);
 
+    List<FlowActivityDefinition> selectAll();
 }
