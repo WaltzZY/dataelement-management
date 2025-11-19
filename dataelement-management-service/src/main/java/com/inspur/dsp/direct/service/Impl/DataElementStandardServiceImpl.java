@@ -655,7 +655,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 创建分页对象
         Page<StandardDataElementPageInfoVo> page = new Page<>(queryDto.getPageNum(), queryDto.getPageSize());
 
-        // 获取当前登录用户信息
+        // 获取当前登录信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         String userOrgCode = userInfo.getOrgCode();
         
