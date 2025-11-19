@@ -17,6 +17,7 @@
         FROM base_data_element bde
         LEFT JOIN revision_comment rc ON bde.dataid = rc.base_dataelement_dataid
         WHERE bde.status IN ('designated_source', 'PendingReview', 'SolicitingOpinions', 'TodoRevised', 'PendingReExamination', 'Todoreleased', 'Published')
+            AND bde.source_unit_code = #{userOrgCode}
         
         <!-- 动态查询条件 -->
         <if test="queryDto != null">
@@ -65,7 +66,17 @@
         <!-- 排序 -->
         <choose>
             <when test="queryDto != null and queryDto.sortField != null and queryDto.sortField != '' and queryDto.sortOrder != null and queryDto.sortOrder != ''">
-                ORDER BY ${queryDto.sortField} ${queryDto.sortOrder}
+                <choose>
+                    <when test="queryDto.sortField == 'create_date'">
+                        ORDER BY bde.create_date ${queryDto.sortOrder}
+                    </when>
+                    <when test="queryDto.sortField == 'revision_createdate'">
+                        ORDER BY rc.revision_createdate ${queryDto.sortOrder}
+                    </when>
+                    <otherwise>
+                        ORDER BY ${queryDto.sortField} ${queryDto.sortOrder}
+                    </otherwise>
+                </choose>
             </when>
             <otherwise>
                 ORDER BY bde.create_date DESC
