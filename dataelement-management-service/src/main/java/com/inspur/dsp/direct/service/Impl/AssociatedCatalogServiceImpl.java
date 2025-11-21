@@ -15,6 +15,7 @@ import com.inspur.dsp.direct.entity.vo.DataElementCatalogRelationVO;
 import com.inspur.dsp.direct.httpService.BasecatalogService;
 import com.inspur.dsp.direct.service.AssociatedCatalogService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,11 +23,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
 @Service
+@Slf4j
 public class AssociatedCatalogServiceImpl implements AssociatedCatalogService {
 
     private static final String URL = "/restapi/getRelationCatalogItemLike";
@@ -130,6 +133,10 @@ public class AssociatedCatalogServiceImpl implements AssociatedCatalogService {
             Map<String, Object> param = new HashMap<>();
             param.put("name", keyword != null ? keyword : "");
             param.put("orgCodes", orgCodeList);
+            if (CollectionUtils.isEmpty(orgCodeList)) {
+                log.info("采集单位为空,则直接返回空数组");
+                return new ArrayList<>();
+            }
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
