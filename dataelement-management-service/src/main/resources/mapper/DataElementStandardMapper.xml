@@ -4,7 +4,7 @@
 
     <!-- 数据元列表查询 -->
     <select id="getAllStandardList" resultType="com.inspur.dsp.direct.entity.vo.StandardDataElementPageInfoVo">
-        SELECT 
+        SELECT
             bde.dataid,
             bde.data_element_id AS dataelementCode,
             bde.name,
@@ -13,12 +13,13 @@
             bde.status,
             bde.confirm_date AS confirmDate,
             bde.publish_date AS publishDate,
-            rc.revision_createdate AS revisionCreateDate
+            rc.revision_createdate AS revisionCreateDate,
+            bde.source_unit_code as sourceunitCode
         FROM base_data_element bde
         LEFT JOIN revision_comment rc ON bde.dataid = rc.base_dataelement_dataid
         WHERE bde.status IN ('designated_source', 'PendingReview', 'SolicitingOpinions', 'TodoRevised', 'PendingReExamination', 'Todoreleased', 'Published')
             AND bde.source_unit_code = #{userOrgCode}
-        
+
         <!-- 动态查询条件 -->
         <if test="queryDto != null">
             <!-- 数据元状态精确匹配（支持多选） -->
@@ -28,7 +29,7 @@
                     #{status}
                 </foreach>
             </if>
-            
+
             <!-- 定源时间范围查询 -->
             <if test="queryDto.confirmDateBegin != null">
                 AND bde.confirm_date >= #{queryDto.confirmDateBegin}
@@ -36,7 +37,7 @@
             <if test="queryDto.confirmDateEnd != null">
                 AND bde.confirm_date &lt;= #{queryDto.confirmDateEnd}
             </if>
-            
+
             <!-- 发布时间范围查询 -->
             <if test="queryDto.publishDateBegin != null">
                 AND bde.publish_date >= #{queryDto.publishDateBegin}
@@ -44,7 +45,7 @@
             <if test="queryDto.publishDateEnd != null">
                 AND bde.publish_date &lt;= #{queryDto.publishDateEnd}
             </if>
-            
+
             <!-- 修订时间范围查询 -->
             <if test="queryDto.revisionCreateDateBegin != null">
                 AND rc.revision_createdate >= #{queryDto.revisionCreateDateBegin}
@@ -52,17 +53,17 @@
             <if test="queryDto.revisionCreateDateEnd != null">
                 AND rc.revision_createdate &lt;= #{queryDto.revisionCreateDateEnd}
             </if>
-            
+
             <!-- 关键字模糊匹配 -->
             <if test="queryDto.keyword != null and queryDto.keyword != ''">
                 AND (
-                    bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%') 
-                    OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%') 
+                    bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%')
+                    OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%')
                     OR bde.data_element_id LIKE CONCAT('%', #{queryDto.keyword}, '%')
                 )
             </if>
         </if>
-        
+
         <!-- 排序 -->
         <choose>
             <when test="queryDto != null and queryDto.sortField != null and queryDto.sortField != '' and queryDto.sortOrder != null and queryDto.sortOrder != ''">
@@ -86,7 +87,7 @@
 
     <!-- 审核标准模块数据元查询 -->
     <select id="queryAuditDataElementList" resultType="com.inspur.dsp.direct.entity.vo.AuditDataElementVo">
-        SELECT 
+        SELECT
             bde.dataid,
             bde.name,
             bde.data_element_id AS dataelementCode,
@@ -103,14 +104,14 @@
             bde.publish_date AS publishDate,
             bde.last_submit_date AS submitTime,
             bde.last_submitreleased_date AS reportTime,
-            (SELECT MAX(pr.processdatetime) 
-             FROM process_record pr 
-             WHERE pr.base_dataelement_dataid = bde.dataid 
+            (SELECT MAX(pr.processdatetime)
+             FROM process_record pr
+             WHERE pr.base_dataelement_dataid = bde.dataid
              AND pr.useroperation = '驳回') AS rejectTime
         FROM base_data_element bde
         LEFT JOIN organization_unit ou ON bde.source_unit_code = ou.unit_code
         WHERE 1=1
-        
+
         <!-- 动态查询条件 -->
         <if test="queryDto != null">
             <!-- 数源单位多选条件 -->
@@ -120,7 +121,7 @@
                     #{code}
                 </foreach>
             </if>
-            
+
             <!-- 数据元状态多选条件 -->
             <if test="queryDto.statusList != null and queryDto.statusList.size() > 0">
                 AND bde.status IN
@@ -128,7 +129,7 @@
                     #{status}
                 </foreach>
             </if>
-            
+
             <!-- 提交时间范围查询 -->
             <if test="queryDto.submitTimeBegin != null">
                 AND bde.last_submit_date >= #{queryDto.submitTimeBegin}
@@ -136,7 +137,7 @@
             <if test="queryDto.submitTimeEnd != null">
                 AND bde.last_submit_date &lt;= #{queryDto.submitTimeEnd}
             </if>
-            
+
             <!-- 审核时间范围查询 -->
             <if test="queryDto.approveTimeBegin != null">
                 AND bde.last_approve_date >= #{queryDto.approveTimeBegin}
@@ -144,7 +145,7 @@
             <if test="queryDto.approveTimeEnd != null">
                 AND bde.last_approve_date &lt;= #{queryDto.approveTimeEnd}
             </if>
-            
+
             <!-- 修订提交时间范围查询 -->
             <if test="queryDto.revisionSubmitTimeBegin != null">
                 AND bde.last_submitreexamination_date >= #{queryDto.revisionSubmitTimeBegin}
@@ -152,7 +153,7 @@
             <if test="queryDto.revisionSubmitTimeEnd != null">
                 AND bde.last_submitreexamination_date &lt;= #{queryDto.revisionSubmitTimeEnd}
             </if>
-            
+
             <!-- 报送时间范围查询 -->
             <if test="queryDto.reportTimeBegin != null">
                 AND bde.last_submitreleased_date >= #{queryDto.reportTimeBegin}
@@ -160,11 +161,11 @@
             <if test="queryDto.reportTimeEnd != null">
                 AND bde.last_submitreleased_date &lt;= #{queryDto.reportTimeEnd}
             </if>
-            
+
             <!-- 审核驳回时间范围查询 (从流程记录表查询驳回时间) -->
             <if test="queryDto.rejectTimeBegin != null or queryDto.rejectTimeEnd != null">
                 AND EXISTS (
-                    SELECT 1 FROM process_record pr 
+                    SELECT 1 FROM process_record pr
                     WHERE pr.base_dataelement_dataid = bde.dataid
                     AND pr.useroperation = '驳回'
                     <if test="queryDto.rejectTimeBegin != null">
@@ -175,7 +176,7 @@
                     </if>
                 )
             </if>
-            
+
             <!-- 发起修订时间范围查询 -->
             <if test="queryDto.initiateRevisionTimeBegin != null">
                 AND bde.last_initiaterevised_date >= #{queryDto.initiateRevisionTimeBegin}
@@ -183,17 +184,17 @@
             <if test="queryDto.initiateRevisionTimeEnd != null">
                 AND bde.last_initiaterevised_date &lt;= #{queryDto.initiateRevisionTimeEnd}
             </if>
-            
+
             <!-- 关键词模糊匹配 -->
             <if test="queryDto.keyword != null and queryDto.keyword != ''">
                 AND (
-                    bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%') 
-                    OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%') 
+                    bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%')
+                    OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%')
                     OR bde.data_element_id LIKE CONCAT('%', #{queryDto.keyword}, '%')
                 )
             </if>
         </if>
-        
+
         <!-- 排序 -->
         <choose>
             <when test="queryDto != null and queryDto.sortField != null and queryDto.sortField != '' and queryDto.sortOrder != null and queryDto.sortOrder != ''">
@@ -207,7 +208,7 @@
 
     <!-- 审核标准模块数据元分页查询 -->
     <select id="queryAuditDataElementListPage" resultType="com.inspur.dsp.direct.entity.vo.AuditDataElementVo">
-        SELECT 
+        SELECT
             bde.dataid,
             bde.name,
             bde.data_element_id AS dataelementCode,
@@ -224,14 +225,14 @@
             bde.publish_date AS publishDate,
             bde.last_submit_date AS submitTime,
             bde.last_submitreleased_date AS reportTime,
-            (SELECT MAX(pr.processdatetime) 
-             FROM process_record pr 
-             WHERE pr.base_dataelement_dataid = bde.dataid 
+            (SELECT MAX(pr.processdatetime)
+             FROM process_record pr
+             WHERE pr.base_dataelement_dataid = bde.dataid
              AND pr.useroperation = '驳回') AS rejectTime
         FROM base_data_element bde
         LEFT JOIN organization_unit ou ON bde.source_unit_code = ou.unit_code
         WHERE 1=1
-        
+
         <!-- 动态查询条件 -->
         <if test="queryDto != null">
             <!-- 数源单位多选条件 -->
@@ -241,7 +242,7 @@
                     #{code}
                 </foreach>
             </if>
-            
+
             <!-- 数据元状态多选条件 -->
             <if test="queryDto.statusList != null and queryDto.statusList.size() > 0">
                 AND bde.status IN
@@ -249,7 +250,7 @@
                     #{status}
                 </foreach>
             </if>
-            
+
             <!-- 提交时间范围查询 -->
             <if test="queryDto.submitTimeBegin != null">
                 AND bde.last_submit_date >= #{queryDto.submitTimeBegin}
@@ -257,7 +258,7 @@
             <if test="queryDto.submitTimeEnd != null">
                 AND bde.last_submit_date &lt;= #{queryDto.submitTimeEnd}
             </if>
-            
+
             <!-- 审核时间范围查询 -->
             <if test="queryDto.approveTimeBegin != null">
                 AND bde.last_approve_date >= #{queryDto.approveTimeBegin}
@@ -265,7 +266,7 @@
             <if test="queryDto.approveTimeEnd != null">
                 AND bde.last_approve_date &lt;= #{queryDto.approveTimeEnd}
             </if>
-            
+
             <!-- 修订提交时间范围查询 -->
             <if test="queryDto.revisionSubmitTimeBegin != null">
                 AND bde.last_submitreexamination_date >= #{queryDto.revisionSubmitTimeBegin}
@@ -273,7 +274,7 @@
             <if test="queryDto.revisionSubmitTimeEnd != null">
                 AND bde.last_submitreexamination_date &lt;= #{queryDto.revisionSubmitTimeEnd}
             </if>
-            
+
             <!-- 报送时间范围查询 -->
             <if test="queryDto.reportTimeBegin != null">
                 AND bde.last_submitreleased_date >= #{queryDto.reportTimeBegin}
@@ -281,11 +282,11 @@
             <if test="queryDto.reportTimeEnd != null">
                 AND bde.last_submitreleased_date &lt;= #{queryDto.reportTimeEnd}
             </if>
-            
+
             <!-- 审核驳回时间范围查询 (从流程记录表查询驳回时间) -->
             <if test="queryDto.rejectTimeBegin != null or queryDto.rejectTimeEnd != null">
                 AND EXISTS (
-                    SELECT 1 FROM process_record pr 
+                    SELECT 1 FROM process_record pr
                     WHERE pr.base_dataelement_dataid = bde.dataid
                     AND pr.useroperation = '驳回'
                     <if test="queryDto.rejectTimeBegin != null">
@@ -296,7 +297,7 @@
                     </if>
                 )
             </if>
-            
+
             <!-- 发起修订时间范围查询 -->
             <if test="queryDto.initiateRevisionTimeBegin != null">
                 AND bde.last_initiaterevised_date >= #{queryDto.initiateRevisionTimeBegin}
@@ -304,17 +305,17 @@
             <if test="queryDto.initiateRevisionTimeEnd != null">
                 AND bde.last_initiaterevised_date &lt;= #{queryDto.initiateRevisionTimeEnd}
             </if>
-            
+
             <!-- 关键词模糊匹配 -->
             <if test="queryDto.keyword != null and queryDto.keyword != ''">
                 AND (
-                    bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%') 
-                    OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%') 
+                    bde.name LIKE CONCAT('%', #{queryDto.keyword}, '%')
+                    OR bde.definition LIKE CONCAT('%', #{queryDto.keyword}, '%')
                     OR bde.data_element_id LIKE CONCAT('%', #{queryDto.keyword}, '%')
                 )
             </if>
         </if>
-        
+
         <!-- 排序 -->
         <choose>
             <when test="queryDto != null and queryDto.sortField != null and queryDto.sortField != '' and queryDto.sortOrder != null and queryDto.sortOrder != ''">
