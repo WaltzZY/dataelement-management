@@ -31,4 +31,12 @@ public interface RevisionCommentMapper extends BaseMapper<RevisionComment> {
      * @return 所有修订意见列表，按create_date时间倒序排列
      */
     List<RevisionComment> selectAllByDataId(@Param("dataElementId") String dataElementId);
+    
+    /**
+     * 批量插入修订意见
+     * 
+     * @param revisionComments 修订意见列表
+     * @return 插入成功的条数
+     */
+    int batchInsert(@Param("revisionComments") List<RevisionComment> revisionComments);
 }

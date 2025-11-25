@@ -7,12 +7,15 @@
         SELECT 
             id,
             base_dataelement_dataid AS baseDataelementDataid,
-            comment AS revisionContent,
+            comment,
+            revision_initiator_account AS revisionInitiatorAccount,
+            revision_initiator_name AS revisionInitiatorName,
             revision_createdate AS revisionCreatedate,
+            revision_initiator_tel AS revisionInitiatorTel,
             create_date AS createDate,
-            last_modify_date AS modifyDate,
             create_account AS createAccount,
-            last_modify_account AS modifyAccount
+            last_modify_date AS lastModifyDate,
+            last_modify_account AS lastModifyAccount
         FROM revision_comment
         WHERE base_dataelement_dataid = #{dataElementId}
         ORDER BY create_date DESC
@@ -24,15 +27,50 @@
         SELECT 
             id,
             base_dataelement_dataid AS baseDataelementDataid,
-            comment AS revisionContent,
+            comment,
+            revision_initiator_account AS revisionInitiatorAccount,
+            revision_initiator_name AS revisionInitiatorName,
             revision_createdate AS revisionCreatedate,
+            revision_initiator_tel AS revisionInitiatorTel,
             create_date AS createDate,
-            last_modify_date AS modifyDate,
             create_account AS createAccount,
-            last_modify_account AS modifyAccount
+            last_modify_date AS lastModifyDate,
+            last_modify_account AS lastModifyAccount
         FROM revision_comment
         WHERE base_dataelement_dataid = #{dataElementId}
         ORDER BY create_date DESC
     </select>
+    
+    <!-- 批量插入修订意见 -->
+    <insert id="batchInsert">
+        INSERT INTO revision_comment (
+            id,
+            base_dataelement_dataid,
+            comment,
+            revision_initiator_account,
+            revision_initiator_name,
+            revision_createdate,
+            revision_initiator_tel,
+            create_date,
+            create_account,
+            last_modify_date,
+            last_modify_account
+        ) VALUES
+        <foreach collection="revisionComments" item="item" separator=",">
+        (
+            #{item.id},
+            #{item.baseDataelementDataid},
+            #{item.comment},
+            #{item.revisionInitiatorAccount},
+            #{item.revisionInitiatorName},
+            #{item.revisionCreatedate},
+            #{item.revisionInitiatorTel},
+            #{item.createDate},
+            #{item.createAccount},
+            #{item.lastModifyDate},
+            #{item.lastModifyAccount}
+        )
+        </foreach>
+    </insert>
 
 </mapper>

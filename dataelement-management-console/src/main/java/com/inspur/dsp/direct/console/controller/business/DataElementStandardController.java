@@ -297,7 +297,7 @@ public class DataElementStandardController {
      */
     @PostMapping("/appvoveStandard")
     @RespAdvice
-    public ApproveResultVo appvoveStandard(@RequestBody @Valid ApproveInfoDTO approveDTO) {
+    public StandardOperationResultVo appvoveStandard(@RequestBody @Valid ApproveInfoDTO approveDTO) {
         log.info("审核标准 - approveDTO: {}", approveDTO);
         return dataElementStandardService.appvoveStandard(approveDTO);
     }
@@ -347,7 +347,198 @@ public class DataElementStandardController {
         dataElementStandardService.exportDoneOrganizerList(queryDto, response);
     }
 
+    /**
+     * 导出已发布数据元列表
+     */
+    @PostMapping("/exportPublishedList")
+    public void exportPublishedList(@RequestBody @Valid AuditDataElementQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出已发布数据元列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportPublishedList(queryDto, response);
+    }
+
+    /**
+     * 导出进度列表 (009页面 - 我要了解进度)
+     */
+    @PostMapping("/exportProgressList")
+    public void exportProgressList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出进度列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportProgressList(queryDto, response);
+    }
+
+    /**
+     * 导出数源单位在办列表 (011页面)
+     */
+    @PostMapping("/exportSourceUnitInProgressList")
+    public void exportSourceUnitInProgressList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出数源单位在办列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportSourceUnitInProgressList(queryDto, response);
+    }
+
+    /**
+     * 导出组织方在办-待审核列表 (012页面)
+     */
+    @PostMapping("/exportOrgAuditInProgressList")
+    public void exportOrgAuditInProgressList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办-待审核列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportOrgAuditInProgressList(queryDto, response);
+    }
+
+    /**
+     * 导出组织方在办-征求意见列表 (013页面)
+     */
+    @PostMapping("/exportOrgOpinionInProgressList")
+    public void exportOrgOpinionInProgressList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办-征求意见列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportOrgOpinionInProgressList(queryDto, response);
+    }
+
+    /**
+     * 导出组织方在办-待复审列表 (014页面)
+     */
+    @PostMapping("/exportOrgReexamInProgressList")
+    public void exportOrgReexamInProgressList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办-待复审列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportOrgReexamInProgressList(queryDto, response);
+    }
+
+    /**
+     * 导出组织方在办-待发布列表 (015页面)
+     */
+    @PostMapping("/exportOrgReleaseInProgressList")
+    public void exportOrgReleaseInProgressList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办-待发布列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportOrgReleaseInProgressList(queryDto, response);
+    }
+
+    /**
+     * 导出已完成列表 (016页面)
+     */
+    @PostMapping("/exportCompletedList")
+    public void exportCompletedList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出已完成列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportCompletedList(queryDto, response);
+    }
+
+    /**
+     * 导出我要了解情况列表 (019页面)
+     */
+    @PostMapping("/exportUnderstandingSituationList")
+    public void exportUnderstandingSituationList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出我要了解情况列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportUnderstandingSituationList(queryDto, response);
+    }
+
+    /**
+     * 导出数源单位定标结果列表 (020页面)
+     */
+    @PostMapping("/exportSourceUnitStandardResultList")
+    public void exportSourceUnitStandardResultList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出数源单位定标结果列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportSourceUnitStandardResultList(queryDto, response);
+    }
+
+    /**
+     * 导出组织方定标结果列表 (010页面)
+     */
+    @PostMapping("/exportOrgStandardResultList")
+    public void exportOrgStandardResultList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方定标结果列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportOrgStandardResultList(queryDto, response);
+    }
+
+    /**
+     * 导出本单位在办列表 (021页面)
+     */
+    @PostMapping("/exportOwnUnitInProgressList")
+    public void exportOwnUnitInProgressList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出本单位在办列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportOwnUnitInProgressList(queryDto, response);
+    }
+
+    /**
+     * 导出组织方在办列表 (022页面)
+     */
+    @PostMapping("/exportOrgInProgressList")
+    public void exportOrgInProgressList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办列表 - queryDto: {}", queryDto);
+        dataElementStandardService.exportOrgInProgressList(queryDto, response);
+    }
+
+    /**
+     * 导出已完成列表页 (023页面)
+     */
+    @PostMapping("/exportCompletedPageList")
+    public void exportCompletedPageList(@RequestBody @Valid StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出已完成列表页 - queryDto: {}", queryDto);
+        dataElementStandardService.exportCompletedPageList(queryDto, response);
+    }
+
+    // ============== 005 页面：我要发起修订 接口开始 ==============
+
+    /**
+     * 单条发起修订操作
+     * 支持单条发起修订和报送操作
+     */
+    @PostMapping("/initiateRevision")
+    @RespAdvice
+    public StandardOperationResultVo initiateRevision(@RequestBody @Valid RevisionInfoDTO revisionDTO) {
+        log.info("单条发起修订操作 - revisionDTO: {}", revisionDTO);
+        return dataElementStandardService.initiateRevision(revisionDTO);
+    }
+
+    /**
+     * 批量发起修订操作
+     * 通过文件流进行批量修订操作
+     */
+    @PostMapping("/batchInitiateRevision")
+    @RespAdvice
+    public StandardOperationResultVo batchInitiateRevision(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam @NotBlank(message = "操作类型不能为空") String useroperation,
+            @RequestParam String usersuggestion) {
+        log.info("批量发起修订操作 - useroperation: {}, fileName: {}", useroperation, file.getOriginalFilename());
+        return dataElementStandardService.batchInitiateRevision(file, useroperation, usersuggestion);
+    }
+
+    /**
+     * 导出修订失败条目
+     * 导出批量发起修订操作中失败的条目
+     */
+    @PostMapping("/exportRevisionFailures")
+    public void exportRevisionFailures(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam @NotBlank(message = "操作类型不能为空") String useroperation,
+            @RequestParam String usersuggestion,
+            HttpServletResponse response) {
+        log.info("导出修订失败条目 - useroperation: {}, fileName: {}", useroperation, file.getOriginalFilename());
+        dataElementStandardService.exportRevisionFailures(file, useroperation, usersuggestion, response);
+    }
+
     // ============== 006 页面：我要复审 接口开始 ==============
 
-    // ============== 006 页面：我要复审 接口结束 ==============
+    
+    /**
+     * 复审操作
+     * 支持批量复审（报送通过/驳回）
+     */
+    @PostMapping("/reExaminationStandard")
+    @RespAdvice
+    public StandardOperationResultVo reExaminationStandard(@RequestBody @Valid ReExaminationDataElementDTO reExaminationDTO) {
+        log.info("复审操作 - reExaminationDTO: {}", reExaminationDTO);
+        return dataElementStandardService.reExaminationStandard(reExaminationDTO);
+    }
+
+    /**
+     * 我要发布标准
+     * 支持单条和批量发布操作
+     */
+    @PostMapping("/publishStandard")
+    @RespAdvice
+    public StandardOperationResultVo publishStandard(@RequestBody @Valid ApproveInfoDTO publishDTO) {
+        log.info("发布标准 - publishDTO: {}", publishDTO);
+        return dataElementStandardService.publishStandard(publishDTO);
+    }
+
+
+
 }

@@ -28,34 +28,34 @@ public class RevisionComment {
     private String baseDataelementDataid;
     
     /**
-     * 修订意见内容
+     * 修订意见内容（对应数据库comment字段）
      */
-    private String revisionContent;
+    private String comment;
+    
+    /**
+     * 修订发起人账号
+     */
+    private String revisionInitiatorAccount;
+    
+    /**
+     * 修订发起人姓名
+     */
+    private String revisionInitiatorName;
     
     /**
      * 修订创建时间
      */
     private Date revisionCreatedate;
-
+    
     /**
-     * 修订发起人姓名
+     * 修订发起人电话
      */
-    private String revisionCreateName;
-
-
-    /**
-     * 修订发起人账号
-     */
-    private String revisionCreateAccount;
+    private String revisionInitiatorTel;
+    
     /**
      * 创建时间
      */
     private Date createDate;
-    
-    /**
-     * 修改时间
-     */
-    private Date modifyDate;
     
     /**
      * 创建人账号
@@ -63,12 +63,12 @@ public class RevisionComment {
     private String createAccount;
     
     /**
-     * 修改人账号
+     * 最后修改时间
      */
-    private String modifyAccount;
+    private Date lastModifyDate;
     
     /**
-     * 联系电话
+     * 最后修改人账号
      */
-    private String contactTel;
+    private String lastModifyAccount;
 }

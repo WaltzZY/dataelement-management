@@ -22,13 +22,13 @@ public class ExportPendingReviewDTO {
     /**
      * 数据元名称
      */
-    @ExcelProperty("名称")
+    @ExcelProperty("基准数据元名称")
     private String name;
     
     /**
      * 数据元编码
      */
-    @ExcelProperty("标识符")
+    @ExcelProperty("数据元编码")
     private String dataElementId;
     
     /**
@@ -56,7 +56,7 @@ public class ExportPendingReviewDTO {
     private String statusDesc;
     
     /**
-     * 提交时间
+     * 报送时间
      */
     @ExcelProperty("提交时间")
     private Date lastSubmitDate;

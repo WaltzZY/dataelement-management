@@ -175,7 +175,7 @@ public interface DataElementStandardService {
      * @param approveDTO 审核信息DTO
      * @return 审核结果VO
      */
-    ApproveResultVo appvoveStandard(ApproveInfoDTO approveDTO);
+    StandardOperationResultVo appvoveStandard(ApproveInfoDTO approveDTO);
 
     /**
      * 导出待审核列表
@@ -216,5 +216,166 @@ public interface DataElementStandardService {
      * @param response HttpServletResponse对象
      */
     void exportDoneOrganizerList(AuditDataElementQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 复审操作
+     * 支持批量复审（报送通过/驳回）
+     *
+     * @param reExaminationDTO 复审操作DTO
+     * @return 复审操作结果VO
+     */
+    StandardOperationResultVo reExaminationStandard(ReExaminationDataElementDTO reExaminationDTO);
+
+    /**
+     * 发起修订操作
+     * 支持单条和批量发起修订
+     *
+     * @param revisionDTO 发起修订DTO
+     * @return 发起修订操作结果VO
+     */
+    StandardOperationResultVo initiateRevision(RevisionInfoDTO revisionDTO);
+
+    /**
+     * 批量发起修订操作
+     * 通过文件流进行批量修订操作
+     *
+     * @param file 包含数据元ID列表的文件
+     * @param useroperation 操作类型（发起修订、报送）
+     * @param usersuggestion 修订意见
+     * @return 批量发起修订操作结果VO
+     */
+    StandardOperationResultVo batchInitiateRevision(MultipartFile file, String useroperation, String usersuggestion);
+
+    /**
+     * 我要发布标准
+     * 支持单条和批量发布操作
+     *
+     * @param publishDTO 发布信息DTO
+     * @return 发布操作结果VO
+     */
+    StandardOperationResultVo publishStandard(ApproveInfoDTO publishDTO);
+
+    /**
+     * 导出修订失败条目
+     * 导出批量发起修订操作中失败的条目
+     *
+     * @param file 包含数据元ID列表的文件
+     * @param useroperation 操作类型（发起修订、报送）
+     * @param usersuggestion 修订意见
+     * @param response HttpServletResponse对象
+     */
+    void exportRevisionFailures(MultipartFile file, String useroperation, String usersuggestion, HttpServletResponse response);
+
+    /**
+     * 导出已发布数据元列表
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportPublishedList(AuditDataElementQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出进度列表 (009页面 - 我要了解进度)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出数源单位在办列表 (011页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportSourceUnitInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出组织方在办-待审核列表 (012页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportOrgAuditInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出组织方在办-征求意见列表 (013页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportOrgOpinionInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出组织方在办-待复审列表 (014页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportOrgReexamInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出组织方在办-待发布列表 (015页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportOrgReleaseInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出已完成列表 (016页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportCompletedList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出我要了解情况列表 (019页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportUnderstandingSituationList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出数源单位定标结果列表 (020页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportSourceUnitStandardResultList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出组织方定标结果列表 (010页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportOrgStandardResultList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出本单位在办列表 (021页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportOwnUnitInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出组织方在办列表 (022页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportOrgInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
+
+    /**
+     * 导出已完成列表页 (023页面)
+     *
+     * @param queryDto 查询条件DTO
+     * @param response HttpServletResponse对象
+     */
+    void exportCompletedPageList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
 
 }

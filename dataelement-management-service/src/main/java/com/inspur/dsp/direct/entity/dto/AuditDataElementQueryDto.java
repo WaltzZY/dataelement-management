@@ -98,6 +98,16 @@ public class AuditDataElementQueryDto {
     private Date initiateRevisionTimeEnd;
     
     /**
+     * 定源开始时间
+     */
+    private Date sourceTimeBegin;
+    
+    /**
+     * 定源结束时间
+     */
+    private Date sourceTimeEnd;
+    
+    /**
      * 关键词（在数据元名称、数据元编码、定义中模糊匹配）
      */
     private String keyword;

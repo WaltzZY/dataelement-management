@@ -2,25 +2,20 @@ package com.inspur.dsp.direct.entity.dto;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
+
 import java.util.Date;
 
 /**
- * 导出组织方已处理状态列表DTO
+ * 组织方在办-征求意见列表导出DTO (013页面)
  * 
  * @author system
  * @since 2025
  */
 @Data
-public class ExportDoneOrganizerDTO {
+public class ExportOrgOpinionInProgressDTO {
     
     /**
-     * 序号
-     */
-    @ExcelProperty("序号")
-    private String serialNumber;
-    
-    /**
-     * 数据元名称
+     * 基准数据元名称
      */
     @ExcelProperty("基准数据元名称")
     private String name;
@@ -29,10 +24,10 @@ public class ExportDoneOrganizerDTO {
      * 数据元编码
      */
     @ExcelProperty("数据元编码")
-    private String dataElementId;
+    private String dataElementCode;
     
     /**
-     * 数据元定义
+     * 定义
      */
     @ExcelProperty("定义")
     private String definition;
@@ -50,26 +45,20 @@ public class ExportDoneOrganizerDTO {
     private String sourceUnitName;
     
     /**
-     * 状态描述
+     * 状态
      */
     @ExcelProperty("状态")
     private String statusDesc;
     
     /**
+     * 定源时间
+     */
+    @ExcelProperty("定源时间")
+    private Date confirmDate;
+    
+    /**
      * 审核时间
      */
-    @ExcelProperty("审核驳回时间")
-    private Date lastApproveDate;
-    
-    /**
-     * 发起修订时间
-     */
-    @ExcelProperty("发起修订时间")
-    private Date lastInitiateRevisedDate;
-    
-    /**
-     * 发布时间
-     */
-    @ExcelProperty("发布时间")
-    private Date publishDate;
+    @ExcelProperty("审核时间")
+    private Date auditTime;
 }
