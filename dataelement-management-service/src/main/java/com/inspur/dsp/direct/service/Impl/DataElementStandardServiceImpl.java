@@ -664,9 +664,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
 
         // 更新数据元状态
+        Date date = new Date();
         dataElement.setStatus(nextStatus);
-        dataElement.setLastModifyDate(new Date());
+        dataElement.setLastModifyDate(date);
         dataElement.setLastModifyAccount(userInfo.getAccount());
+        dataElement.setLastSubmitDate(date);
         baseDataElementMapper.updateById(dataElement);
 
         // 记录流程历史
