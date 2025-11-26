@@ -185,15 +185,15 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 RevisionCommentVO vo = new RevisionCommentVO();
                 
                 // 如果是多条记录，添加序号到修订意见内容中
-                String content = entity.getRevisionContent();
+                String content = entity.getComment();
                 if (revisionCommentEntities.size() > 1) {
                     content = (i + 1) + ". " + content;
                 }
                 vo.setRevisionContent(content);
                 vo.setRevisionCreatedate(entity.getRevisionCreatedate());
                 vo.setRevisionInitiatorAccount(entity.getCreateAccount());
-                vo.setRevisionInitiatorName(entity.getRevisionCreateName()); // 当前设为空，后续可以添加用户信息查询
-                vo.setContactTel(entity.getContactTel());
+                vo.setRevisionInitiatorName(entity.getRevisionInitiatorName()); // 当前设为空，后续可以添加用户信息查询
+                vo.setContactTel(entity.getRevisionInitiatorTel());
                 
                 revisionComments.add(vo);
             }
@@ -607,7 +607,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 计算下一状态 - 将designated_source映射为TodoDetermined用于查询流程配置
         String flowStatus = mapStatusForFlow(dataElement.getStatus());
-        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(flowStatus, "提交复审");
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(flowStatus, "审核通过");
         if (!nextStatusVo.getIsValid()) {
             throw new RuntimeException("状态流转配置不存在或无效");
         }
@@ -1035,6 +1035,10 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 处理发起修订时间
         normalizeDateField(queryDto.getInitiateRevisionTimeBegin(), queryDto::setInitiateRevisionTimeBegin, true);
         normalizeDateField(queryDto.getInitiateRevisionTimeEnd(), queryDto::setInitiateRevisionTimeEnd, false);
+        
+        // 处理定源时间
+        normalizeDateField(queryDto.getSourceTimeBegin(), queryDto::setSourceTimeBegin, true);
+        normalizeDateField(queryDto.getSourceTimeEnd(), queryDto::setSourceTimeEnd, false);
     }
     
     /**
@@ -1085,23 +1089,23 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     }
 
     @Override
-    public ApproveResultVo appvoveStandard(ApproveInfoDTO approveDTO) {
+    public StandardOperationResultVo appvoveStandard(ApproveInfoDTO approveDTO) {
         log.info("审核标准 - approveDTO: {}", approveDTO);
         
         if (approveDTO.getList() == null || approveDTO.getList().isEmpty()) {
             throw new IllegalArgumentException("数据元ID列表不能为空");
         }
-        
+
         // 驳回时必须提供意见
-        if ("驳回".equals(approveDTO.getUseroperation()) && 
+        if ("驳回".equals(approveDTO.getUseroperation()) &&
             (approveDTO.getUsersuggestion() == null || approveDTO.getUsersuggestion().trim().isEmpty())) {
             throw new IllegalArgumentException("驳回意见不能为空");
         }
-        
+
         int successCount = 0;
         int errorCount = 0;
         StringBuilder errorDetails = new StringBuilder();
-        
+
         for (String dataid : approveDTO.getList()) {
             try {
                 // 验证数据元是否存在
@@ -1111,7 +1115,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                     errorDetails.append("数据元[").append(dataid).append("]不存在；");
                     continue;
                 }
-                
+
                 // 根据审核操作类型处理
                 if ("审核通过".equals(approveDTO.getUseroperation())) {
                     // 处理审核通过逻辑
@@ -1125,37 +1129,37 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                     errorCount++;
                     errorDetails.append("数据元[").append(dataid).append("]操作类型无效；");
                 }
-                
+
             } catch (Exception e) {
                 errorCount++;
                 errorDetails.append("数据元[").append(dataid).append("]处理失败：").append(e.getMessage()).append("；");
                 log.error("审核数据元[{}]时发生异常", dataid, e);
             }
         }
-        
+
         // 构建返回结果
-        ApproveResultVo result = new ApproveResultVo();
+        StandardOperationResultVo result = new StandardOperationResultVo();
         result.setSuccessCount(successCount);
         result.setErrorCount(errorCount);
         result.setTotalCount(approveDTO.getList().size());
         result.setOperationType(approveDTO.getUseroperation());
         result.setIsSuccess(errorCount == 0);
-        
+
         String resultMessage = String.format("审核完成：成功%d条，失败%d条", successCount, errorCount);
         result.setResultMessage(resultMessage);
-        
+
         if (errorCount > 0) {
             result.setErrorDetails(errorDetails.toString());
         }
-        
+
         log.info("审核结果：{}", resultMessage);
         return result;
     }
-    
+
     private void processApprovalPass(BaseDataElement dataElement, String dataid, String usersuggestion) {
         // 获取当前登录用户信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-        
+
         // 计算下一状态
         String originalStatus = dataElement.getStatus();
         NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(originalStatus, "审核通过");
@@ -1163,14 +1167,14 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             throw new RuntimeException("状态流转配置不存在或无效");
         }
         String nextStatus = nextStatusVo.getNextStatus();
-        
+
         // 更新数据元状态和审核时间
         dataElement.setStatus(nextStatus);
         dataElement.setLastApproveDate(new Date());
         dataElement.setLastModifyDate(new Date());
         dataElement.setLastModifyAccount(userInfo.getAccount());
         baseDataElementMapper.updateById(dataElement);
-        
+
         // 记录流程历史到process_record表
         ProcessRecordDto processRecordDto = new ProcessRecordDto();
         processRecordDto.setBaseDataelementDataid(dataid);
@@ -1184,21 +1188,21 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         processRecordDto.setUsersuggestion(usersuggestion); // 审核意见写入process_record（可以为null）
         processRecordDto.setOperateTime(new Date()); // 确保记录时间，防止时间差
         flowProcessService.recordProcessHistory(processRecordDto);
-        
+
         log.info("数据元[{}]审核通过，状态变更为：{}", dataid, nextStatus);
     }
-    
+
     private void processApprovalReject(BaseDataElement dataElement, String dataid, String usersuggestion) {
         // 获取当前登录用户信息
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-        
+
         // 计算下一状态（驳回）
         NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(dataElement.getStatus(), "驳回");
         if (!nextStatusVo.getIsValid()) {
             throw new RuntimeException("状态流转配置不存在或无效");
         }
         String nextStatus = nextStatusVo.getNextStatus();
-        
+
         // 更新数据元状态和审核时间
         String originalStatus = dataElement.getStatus();
         dataElement.setStatus(nextStatus);
@@ -1206,7 +1210,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         dataElement.setLastModifyDate(new Date());
         dataElement.setLastModifyAccount(userInfo.getAccount());
         baseDataElementMapper.updateById(dataElement);
-        
+
         // 记录流程历史到process_record表（驳回意见写入usersuggestion字段）
         ProcessRecordDto processRecordDto = new ProcessRecordDto();
         processRecordDto.setBaseDataelementDataid(dataid);
@@ -1220,25 +1224,25 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         processRecordDto.setUsersuggestion(usersuggestion); // 驳回意见写入process_record的usersuggestion字段
         processRecordDto.setOperateTime(new Date()); // 确保记录时间，防止时间差
         flowProcessService.recordProcessHistory(processRecordDto);
-        
+
         log.info("数据元[{}]已驳回，状态变更为：{}，驳回意见：{}", dataid, nextStatus, usersuggestion);
     }
 
     @Override
     public void exportPendingReviewList(AuditDataElementQueryDto queryDto, HttpServletResponse response) {
         log.info("导出待审核列表 - queryDto: {}", queryDto);
-        
+
         // 移除分页参数，查询所有数据
         queryDto.setPageNum(null);
         queryDto.setPageSize(null);
-        
+
         // 查询所有符合条件的数据元记录
         List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
-        
+
         if (exportList == null) {
             exportList = new ArrayList<>();
         }
-        
+
         // 数据转换
         List<ExportPendingReviewDTO> exportData = new ArrayList<>();
         for (int i = 0; i < exportList.size(); i++) {
@@ -1254,7 +1258,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setLastSubmitDate(vo.getLastSubmitDate());
             exportData.add(dto);
         }
-        
+
         // 导出Excel
         try {
             commonService.exportExcelData(exportData, response, "待审核数据元列表", ExportPendingReviewDTO.class);
@@ -1267,18 +1271,18 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     @Override
     public void exportSolicitingOpinionsList(AuditDataElementQueryDto queryDto, HttpServletResponse response) {
         log.info("导出征求意见列表 - queryDto: {}", queryDto);
-        
+
         // 移除分页参数，查询所有数据
         queryDto.setPageNum(null);
         queryDto.setPageSize(null);
-        
+
         // 查询所有符合条件的数据元记录
         List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
-        
+
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
         }
-        
+
         // 数据转换
         List<ExportSolicitingOpinionsDTO> exportData = new ArrayList<>();
         for (int i = 0; i < exportList.size(); i++) {
@@ -1295,7 +1299,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setLastApproveDate(vo.getLastApproveDate());
             exportData.add(dto);
         }
-        
+
         // 导出Excel
         try {
             commonService.exportExcelData(exportData, response, "征求意见数据元列表", ExportSolicitingOpinionsDTO.class);
@@ -1308,18 +1312,18 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     @Override
     public void exportPendingReExaminationList(AuditDataElementQueryDto queryDto, HttpServletResponse response) {
         log.info("导出待复审列表 - queryDto: {}", queryDto);
-        
+
         // 移除分页参数，查询所有数据
         queryDto.setPageNum(null);
         queryDto.setPageSize(null);
-        
+
         // 查询所有符合条件的数据元记录
         List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
-        
+
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
         }
-        
+
         // 数据转换
         List<ExportPendingReExaminationDTO> exportData = new ArrayList<>();
         for (int i = 0; i < exportList.size(); i++) {
@@ -1335,7 +1339,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setLastSubmitReexaminationDate(vo.getLastSubmitReexaminationDate());
             exportData.add(dto);
         }
-        
+
         // 导出Excel
         try {
             commonService.exportExcelData(exportData, response, "待复审数据元列表", ExportPendingReExaminationDTO.class);
@@ -1348,18 +1352,18 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     @Override
     public void exportTodoReleasedList(AuditDataElementQueryDto queryDto, HttpServletResponse response) {
         log.info("导出待发布列表 - queryDto: {}", queryDto);
-        
+
         // 移除分页参数，查询所有数据
         queryDto.setPageNum(null);
         queryDto.setPageSize(null);
-        
+
         // 查询所有符合条件的数据元记录
         List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
-        
+
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
         }
-        
+
         // 数据转换
         List<ExportTodoReleasedDTO> exportData = new ArrayList<>();
         for (int i = 0; i < exportList.size(); i++) {
@@ -1375,7 +1379,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setLastSubmitReleasedDate(vo.getLastSubmitReleasedDate());
             exportData.add(dto);
         }
-        
+
         // 导出Excel
         try {
             commonService.exportExcelData(exportData, response, "待发布数据元列表", ExportTodoReleasedDTO.class);
@@ -1388,18 +1392,18 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     @Override
     public void exportDoneOrganizerList(AuditDataElementQueryDto queryDto, HttpServletResponse response) {
         log.info("导出组织方已处理列表 - queryDto: {}", queryDto);
-        
+
         // 移除分页参数，查询所有数据
         queryDto.setPageNum(null);
         queryDto.setPageSize(null);
-        
+
         // 查询所有符合条件的数据元记录
         List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
-        
+
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
         }
-        
+
         // 数据转换
         List<ExportDoneOrganizerDTO> exportData = new ArrayList<>();
         for (int i = 0; i < exportList.size(); i++) {
@@ -1417,7 +1421,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             dto.setPublishDate(vo.getPublishDate());
             exportData.add(dto);
         }
-        
+
         // 导出Excel
         try {
             commonService.exportExcelData(exportData, response, "组织方已处理数据元列表", ExportDoneOrganizerDTO.class);
@@ -1426,7 +1430,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             throw new RuntimeException("导出失败");
         }
     }
-    
+
     /**
      * 查询流程记录列表
      * 只有一个dataid参数，先去base_data_element [基准数据元表]查询数据元状态，
@@ -1437,9 +1441,9 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
      */
     private List<ProcessVO> getProcessRecords(String dataid) {
         log.info("查询流程记录 - dataid: {}", dataid);
-        
+
         List<ProcessVO> result = new ArrayList<>();
-        
+
         try {
             // 1. 先去base_data_element [基准数据元表]查询数据元状态
             BaseDataElement dataElement = baseDataElementMapper.selectById(dataid);
@@ -1449,10 +1453,10 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             }
             String currentStatus = dataElement.getStatus();
             log.info("查询到数据元状态: {}", currentStatus);
-            
+
             // 2. 查询flow_activity_definition表，获取所有节点并按顺序排序（不使用flowid过滤）
             List<FlowActivityDefinition> allActivities = flowActivityDefinitionMapper.selectAll();
-            
+
             // 3. 将数据元状态直接当做activityname，找到当前状态对应的activityorder
             Integer currentOrder = null;
             for (FlowActivityDefinition activity : allActivities) {
@@ -1461,12 +1465,12 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                     break;
                 }
             }
-            
+
             if (currentOrder == null) {
                 log.warn("未找到当前状态[{}]对应的流程节点", currentStatus);
                 return result;
             }
-            
+
             // 4. 获取当前状态及小于当前状态的所有节点名称
             Set<String> allowedActivityNames = new HashSet<>();
             for (FlowActivityDefinition activity : allActivities) {
@@ -1474,12 +1478,12 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                     allowedActivityNames.add(activity.getActivityname());
                 }
             }
-            
+
             log.info("当前状态[{}]，当前order[{}]，允许的流程节点: {}", currentStatus, currentOrder, allowedActivityNames);
-            
+
             // 5. 查询process_record表中的所有记录
             List<ProcessRecord> dbRecords = processRecordMapper.getProcessRecordsByDataId(dataid);
-            
+
             // 6. 过滤出目标状态在允许列表中的记录，并转换为ProcessVO
             for (ProcessRecord record : dbRecords) {
                 if (record.getDestactivityname() != null && allowedActivityNames.contains(record.getDestactivityname())) {
@@ -1491,16 +1495,16 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                     result.add(processVO);
                 }
             }
-            
+
             log.info("查询到{}条符合条件的流程记录", result.size());
-            
+
         } catch (Exception e) {
             log.error("查询流程记录失败 - dataid: {}", dataid, e);
         }
-        
+
         return result;
     }
-    
+
     /**
      * 将数据元状态映射为flow_activity_definition表中的activityname
      * @param status 数据元状态
@@ -1524,6 +1528,1128 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 return "已发布";
             default:
                 return status;
+        }
+    }
+
+    @Override
+    public StandardOperationResultVo reExaminationStandard(ReExaminationDataElementDTO reExaminationDTO) {
+        log.info("复审操作 - reExaminationDTO: {}", reExaminationDTO);
+
+        if (reExaminationDTO.getDataid() == null || reExaminationDTO.getDataid().isEmpty()) {
+            throw new IllegalArgumentException("数据元ID列表不能为空");
+        }
+
+        // 驳回时必须提供意见
+        if ("驳回".equals(reExaminationDTO.getUseroperation()) &&
+            (reExaminationDTO.getUsersuggestion() == null || reExaminationDTO.getUsersuggestion().trim().isEmpty())) {
+            throw new IllegalArgumentException("驳回意见不能为空");
+        }
+
+        int successCount = 0;
+        int errorCount = 0;
+        StringBuilder errorDetails = new StringBuilder();
+
+        for (String dataid : reExaminationDTO.getDataid()) {
+            try {
+                // 验证数据元是否存在
+                BaseDataElement dataElement = baseDataElementMapper.selectById(dataid);
+                if (dataElement == null) {
+                    errorCount++;
+                    errorDetails.append("数据元[").append(dataid).append("]不存在；");
+                    continue;
+                }
+                
+                // 根据复审操作类型处理
+                if ("报送通过".equals(reExaminationDTO.getUseroperation())) {
+                    // 处理复审通过逻辑
+                    processReExaminationPass(dataElement, dataid, reExaminationDTO.getUsersuggestion());
+                    successCount++;
+                } else if ("驳回".equals(reExaminationDTO.getUseroperation())) {
+                    // 处理驳回逻辑
+                    processReExaminationReject(dataElement, dataid, reExaminationDTO.getUsersuggestion());
+                    successCount++;
+                } else {
+                    errorCount++;
+                    errorDetails.append("数据元[").append(dataid).append("]操作类型无效；");
+                }
+                
+            } catch (Exception e) {
+                errorCount++;
+                errorDetails.append("数据元[").append(dataid).append("]处理失败：").append(e.getMessage()).append("；");
+                log.error("复审数据元[{}]时发生异常", dataid, e);
+            }
+        }
+        
+        // 构建返回结果
+        StandardOperationResultVo result = new StandardOperationResultVo();
+        result.setSuccessCount(successCount);
+        result.setErrorCount(errorCount);
+        result.setTotalCount(reExaminationDTO.getDataid().size());
+        result.setOperationType(reExaminationDTO.getUseroperation());
+        result.setIsSuccess(errorCount == 0);
+        
+        String resultMessage = String.format("复审完成：成功%d条，失败%d条", successCount, errorCount);
+        result.setResultMessage(resultMessage);
+        
+        if (errorCount > 0) {
+            result.setErrorDetails(errorDetails.toString());
+        }
+        
+        log.info("复审结果：{}", resultMessage);
+        return result;
+    }
+    
+    private void processReExaminationPass(BaseDataElement dataElement, String dataid, String usersuggestion) {
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        
+        // 计算下一状态
+        String originalStatus = dataElement.getStatus();
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(originalStatus, "审核通过");
+        if (!nextStatusVo.getIsValid()) {
+            throw new RuntimeException("状态流转配置不存在或无效");
+        }
+        String nextStatus = nextStatusVo.getNextStatus();
+        
+        // 更新数据元状态和复审时间
+        dataElement.setStatus(nextStatus);
+        dataElement.setLastSubmitreleasedDate(new Date());
+        dataElement.setLastModifyDate(new Date());
+        dataElement.setLastModifyAccount(userInfo.getAccount());
+        baseDataElementMapper.updateById(dataElement);
+        
+        // 记录流程历史到process_record表
+        ProcessRecordDto processRecordDto = new ProcessRecordDto();
+        processRecordDto.setBaseDataelementDataid(dataid);
+        processRecordDto.setOperation("报送通过");
+        processRecordDto.setSourceStatus(originalStatus);
+        processRecordDto.setDestStatus(nextStatus);
+        processRecordDto.setOperatorAccount(userInfo.getAccount());
+        processRecordDto.setOperatorName(userInfo.getName());
+        processRecordDto.setOperatorUnitCode(userInfo.getOrgCode());
+        processRecordDto.setOperatorUnitName(userInfo.getOrgName());
+        processRecordDto.setUsersuggestion(usersuggestion); // 复审意见写入process_record（可以为null）
+        processRecordDto.setOperateTime(new Date()); // 确保记录时间，防止时间差
+        flowProcessService.recordProcessHistory(processRecordDto);
+        
+        log.info("数据元[{}]复审通过，状态变更为：{}", dataid, nextStatus);
+    }
+    
+    private void processReExaminationReject(BaseDataElement dataElement, String dataid, String usersuggestion) {
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        
+        // 计算下一状态（驳回）
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(dataElement.getStatus(), "驳回");
+        if (!nextStatusVo.getIsValid()) {
+            throw new RuntimeException("状态流转配置不存在或无效");
+        }
+        String nextStatus = nextStatusVo.getNextStatus();
+        
+        // 更新数据元状态和复审时间
+        String originalStatus = dataElement.getStatus();
+        dataElement.setStatus(nextStatus);
+        dataElement.setLastSubmitreleasedDate(new Date());
+        dataElement.setLastModifyDate(new Date());
+        dataElement.setLastModifyAccount(userInfo.getAccount());
+        baseDataElementMapper.updateById(dataElement);
+        
+        // 记录流程历史到process_record表（驳回意见写入usersuggestion字段）
+        ProcessRecordDto processRecordDto = new ProcessRecordDto();
+        processRecordDto.setBaseDataelementDataid(dataid);
+        processRecordDto.setOperation("驳回");
+        processRecordDto.setSourceStatus(originalStatus);
+        processRecordDto.setDestStatus(nextStatus);
+        processRecordDto.setOperatorAccount(userInfo.getAccount());
+        processRecordDto.setOperatorName(userInfo.getName());
+        processRecordDto.setOperatorUnitCode(userInfo.getOrgCode());
+        processRecordDto.setOperatorUnitName(userInfo.getOrgName());
+        processRecordDto.setUsersuggestion(usersuggestion); // 驳回意见写入process_record的usersuggestion字段
+        processRecordDto.setOperateTime(new Date()); // 确保记录时间，防止时间差
+        flowProcessService.recordProcessHistory(processRecordDto);
+        
+        log.info("数据元[{}]复审驳回，状态变更为：{}，驳回意见：{}", dataid, nextStatus, usersuggestion);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public StandardOperationResultVo initiateRevision(RevisionInfoDTO revisionDTO) {
+        log.info("发起修订操作 - revisionDTO: {}", revisionDTO);
+        
+        if (revisionDTO.getList() == null || revisionDTO.getList().isEmpty()) {
+            throw new IllegalArgumentException("数据元ID列表不能为空");
+        }
+
+        int successCount = 0;
+        int errorCount = 0;
+        List<StandardOperationResultVo.FailureItem> failureItems = new ArrayList<>();
+        List<RevisionComment> revisionComments = new ArrayList<>();
+
+        // 查询所有数据元信息，用于验证存在性
+        List<BaseDataElement> dataElements = dataElementStandardMapper.queryDataElementsByIds(revisionDTO.getList());
+        Map<String, BaseDataElement> dataElementMap = new HashMap<>();
+        for (BaseDataElement element : dataElements) {
+            dataElementMap.put(element.getDataid(), element);
+        }
+
+        for (String dataid : revisionDTO.getList()) {
+            // 验证数据元是否存在
+            BaseDataElement dataElement = dataElementMap.get(dataid);
+            if (dataElement == null) {
+                errorCount++;
+                StandardOperationResultVo.FailureItem failureItem = new StandardOperationResultVo.FailureItem();
+                failureItem.setDataElementName("未知");
+                failureItem.setSourceUnitName("");
+                failureItem.setFailureReason("系统中未找到相关数据元");
+                failureItems.add(failureItem);
+                continue;
+            }
+
+            // 验证修订意见
+            if ("发起修订".equals(revisionDTO.getUseroperation()) &&
+                (revisionDTO.getUsersuggestion() == null || revisionDTO.getUsersuggestion().trim().isEmpty())) {
+                errorCount++;
+                // 获取组织单位名称（非必须，仅用于显示）
+                String sourceUnitName = "";
+                try {
+                    OrganizationUnit orgUnit = organizationUnitMapper.selectById(dataElement.getSourceUnitCode());
+                    sourceUnitName = orgUnit != null ? orgUnit.getUnitName() : "";
+                } catch (Exception e) {
+                    // 组织单位获取失败不影响主流程
+                }
+                
+                StandardOperationResultVo.FailureItem failureItem = new StandardOperationResultVo.FailureItem();
+                failureItem.setDataElementName(dataElement.getName());
+                failureItem.setSourceUnitName(sourceUnitName);
+                failureItem.setFailureReason("修订意见为空");
+                failureItems.add(failureItem);
+                continue;
+            }
+
+            try {
+                // 根据操作类型处理
+                if ("发起修订".equals(revisionDTO.getUseroperation())) {
+                    // 处理发起修订逻辑
+                    processInitiateRevision(dataElement, dataid, revisionDTO.getUsersuggestion());
+                    
+                    // 创建修订意见记录
+                    RevisionComment revisionComment = createRevisionComment(dataid, revisionDTO.getUsersuggestion());
+                    revisionComments.add(revisionComment);
+                    
+                    successCount++;
+                } else if ("报送".equals(revisionDTO.getUseroperation())) {
+                    // 处理报送逻辑
+                    processSubmitRelease(dataElement, dataid, revisionDTO.getUsersuggestion());
+                    successCount++;
+                } else {
+                    // 操作类型无效，但这不应该发生，因为前端应该控制
+                    successCount++;
+                }
+
+            } catch (Exception e) {
+                errorCount++;
+                // 获取组织单位名称（非必须，仅用于显示）
+                String sourceUnitName = "";
+                try {
+                    OrganizationUnit orgUnit = organizationUnitMapper.selectById(dataElement.getSourceUnitCode());
+                    sourceUnitName = orgUnit != null ? orgUnit.getUnitName() : "";
+                } catch (Exception ex) {
+                    // 组织单位获取失败不影响主流程
+                }
+                
+                StandardOperationResultVo.FailureItem failureItem = new StandardOperationResultVo.FailureItem();
+                failureItem.setDataElementName(dataElement.getName());
+                failureItem.setSourceUnitName(sourceUnitName);
+                failureItem.setFailureReason("系统异常：" + e.getMessage());
+                failureItems.add(failureItem);
+                log.error("发起修订数据元[{}]时发生异常", dataid, e);
+            }
+        }
+
+        // 批量插入修订意见记录
+        if (!revisionComments.isEmpty()) {
+            try {
+                revisionCommentMapper.batchInsert(revisionComments);
+            } catch (Exception e) {
+                log.error("批量插入修订意见失败", e);
+                throw new RuntimeException("保存修订意见失败：" + e.getMessage());
+            }
+        }
+
+        // 构建返回结果
+        StandardOperationResultVo result = new StandardOperationResultVo();
+        result.setSuccessCount(successCount);
+        result.setErrorCount(errorCount);
+        result.setTotalCount(revisionDTO.getList().size());
+        result.setOperationType(revisionDTO.getUseroperation());
+        result.setIsSuccess(errorCount == 0);
+        result.setFailureItems(failureItems);
+        
+        if (errorCount == 0) {
+            result.setResultMessage("操作完成，全部成功");
+        } else {
+            result.setResultMessage("操作完成，成功" + successCount + "条，失败" + errorCount + "条");
+        }
+
+        log.info("发起修订操作完成 - 总数：{}，成功：{}，失败：{}", 
+                revisionDTO.getList().size(), successCount, errorCount);
+        
+        return result;
+    }
+
+    /**
+     * 私有方法 - processInitiateRevision
+     * 
+     * 用途：处理单个数据元的发起修订逻辑，确保状态从当前状态过渡到待修订状态，
+     * 同时更新相关时间戳和修订记录。
+     * 
+     * 业务逻辑：首先验证当前数据元是否允许发起修订（例如，必须处于可修订的状态，如征求意见）。
+     * 然后，计算下一状态，更新数据元的最后发起修订时间、最后修改时间和最后修改人。
+     * 创建流程记录，包括操作类型"发起修订"、源状态、目标状态、操作人信息和修订意见。
+     * 
+     * 状态流转：当前状态（征求意见） → "按意见完善" → 待修订状态。
+     * 
+     * @param dataElement 数据元实体
+     * @param dataid 数据元ID
+     * @param usersuggestion 用户修订意见
+     */
+    private void processInitiateRevision(BaseDataElement dataElement, String dataid, String usersuggestion) {
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        
+        String originalStatus = dataElement.getStatus();
+        
+        // 验证当前数据元是否允许发起修订（必须处于可修订的状态，如征求意见）
+        if (!"征求意见".equals(originalStatus)) {
+            throw new RuntimeException("数据元当前状态为[" + originalStatus + "]，不允许发起修订操作，只有处于[征求意见]状态的数据元才能发起修订");
+        }
+
+        // 计算下一状态：当前状态（征求意见） → "按意见完善" → 待修订状态
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(originalStatus, "按意见完善");
+        if (!nextStatusVo.getIsValid()) {
+            throw new RuntimeException("状态流转配置不存在或无效：从[" + originalStatus + "]执行[按意见完善]操作");
+        }
+        String nextStatus = nextStatusVo.getNextStatus();
+
+        // 更新数据元的状态和相关时间戳
+        dataElement.setStatus(nextStatus);
+        dataElement.setLastInitiaterevisedDate(new Date()); // 最后发起修订时间
+        dataElement.setLastModifyDate(new Date()); // 最后修改时间
+        dataElement.setLastModifyAccount(userInfo.getAccount()); // 最后修改人
+        baseDataElementMapper.updateById(dataElement);
+
+        // 创建流程记录，包括操作类型、源状态、目标状态、操作人信息和修订意见
+        ProcessRecordDto processRecordDto = new ProcessRecordDto();
+        processRecordDto.setBaseDataelementDataid(dataid);
+        processRecordDto.setOperation("发起修订"); // 操作类型
+        processRecordDto.setSourceStatus(originalStatus); // 源状态
+        processRecordDto.setDestStatus(nextStatus); // 目标状态
+        processRecordDto.setOperatorAccount(userInfo.getAccount()); // 操作人账号
+        processRecordDto.setOperatorName(userInfo.getName()); // 操作人姓名
+        processRecordDto.setOperatorUnitCode(userInfo.getOrgCode()); // 操作人组织代码
+        processRecordDto.setOperatorUnitName(userInfo.getOrgName()); // 操作人组织名称
+        processRecordDto.setUsersuggestion(usersuggestion); // 修订意见
+        processRecordDto.setOperateTime(new Date()); // 操作时间
+        flowProcessService.recordProcessHistory(processRecordDto);
+
+        log.info("数据元[{}]发起修订成功，状态从[{}]变更为[{}]，修订意见：{}", dataid, originalStatus, nextStatus, usersuggestion);
+    }
+
+    private void processSubmitRelease(BaseDataElement dataElement, String dataid, String usersuggestion) {
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+
+        // 计算下一状态
+        String originalStatus = dataElement.getStatus();
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(originalStatus, "报送领导审阅");
+        if (!nextStatusVo.getIsValid()) {
+            throw new RuntimeException("状态流转配置不存在或无效");
+        }
+        String nextStatus = nextStatusVo.getNextStatus();
+
+        // 更新数据元状态和报送时间
+        dataElement.setStatus(nextStatus);
+        dataElement.setLastSubmitreleasedDate(new Date());
+        dataElement.setLastModifyDate(new Date());
+        dataElement.setLastModifyAccount(userInfo.getAccount());
+        baseDataElementMapper.updateById(dataElement);
+
+        // 记录流程历史到process_record表
+        ProcessRecordDto processRecordDto = new ProcessRecordDto();
+        processRecordDto.setBaseDataelementDataid(dataid);
+        processRecordDto.setOperation("报送");
+        processRecordDto.setSourceStatus(originalStatus);
+        processRecordDto.setDestStatus(nextStatus);
+        processRecordDto.setOperatorAccount(userInfo.getAccount());
+        processRecordDto.setOperatorName(userInfo.getName());
+        processRecordDto.setOperatorUnitCode(userInfo.getOrgCode());
+        processRecordDto.setOperatorUnitName(userInfo.getOrgName());
+        processRecordDto.setUsersuggestion(usersuggestion);
+        processRecordDto.setOperateTime(new Date());
+        flowProcessService.recordProcessHistory(processRecordDto);
+
+        log.info("数据元[{}]报送，状态变更为：{}", dataid, nextStatus);
+    }
+
+    private RevisionComment createRevisionComment(String dataid, String usersuggestion) {
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        Date now = new Date();
+
+        RevisionComment revisionComment = new RevisionComment();
+        revisionComment.setId(UUID.randomUUID().toString());
+        revisionComment.setBaseDataelementDataid(dataid);
+        revisionComment.setComment(usersuggestion);
+        revisionComment.setRevisionInitiatorAccount(userInfo.getAccount());
+        revisionComment.setRevisionInitiatorName(userInfo.getName());
+        revisionComment.setRevisionCreatedate(now);
+        revisionComment.setRevisionInitiatorTel(userInfo.getPhone());
+        revisionComment.setCreateDate(now);
+        revisionComment.setCreateAccount(userInfo.getAccount());
+        revisionComment.setLastModifyDate(now);
+        revisionComment.setLastModifyAccount(userInfo.getAccount());
+
+        return revisionComment;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public StandardOperationResultVo batchInitiateRevision(MultipartFile file, String useroperation, String usersuggestion) {
+        log.info("批量发起修订操作 - useroperation: {}, fileName: {}", useroperation, file.getOriginalFilename());
+        
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("上传文件不能为空");
+        }
+        
+        if (useroperation == null || useroperation.trim().isEmpty()) {
+            throw new IllegalArgumentException("操作类型不能为空");
+        }
+
+        List<String> dataElementIds = new ArrayList<>();
+        
+        // 解析文件内容获取数据元ID列表
+        try {
+            // 这里假设文件是CSV或Excel格式，包含数据元ID
+            // 具体的文件解析逻辑需要根据实际文件格式来实现
+            String content = new String(file.getBytes(), "UTF-8");
+            String[] lines = content.split("\n");
+            
+            for (String line : lines) {
+                line = line.trim();
+                if (!line.isEmpty() && !line.startsWith("#")) { // 忽略空行和注释行
+                    // 如果是CSV格式，取第一列作为数据元ID
+                    String[] columns = line.split(",");
+                    if (columns.length > 0) {
+                        String dataid = columns[0].trim().replace("\"", "");
+                        if (!dataid.isEmpty()) {
+                            dataElementIds.add(dataid);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("解析文件失败", e);
+            throw new IllegalArgumentException("文件格式不正确或内容解析失败：" + e.getMessage());
+        }
+        
+        if (dataElementIds.isEmpty()) {
+            throw new IllegalArgumentException("文件中未找到有效的数据元ID");
+        }
+        
+        // 构建RevisionInfoDTO并调用现有的方法
+        RevisionInfoDTO revisionDTO = new RevisionInfoDTO();
+        revisionDTO.setList(dataElementIds);
+        revisionDTO.setUseroperation(useroperation);
+        revisionDTO.setUsersuggestion(usersuggestion);
+        
+        return initiateRevision(revisionDTO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public StandardOperationResultVo publishStandard(ApproveInfoDTO publishDTO) {
+        log.info("发布标准 - publishDTO: {}", publishDTO);
+        
+        if (publishDTO.getList() == null || publishDTO.getList().isEmpty()) {
+            throw new IllegalArgumentException("数据元ID列表不能为空");
+        }
+
+        // 只支持"发布"操作
+        if (!"发布".equals(publishDTO.getUseroperation())) {
+            throw new IllegalArgumentException("操作类型只能为'发布'");
+        }
+
+        int successCount = 0;
+        int errorCount = 0;
+        StringBuilder errorDetails = new StringBuilder();
+
+        for (String dataid : publishDTO.getList()) {
+            try {
+                // 验证数据元是否存在
+                BaseDataElement dataElement = dataElementStandardMapper.selectById(dataid);
+                if (dataElement == null) {
+                    errorCount++;
+                    errorDetails.append("数据元[").append(dataid).append("]不存在；");
+                    continue;
+                }
+
+                // 处理发布逻辑
+                processPublish(dataElement, dataid, publishDTO.getUsersuggestion());
+                successCount++;
+
+            } catch (Exception e) {
+                errorCount++;
+                errorDetails.append("数据元[").append(dataid).append("]处理失败：").append(e.getMessage()).append("；");
+                log.error("发布数据元[{}]时发生异常", dataid, e);
+            }
+        }
+
+        // 构建返回结果
+        StandardOperationResultVo result = new StandardOperationResultVo();
+        result.setSuccessCount(successCount);
+        result.setErrorCount(errorCount);
+        result.setTotalCount(publishDTO.getList().size());
+        result.setOperationType(publishDTO.getUseroperation());
+        result.setIsSuccess(errorCount == 0);
+
+        String resultMessage = String.format("发布完成：成功%d条，失败%d条", successCount, errorCount);
+        result.setResultMessage(resultMessage);
+
+        if (errorCount > 0) {
+            result.setErrorDetails(errorDetails.toString());
+        }
+
+        log.info("发布结果：{}", resultMessage);
+        return result;
+    }
+
+    private void processPublish(BaseDataElement dataElement, String dataid, String usersuggestion) {
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+
+        String originalStatus = dataElement.getStatus();
+        
+        // 验证数据元状态：必须为待发布状态
+        if (!"Todoreleased".equals(originalStatus)) {
+            throw new RuntimeException("数据元当前状态为[" + originalStatus + "]，不允许发布操作，只有处于[Todoreleased]状态的数据元才能发布");
+        }
+
+        // 计算下一状态（发布）
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(originalStatus, "发布");
+        if (!nextStatusVo.getIsValid()) {
+            throw new RuntimeException("状态流转配置不存在或无效：从[" + originalStatus + "]执行[发布]操作");
+        }
+        String nextStatus = nextStatusVo.getNextStatus();
+
+        // 更新数据元状态和发布时间
+        dataElement.setStatus(nextStatus);
+        dataElement.setLastApproveDate(new Date());
+        dataElement.setLastModifyDate(new Date());
+        dataElement.setLastModifyAccount(userInfo.getAccount());
+        baseDataElementMapper.updateById(dataElement);
+
+        // 记录流程历史到process_record表
+        ProcessRecordDto processRecordDto = new ProcessRecordDto();
+        processRecordDto.setBaseDataelementDataid(dataid);
+        processRecordDto.setOperation("发布");
+        processRecordDto.setSourceStatus(originalStatus);
+        processRecordDto.setDestStatus(nextStatus);
+        processRecordDto.setOperatorAccount(userInfo.getAccount());
+        processRecordDto.setOperatorName(userInfo.getName());
+        processRecordDto.setOperatorUnitCode(userInfo.getOrgCode());
+        processRecordDto.setOperatorUnitName(userInfo.getOrgName());
+        processRecordDto.setUsersuggestion(usersuggestion);
+        processRecordDto.setOperateTime(new Date());
+        flowProcessService.recordProcessHistory(processRecordDto);
+        
+        log.info("数据元[{}]发布成功：{} -> {}", dataid, originalStatus, nextStatus);
+    }
+
+    @Override
+    public void exportRevisionFailures(MultipartFile file, String useroperation, String usersuggestion, HttpServletResponse response) {
+        log.info("导出修订失败条目 - useroperation: {}, fileName: {}", useroperation, file.getOriginalFilename());
+        
+        // 先执行批量修订操作获取结果
+        StandardOperationResultVo result = batchInitiateRevision(file, useroperation, usersuggestion);
+        
+        // 初始化List<ExportRevisionFailureDTO> failList
+        List<ExportRevisionFailureDTO> failList = new ArrayList<>();
+        
+        if (result.getFailureItems() == null || result.getFailureItems().isEmpty()) {
+            // 如果没有失败条目，创建一个提示信息
+            ExportRevisionFailureDTO noFailureDTO = new ExportRevisionFailureDTO();
+            noFailureDTO.setSerialNumber("1");
+            noFailureDTO.setDataElementName("无");
+            noFailureDTO.setSourceUnitName("无");
+            noFailureDTO.setRevisionSuggestion("无");
+            noFailureDTO.setFailureReason("所有数据元都处理成功，没有失败条目");
+            failList.add(noFailureDTO);
+        } else {
+            int seqNo = 1;
+            // 遍历失败条目，依次取出failItem
+            for (StandardOperationResultVo.FailureItem failItem : result.getFailureItems()) {
+                // 创建ExportRevisionFailureDTO exportFail
+                ExportRevisionFailureDTO exportFail = new ExportRevisionFailureDTO();
+                exportFail.setSerialNumber(String.valueOf(seqNo++));
+                exportFail.setDataElementName(failItem.getDataElementName());
+                exportFail.setSourceUnitName(failItem.getSourceUnitName());
+                exportFail.setRevisionSuggestion(usersuggestion);
+                exportFail.setFailureReason(failItem.getFailureReason());
+                
+                // 添加exportFail到failList中
+                failList.add(exportFail);
+            }
+        }
+        
+        // 调用CommonService.exportExcelData
+        try {
+            commonService.exportExcelData(failList, response, "修订失败条目", ExportRevisionFailureDTO.class);
+            log.info("成功导出{}条修订失败条目", failList.size());
+        } catch (Exception e) {
+            log.error("导出修订失败条目失败", e);
+            throw new RuntimeException("导出修订失败条目失败");
+        }
+    }
+
+    @Override
+    public void exportPublishedList(AuditDataElementQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出已发布数据元列表 - queryDto: {}", queryDto);
+
+        // 移除分页参数，查询所有数据
+        queryDto.setPageNum(null);
+        queryDto.setPageSize(null);
+
+        // 查询所有符合条件的数据元记录
+        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
+
+        if (exportList == null) {
+            exportList = new ArrayList<>();
+        }
+
+        // 数据转换
+        List<ExportPublishedDTO> exportData = new ArrayList<>();
+        for (AuditDataElementVo vo : exportList) {
+            ExportPublishedDTO dto = new ExportPublishedDTO();
+            dto.setDataElementName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setReportTime(vo.getReportTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "已发布数据元列表", ExportPublishedDTO.class);
+            log.info("成功导出{}条已发布数据元", exportData.size());
+        } catch (Exception e) {
+            log.error("导出已发布数据元列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出进度列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportProgressDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportProgressDTO dto = new ExportProgressDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setInitiateRevisionTime(vo.getInitiateRevisionTime());
+            dto.setPublishTime(vo.getPublishTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "进度列表", ExportProgressDTO.class);
+        } catch (Exception e) {
+            log.error("导出进度列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportSourceUnitInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出数源单位在办列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportSourceUnitInProgressDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportSourceUnitInProgressDTO dto = new ExportSourceUnitInProgressDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setInitiateRevisionTime(vo.getInitiateRevisionTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "数源单位在办列表", ExportSourceUnitInProgressDTO.class);
+        } catch (Exception e) {
+            log.error("导出数源单位在办列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportOrgAuditInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办-待审核列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportOrgAuditInProgressDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportOrgAuditInProgressDTO dto = new ExportOrgAuditInProgressDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setSubmitTime(vo.getSubmitTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "组织方在办-待审核列表", ExportOrgAuditInProgressDTO.class);
+        } catch (Exception e) {
+            log.error("导出组织方在办-待审核列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportOrgOpinionInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办-征求意见列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportOrgOpinionInProgressDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportOrgOpinionInProgressDTO dto = new ExportOrgOpinionInProgressDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setAuditTime(vo.getAuditTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "组织方在办-征求意见列表", ExportOrgOpinionInProgressDTO.class);
+        } catch (Exception e) {
+            log.error("导出组织方在办-征求意见列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportOrgReexamInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办-待复审列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportOrgReexamInProgressDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportOrgReexamInProgressDTO dto = new ExportOrgReexamInProgressDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setInitiateRevisionTime(vo.getInitiateRevisionTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "组织方在办-待复审列表", ExportOrgReexamInProgressDTO.class);
+        } catch (Exception e) {
+            log.error("导出组织方在办-待复审列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportOrgReleaseInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办-待发布列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportOrgReleaseInProgressDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportOrgReleaseInProgressDTO dto = new ExportOrgReleaseInProgressDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setReportTime(vo.getReportTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "组织方在办-待发布列表", ExportOrgReleaseInProgressDTO.class);
+        } catch (Exception e) {
+            log.error("导出组织方在办-待发布列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportCompletedList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出已完成列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportCompletedDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportCompletedDTO dto = new ExportCompletedDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setPublishTime(vo.getPublishTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "已完成列表", ExportCompletedDTO.class);
+        } catch (Exception e) {
+            log.error("导出已完成列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportUnderstandingSituationList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出我要了解情况列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportUnderstandingSituationDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportUnderstandingSituationDTO dto = new ExportUnderstandingSituationDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setPublishTime(vo.getPublishTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "我要了解情况列表", ExportUnderstandingSituationDTO.class);
+        } catch (Exception e) {
+            log.error("导出我要了解情况列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportSourceUnitStandardResultList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出数源单位定标结果列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportSourceUnitStandardResultDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportSourceUnitStandardResultDTO dto = new ExportSourceUnitStandardResultDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setPublishTime(vo.getPublishTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "数源单位定标结果列表", ExportSourceUnitStandardResultDTO.class);
+        } catch (Exception e) {
+            log.error("导出数源单位定标结果列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportOrgStandardResultList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方定标结果列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportOrgStandardResultDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportOrgStandardResultDTO dto = new ExportOrgStandardResultDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setSourceUnitName(vo.getSourceunitName());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setPublishTime(vo.getPublishTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "组织方定标结果列表", ExportOrgStandardResultDTO.class);
+        } catch (Exception e) {
+            log.error("导出组织方定标结果列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportOwnUnitInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出本单位在办列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportOwnUnitInProgressDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportOwnUnitInProgressDTO dto = new ExportOwnUnitInProgressDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setInitiateRevisionTime(vo.getInitiateRevisionTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "本单位在办列表", ExportOwnUnitInProgressDTO.class);
+        } catch (Exception e) {
+            log.error("导出本单位在办列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportOrgInProgressList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出组织方在办列表 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportOrgInProgressDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportOrgInProgressDTO dto = new ExportOrgInProgressDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setSubmitTime(vo.getSubmitTime());
+            dto.setRevisionSubmitTime(vo.getRevisionSubmitTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "组织方在办列表", ExportOrgInProgressDTO.class);
+        } catch (Exception e) {
+            log.error("导出组织方在办列表失败", e);
+            throw new RuntimeException("导出失败");
+        }
+    }
+
+    @Override
+    public void exportCompletedPageList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
+        log.info("导出已完成列表页 - queryDto: {}", queryDto);
+
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        // 查询所有符合条件的数据元记录(不分页)
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+
+        if (exportList.isEmpty()) {
+            throw new IllegalArgumentException("无数据可导出");
+        }
+
+        // 数据转换
+        List<ExportCompletedPageDTO> exportData = new ArrayList<>();
+        for (StandardDataElementPageInfoVo vo : exportList) {
+            ExportCompletedPageDTO dto = new ExportCompletedPageDTO();
+            dto.setName(vo.getName());
+            dto.setDataElementCode(vo.getDataelementCode());
+            dto.setDefinition(vo.getDefinition());
+            dto.setDatatype(vo.getDatatype());
+            dto.setStatusDesc(CalibrationStatusEnums.getDescByCode(vo.getStatus()));
+            dto.setConfirmDate(vo.getConfirmDate());
+            dto.setPublishTime(vo.getPublishTime());
+            exportData.add(dto);
+        }
+
+        // 导出Excel
+        try {
+            commonService.exportExcelData(exportData, response, "已完成列表页", ExportCompletedPageDTO.class);
+        } catch (Exception e) {
+            log.error("导出已完成列表页失败", e);
+            throw new RuntimeException("导出失败");
         }
     }
 }
