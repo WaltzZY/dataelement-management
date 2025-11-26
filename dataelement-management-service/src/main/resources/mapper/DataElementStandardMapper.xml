@@ -13,17 +13,9 @@
             bde.status,
             bde.confirm_date AS confirmDate,
             bde.publish_date AS publishDate,
-            bde.publish_date AS publishTime,
-            rc.revision_createdate AS revisionCreateDate,
-            ou.unit_name AS sourceunitName,
-            bde.last_submit_date AS submitTime,
-            bde.last_approve_date AS auditTime,
-            bde.last_initiaterevised_date AS initiateRevisionTime,
-            bde.last_submitreleased_date AS reportTime,
-            bde.last_submitreexamination_date AS revisionSubmitTime
+            rc.revision_createdate AS revisionCreateDate
         FROM base_data_element bde
         LEFT JOIN revision_comment rc ON bde.dataid = rc.base_dataelement_dataid
-        LEFT JOIN organization_unit ou ON bde.source_unit_code = ou.unit_code
         WHERE bde.status IN ('designated_source', 'PendingReview', 'SolicitingOpinions', 'TodoRevised', 'PendingReExamination', 'Todoreleased', 'Published')
             AND bde.source_unit_code = #{userOrgCode}
         
@@ -192,14 +184,6 @@
                 AND bde.last_initiaterevised_date &lt;= #{queryDto.initiateRevisionTimeEnd}
             </if>
             
-            <!-- 定源时间范围查询 -->
-            <if test="queryDto.sourceTimeBegin != null">
-                AND bde.confirm_date >= #{queryDto.sourceTimeBegin}
-            </if>
-            <if test="queryDto.sourceTimeEnd != null">
-                AND bde.confirm_date &lt;= #{queryDto.sourceTimeEnd}
-            </if>
-            
             <!-- 关键词模糊匹配 -->
             <if test="queryDto.keyword != null and queryDto.keyword != ''">
                 AND (
@@ -321,14 +305,6 @@
                 AND bde.last_initiaterevised_date &lt;= #{queryDto.initiateRevisionTimeEnd}
             </if>
             
-            <!-- 定源时间范围查询 -->
-            <if test="queryDto.sourceTimeBegin != null">
-                AND bde.confirm_date >= #{queryDto.sourceTimeBegin}
-            </if>
-            <if test="queryDto.sourceTimeEnd != null">
-                AND bde.confirm_date &lt;= #{queryDto.sourceTimeEnd}
-            </if>
-            
             <!-- 关键词模糊匹配 -->
             <if test="queryDto.keyword != null and queryDto.keyword != ''">
                 AND (
@@ -348,23 +324,6 @@
                 ORDER BY bde.last_submit_date DESC
             </otherwise>
         </choose>
-    </select>
-
-    <!-- 根据数据元ID列表查询数据元基本信息 -->
-    <select id="queryDataElementsByIds" resultType="com.inspur.dsp.direct.dbentity.BaseDataElement">
-        SELECT 
-            dataid,
-            name,
-            data_element_id AS dataElementId,
-            definition,
-            datatype,
-            status,
-            source_unit_code AS sourceUnitCode
-        FROM base_data_element
-        WHERE dataid IN
-        <foreach collection="dataElementIds" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
     </select>
 
 </mapper>

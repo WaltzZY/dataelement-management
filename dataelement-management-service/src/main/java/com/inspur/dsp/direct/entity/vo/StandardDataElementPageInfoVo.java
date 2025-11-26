@@ -62,39 +62,4 @@ public class StandardDataElementPageInfoVo {
      * 发起修订时间，表revision_comment中，revision_createdate
      */
     private Date revisionCreateDate;
-    
-    /**
-     * 数源单位名称
-     */
-    private String sourceunitName;
-    
-    /**
-     * 提交时间
-     */
-    private Date submitTime;
-    
-    /**
-     * 审核时间
-     */
-    private Date auditTime;
-    
-    /**
-     * 发起修订时间
-     */
-    private Date initiateRevisionTime;
-    
-    /**
-     * 报送时间
-     */
-    private Date reportTime;
-    
-    /**
-     * 发布时间（与publishDate相同，为了统一命名）
-     */
-    private Date publishTime;
-    
-    /**
-     * 修订提交时间
-     */
-    private Date revisionSubmitTime;
 }

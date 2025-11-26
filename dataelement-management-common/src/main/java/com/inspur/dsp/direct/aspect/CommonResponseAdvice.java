@@ -60,7 +60,7 @@ public class CommonResponseAdvice implements ResponseBodyAdvice<Object> {
                 return returnValue;
             case "String":
                 response.getHeaders().setContentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE));
-                return objectMapper.writeValueAsString(Resp.success(returnValue));
+                return Resp.success(returnValue);
             case "Boolean":
                 Boolean boo1 = (Boolean) returnValue;
                 if (boo1) {
