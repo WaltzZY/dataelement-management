@@ -12,7 +12,8 @@ import java.util.Date;
  */
 @Data
 public class StandardDataElementPageInfoVo {
-    
+
+
     /**
      * 数据元唯一标识
      */
