@@ -21,6 +21,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +36,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * 数据元编制标准Service实现类
@@ -89,9 +97,6 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         DataElementContact contact = dataElementContactMapper.selectByDataElementId(dataid);
 
         OrganizationUnit organizationUnit = organizationUnitMapper.selectByCode(sourceunitcode);
-        if (organizationUnit == null) {
-            throw new IllegalArgumentException("数源单位不存在");
-        }
 
         if (contact != null) {
             contactInfo.setDataid(contact.getDataid());
@@ -166,6 +171,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
                 vo.setRevisionContent(content);
                 vo.setRevisionCreatedate(processRecord.getProcessdatetime());
                 vo.setCreateUserName(processRecord.getProcessusername());
+                vo.setCreateUserOrgName(processRecord.getProcessunitname());
                 
                 // 映射驳回节点名称
                 String rejectionNode = mapRejectionNode(processRecord.getSourceactivityname());
@@ -1820,7 +1826,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         String originalStatus = dataElement.getStatus();
         
         // 验证当前数据元是否允许发起修订（必须处于可修订的状态，如征求意见）
-        if (!"征求意见".equals(originalStatus)) {
+        if (!"SolicitingOpinions".equals(originalStatus)) {
             throw new RuntimeException("数据元当前状态为[" + originalStatus + "]，不允许发起修订操作，只有处于[征求意见]状态的数据元才能发起修订");
         }
 
@@ -1925,43 +1931,193 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         }
 
         List<String> dataElementIds = new ArrayList<>();
+        Map<String, String> dataElementRevisionMap = new HashMap<>(); // 存储数据元ID和对应的修订意见
         
-        // 解析文件内容获取数据元ID列表
+        // 解析Excel文件内容获取数据元名称和修订意见列表
         try {
-            // 这里假设文件是CSV或Excel格式，包含数据元ID
-            // 具体的文件解析逻辑需要根据实际文件格式来实现
-            String content = new String(file.getBytes(), "UTF-8");
-            String[] lines = content.split("\n");
-            
-            for (String line : lines) {
-                line = line.trim();
-                if (!line.isEmpty() && !line.startsWith("#")) { // 忽略空行和注释行
-                    // 如果是CSV格式，取第一列作为数据元ID
-                    String[] columns = line.split(",");
-                    if (columns.length > 0) {
-                        String dataid = columns[0].trim().replace("\"", "");
-                        if (!dataid.isEmpty()) {
-                            dataElementIds.add(dataid);
+            String fileName = file.getOriginalFilename();
+            if (fileName == null || !fileName.toLowerCase().endsWith(".xlsx")) {
+                throw new IllegalArgumentException("仅支持.xlsx格式的Excel文件");
+            }
+
+            try (InputStream inputStream = file.getInputStream();
+                 Workbook workbook = new XSSFWorkbook(inputStream)) {
+                
+                Sheet sheet = workbook.getSheetAt(0); // 读取第一个工作表
+                
+                for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) { // 从第二行开始读取，跳过表头
+                    Row row = sheet.getRow(rowIndex);
+                    if (row == null) continue;
+                    
+                    // 读取第二列：数据元名称
+                    Cell dataElementNameCell = row.getCell(1);
+                    if (dataElementNameCell == null) continue;
+                    
+                    String dataElementName = "";
+                    if (dataElementNameCell.getCellType() == CellType.STRING) {
+                        dataElementName = dataElementNameCell.getStringCellValue();
+                    } else if (dataElementNameCell.getCellType() == CellType.NUMERIC) {
+                        dataElementName = String.valueOf((long) dataElementNameCell.getNumericCellValue());
+                    }
+                    
+                    // 读取第三列：修订意见
+                    Cell revisionCommentCell = row.getCell(2);
+                    String revisionComment = "";
+                    if (revisionCommentCell != null) {
+                        if (revisionCommentCell.getCellType() == CellType.STRING) {
+                            revisionComment = revisionCommentCell.getStringCellValue();
+                        } else if (revisionCommentCell.getCellType() == CellType.NUMERIC) {
+                            revisionComment = String.valueOf((long) revisionCommentCell.getNumericCellValue());
+                        }
+                    }
+                    
+                    dataElementName = dataElementName.trim();
+                    revisionComment = revisionComment.trim();
+                    
+                    if (!dataElementName.isEmpty()) {
+                        // 通过数据元名称查询dataid
+                        BaseDataElement element = baseDataElementMapper.selectFirstByName(dataElementName);
+                        if (element != null) {
+                            dataElementIds.add(element.getDataid());
+                            // 存储数据元ID和对应的修订意见
+                            dataElementRevisionMap.put(element.getDataid(), revisionComment);
+                        } else {
+                            log.warn("未找到数据元名称为[{}]的记录", dataElementName);
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            log.error("解析文件失败", e);
-            throw new IllegalArgumentException("文件格式不正确或内容解析失败：" + e.getMessage());
+            log.error("解析Excel文件失败", e);
+            throw new IllegalArgumentException("Excel文件格式不正确或内容解析失败：" + e.getMessage());
         }
         
         if (dataElementIds.isEmpty()) {
             throw new IllegalArgumentException("文件中未找到有效的数据元ID");
         }
         
-        // 构建RevisionInfoDTO并调用现有的方法
-        RevisionInfoDTO revisionDTO = new RevisionInfoDTO();
-        revisionDTO.setList(dataElementIds);
-        revisionDTO.setUseroperation(useroperation);
-        revisionDTO.setUsersuggestion(usersuggestion);
+        // 由于每个数据元都有对应的修订意见，需要单独处理每个数据元
+        int successCount = 0;
+        int errorCount = 0;
+        List<StandardOperationResultVo.FailureItem> failureItems = new ArrayList<>();
+        List<RevisionComment> revisionComments = new ArrayList<>();
+
+        // 查询所有数据元信息，用于验证存在性
+        List<BaseDataElement> dataElements = dataElementStandardMapper.queryDataElementsByIds(dataElementIds);
+        Map<String, BaseDataElement> dataElementMap = new HashMap<>();
+        for (BaseDataElement element : dataElements) {
+            dataElementMap.put(element.getDataid(), element);
+        }
+
+        for (String dataid : dataElementIds) {
+            // 验证数据元是否存在
+            BaseDataElement dataElement = dataElementMap.get(dataid);
+            if (dataElement == null) {
+                errorCount++;
+                StandardOperationResultVo.FailureItem failureItem = new StandardOperationResultVo.FailureItem();
+                failureItem.setDataElementName("未知");
+                failureItem.setSourceUnitName("");
+                failureItem.setFailureReason("系统中未找到相关数据元");
+                failureItems.add(failureItem);
+                continue;
+            }
+
+            // 获取对应的修订意见
+            String elementRevisionComment = dataElementRevisionMap.get(dataid);
+            if (elementRevisionComment == null || elementRevisionComment.trim().isEmpty()) {
+                elementRevisionComment = usersuggestion; // 如果没有单独的修订意见，使用统一的意见
+            }
+
+            // 验证修订意见
+            if ("发起修订".equals(useroperation) &&
+                (elementRevisionComment == null || elementRevisionComment.trim().isEmpty())) {
+                errorCount++;
+                // 获取组织单位名称（非必须，仅用于显示）
+                String sourceUnitName = "";
+                try {
+                    OrganizationUnit orgUnit = organizationUnitMapper.selectById(dataElement.getSourceUnitCode());
+                    sourceUnitName = orgUnit != null ? orgUnit.getUnitName() : "";
+                } catch (Exception e) {
+                    // 组织单位获取失败不影响主流程
+                }
+                
+                StandardOperationResultVo.FailureItem failureItem = new StandardOperationResultVo.FailureItem();
+                failureItem.setDataElementName(dataElement.getName());
+                failureItem.setSourceUnitName(sourceUnitName);
+                failureItem.setFailureReason("修订意见为空");
+                failureItems.add(failureItem);
+                continue;
+            }
+
+            try {
+                // 根据操作类型处理
+                if ("发起修订".equals(useroperation)) {
+                    // 处理发起修订逻辑
+                    processInitiateRevision(dataElement, dataid, elementRevisionComment);
+                    
+                    // 创建修订意见记录
+                    RevisionComment revisionComment = createRevisionComment(dataid, elementRevisionComment);
+                    revisionComments.add(revisionComment);
+                    
+                    successCount++;
+                } else if ("报送".equals(useroperation)) {
+                    // 处理报送逻辑
+                    processSubmitRelease(dataElement, dataid, elementRevisionComment);
+                    successCount++;
+                } else {
+                    // 操作类型无效，但这不应该发生，因为前端应该控制
+                    successCount++;
+                }
+
+            } catch (Exception e) {
+                errorCount++;
+                // 获取组织单位名称（非必须，仅用于显示）
+                String sourceUnitName = "";
+                try {
+                    OrganizationUnit orgUnit = organizationUnitMapper.selectById(dataElement.getSourceUnitCode());
+                    sourceUnitName = orgUnit != null ? orgUnit.getUnitName() : "";
+                } catch (Exception ex) {
+                    // 组织单位获取失败不影响主流程
+                }
+                
+                StandardOperationResultVo.FailureItem failureItem = new StandardOperationResultVo.FailureItem();
+                failureItem.setDataElementName(dataElement.getName());
+                failureItem.setSourceUnitName(sourceUnitName);
+                failureItem.setFailureReason("系统异常：" + e.getMessage());
+                failureItems.add(failureItem);
+                log.error("发起修订数据元[{}]时发生异常", dataid, e);
+            }
+        }
+
+        // 批量插入修订意见记录
+        if (!revisionComments.isEmpty()) {
+            try {
+                revisionCommentMapper.batchInsert(revisionComments);
+            } catch (Exception e) {
+                log.error("批量插入修订意见失败", e);
+                throw new RuntimeException("保存修订意见失败：" + e.getMessage());
+            }
+        }
+
+        // 构建返回结果
+        StandardOperationResultVo result = new StandardOperationResultVo();
+        result.setSuccessCount(successCount);
+        result.setErrorCount(errorCount);
+        result.setTotalCount(dataElementIds.size());
+        result.setOperationType(useroperation);
+        result.setIsSuccess(errorCount == 0);
+        result.setFailureItems(failureItems);
         
-        return initiateRevision(revisionDTO);
+        if (errorCount == 0) {
+            result.setResultMessage("操作完成，全部成功");
+        } else {
+            result.setResultMessage("操作完成，成功" + successCount + "条，失败" + errorCount + "条");
+        }
+
+        log.info("批量发起修订操作完成 - 总数：{}，成功：{}，失败：{}", 
+                dataElementIds.size(), successCount, errorCount);
+        
+        return result;
     }
 
     @Override
@@ -2651,5 +2807,71 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
             log.error("导出已完成列表页失败", e);
             throw new RuntimeException("导出失败");
         }
+    }
+
+    @Override
+    public void downloadBatchRevisionTemplate(HttpServletResponse response) {
+        log.info("开始下载批量修订导入模板");
+
+        try {
+            String templateFileName = "批量修订导入模板.xlsx";
+            String downloadFileName = "批量修订导入模板.xlsx";
+
+            // 从项目根目录读取模板文件
+            downloadTemplateFile(templateFileName, downloadFileName, response);
+
+            log.info("批量修订导入模板下载完成");
+        } catch (Exception e) {
+            log.error("下载批量修订导入模板失败", e);
+            throw new RuntimeException("下载模板失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 下载模板文件（支持jar包运行）
+     */
+    private void downloadTemplateFile(String templateFileName, String downloadFileName, HttpServletResponse response) throws IOException {
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" +
+                URLEncoder.encode(downloadFileName, "UTF-8"));
+
+        // 尝试从classpath读取模板文件（支持jar包运行）
+        try (InputStream templateStream = getClass().getClassLoader().getResourceAsStream("templates/" + templateFileName)) {
+            if (templateStream == null) {
+                // 如果classpath中没有，尝试从项目根目录读取（开发环境）
+                String projectRoot = System.getProperty("user.dir");
+                String templateFilePath = projectRoot + File.separator + templateFileName;
+
+                File templateFile = new File(templateFilePath);
+                if (!templateFile.exists()) {
+                    throw new RuntimeException("模板文件不存在: " + templateFilePath + " 且在classpath中也未找到: templates/" + templateFileName);
+                }
+
+                try (FileInputStream fis = new FileInputStream(templateFile);
+                     OutputStream os = response.getOutputStream()) {
+
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = fis.read(buffer)) != -1) {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                    os.flush();
+                }
+            } else {
+                // 从classpath读取模板文件
+                try (OutputStream os = response.getOutputStream()) {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = templateStream.read(buffer)) != -1) {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                    os.flush();
+                }
+            }
+        }
+
+        log.info("成功下载模板文件: {}", templateFileName);
     }
 }

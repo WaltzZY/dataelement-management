@@ -245,7 +245,7 @@
              WHERE pr.base_dataelement_dataid = bde.dataid 
              AND pr.useroperation = '驳回') AS rejectTime
         FROM base_data_element bde
-        LEFT JOIN organization_unit ou ON bde.source_unit_code = ou.unit_code
+        LEFT JOIN organization_unit ou ON bde.source_unit_code = ou.dataid
         WHERE 1=1
         
         <!-- 动态查询条件 -->

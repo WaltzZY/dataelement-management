@@ -30,6 +30,11 @@ public class RejectionInfoVO {
     private String createUserName;
 
     /**
+     * 驳回人所属组织单位名称
+     */
+    private String createUserOrgName;
+
+    /**
      * 驳回节点/审核节点
      */
     private String revisionNode;

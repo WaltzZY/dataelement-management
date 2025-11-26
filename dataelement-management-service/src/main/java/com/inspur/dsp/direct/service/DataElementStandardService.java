@@ -378,4 +378,12 @@ public interface DataElementStandardService {
      */
     void exportCompletedPageList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response);
 
+    /**
+     * 下载批量修订导入模板
+     * 返回Excel模板文件流
+     *
+     * @param response HttpServletResponse对象
+     */
+    void downloadBatchRevisionTemplate(HttpServletResponse response);
+
 }

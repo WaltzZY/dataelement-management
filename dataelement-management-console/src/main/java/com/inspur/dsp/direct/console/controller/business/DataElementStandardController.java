@@ -539,6 +539,16 @@ public class DataElementStandardController {
         return dataElementStandardService.publishStandard(publishDTO);
     }
 
+    /**
+     * 下载批量修订导入模板
+     * 返回Excel模板文件流
+     */
+    @GetMapping("/downloadBatchRevisionTemplate")
+    public void downloadBatchRevisionTemplate(HttpServletResponse response) {
+        log.info("下载批量修订导入模板");
+        dataElementStandardService.downloadBatchRevisionTemplate(response);
+    }
+
 
 
 }
