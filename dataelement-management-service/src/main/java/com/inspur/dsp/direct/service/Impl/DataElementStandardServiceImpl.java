@@ -1538,6 +1538,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public StandardOperationResultVo reExaminationStandard(ReExaminationDataElementDTO reExaminationDTO) {
         log.info("复审操作 - reExaminationDTO: {}", reExaminationDTO);
 
@@ -1611,7 +1612,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         
         // 计算下一状态
         String originalStatus = dataElement.getStatus();
-        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(originalStatus, "审核通过");
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(originalStatus, "报送领导审阅");
         if (!nextStatusVo.getIsValid()) {
             throw new RuntimeException("状态流转配置不存在或无效");
         }
@@ -1646,7 +1647,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
         
         // 计算下一状态（驳回）
-        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(dataElement.getStatus(), "驳回");
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(dataElement.getStatus(), "复审驳回");
         if (!nextStatusVo.getIsValid()) {
             throw new RuntimeException("状态流转配置不存在或无效");
         }

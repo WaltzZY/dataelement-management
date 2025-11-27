@@ -93,6 +93,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
         processRecord.setProcessdatetime(new Date());
         processRecord.setSourceactivityname(dto.getSourceStatus());
         processRecord.setDestactivityname(dto.getDestStatus());
+        processRecord.setUsersuggestion(dto.getUsersuggestion());
         processRecord.setCreateDate(new Date());
         processRecord.setCreateAccount(dto.getOperatorAccount());
 
