@@ -613,7 +613,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         // 计算下一状态 - 将designated_source映射为TodoDetermined用于查询流程配置
         String flowStatus = mapStatusForFlow(dataElement.getStatus());
-        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(flowStatus, "审核通过");
+        NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(flowStatus, "提交审核");
         if (!nextStatusVo.getIsValid()) {
             throw new RuntimeException("状态流转配置不存在或无效");
         }
@@ -622,11 +622,13 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 获取当前登录用户信息
         log.debug("正在获取当前登录用户信息...");
         UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-        
+
         // 更新数据元状态
+        Date date = new Date();
         dataElement.setStatus(nextStatus);
-        dataElement.setLastModifyDate(new Date());
+        dataElement.setLastModifyDate(date);
         dataElement.setLastModifyAccount(userInfo.getAccount());
+        dataElement.setLastSubmitDate(date);
         baseDataElementMapper.updateById(dataElement);
 
         // 记录流程历史
@@ -647,6 +649,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
 
         return result;
     }
+
 
     @Override
     public Page<StandardDataElementPageInfoVo> getAllStandardListPage(StandardDataElementPageQueryDto queryDto) {
