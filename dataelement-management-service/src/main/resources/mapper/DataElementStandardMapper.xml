@@ -110,6 +110,7 @@
             bde.last_submitreleased_date AS lastSubmitReleasedDate,
             bde.last_initiaterevised_date AS lastInitiateRevisedDate,
             bde.publish_date AS publishDate,
+            bde.confirm_date AS confirmDate,
             bde.last_submit_date AS submitTime,
             bde.last_submitreleased_date AS reportTime,
             (SELECT MAX(pr.processdatetime)
@@ -239,6 +240,7 @@
             bde.last_submitreleased_date AS lastSubmitReleasedDate,
             bde.last_initiaterevised_date AS lastInitiateRevisedDate,
             bde.publish_date AS publishDate,
+            bde.confirm_date AS confirmDate,
             bde.last_submit_date AS submitTime,
             bde.last_submitreleased_date AS reportTime,
             (SELECT MAX(pr.processdatetime)

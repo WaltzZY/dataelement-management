@@ -102,6 +102,12 @@ public class AuditDataElementVo {
     private Date publishDate;
     
     /**
+     * 定源时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date confirmDate;
+    
+    /**
      * 审核驳回时间（从流程记录中获取）
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
