@@ -26,7 +26,9 @@
         LEFT JOIN revision_comment rc ON bde.dataid = rc.base_dataelement_dataid
         LEFT JOIN organization_unit ou ON bde.source_unit_code = ou.unit_code
         WHERE bde.status IN ('designated_source', 'PendingReview', 'SolicitingOpinions', 'TodoRevised', 'PendingReExamination', 'Todoreleased', 'Published')
+            <if test="userOrgCode != null">
             AND bde.source_unit_code = #{userOrgCode}
+            </if>
 
         <!-- 动态查询条件 -->
         <if test="queryDto != null">
@@ -81,6 +83,9 @@
                     </when>
                     <when test="queryDto.sortField == 'revision_createdate'">
                         ORDER BY rc.revision_createdate ${queryDto.sortOrder}
+                    </when>
+                    <when test="queryDto.sortField == 'sourceTime'">
+                        ORDER BY bde.confirm_date ${queryDto.sortOrder}
                     </when>
                     <otherwise>
                         ORDER BY ${queryDto.sortField} ${queryDto.sortOrder}

@@ -2587,12 +2587,8 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
     public void exportUnderstandingSituationList(StandardDataElementPageQueryDto queryDto, HttpServletResponse response) {
         log.info("导出我要了解情况列表 - queryDto: {}", queryDto);
 
-        // 获取当前登录用户信息
-        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
-        String userOrgCode = userInfo.getOrgCode();
-        
-        // 查询所有符合条件的数据元记录(不分页)
-        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, userOrgCode);
+        // 查询所有符合条件的数据元记录(不分页)，不筛选当前登录用户的数源单位
+        List<StandardDataElementPageInfoVo> exportList = dataElementStandardMapper.getAllStandardList(null, queryDto, null);
 
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
