@@ -58,6 +58,16 @@ public class StandardDataElementPageQueryDto {
      * 发布时间结束日期
      */
     private Date publishDateEnd;
+
+    /**
+     * 审核驳回时间开始日期
+     */
+    private Date rejectTimeBegin;
+
+    /**
+     * 审核驳回时间结束日期
+     */
+    private Date rejectTimeEnd;
     
     /**
      * 关键字（在名称/定义/数据元编码中搜索）

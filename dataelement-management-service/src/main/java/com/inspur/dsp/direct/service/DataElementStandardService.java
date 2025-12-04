@@ -20,7 +20,7 @@ public interface DataElementStandardService {
 
     /**
      * 获取编制标准完整信息
-     * 一次性查询数据元的完整编制标准信息
+     * 一次性查询数据元的完整编制标准信息详情
      *
      * @param dataid 数据元ID
      * @param sourceunitcode 数源单位统一社会信用代码

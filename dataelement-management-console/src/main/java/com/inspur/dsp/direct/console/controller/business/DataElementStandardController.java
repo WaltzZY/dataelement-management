@@ -38,7 +38,7 @@ public class DataElementStandardController {
     private FlowProcessService flowProcessService;
 
     /**
-     * 获取编制标准完整信息
+     * 获取编制标准完整信息详情
      * 用于前端6个步骤页面的初始化
      */
     @GetMapping("/info")

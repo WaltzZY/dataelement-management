@@ -612,7 +612,9 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         }
 
         // 计算下一状态 - 将designated_source映射为TodoDetermined用于查询流程配置
-        String flowStatus = mapStatusForFlow(dataElement.getStatus());
+        // String flowStatus = mapStatusForFlow(dataElement.getStatus());
+        //取消映射
+        String flowStatus = dataElement.getStatus();
         NextStatusVo nextStatusVo = flowProcessService.calculateNextStatus(flowStatus, "提交审核");
         if (!nextStatusVo.getIsValid()) {
             throw new RuntimeException("状态流转配置不存在或无效");
@@ -1002,11 +1004,15 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         // 校验并规范化排序参数
         validateAndNormalizeAuditSortParams(queryDto);
         
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
         // 创建分页对象
         Page<AuditDataElementVo> page = new Page<>(queryDto.getPageNum(), queryDto.getPageSize());
         
         // 执行分页查询
-        Page<AuditDataElementVo> resultPage = dataElementStandardMapper.queryAuditDataElementListPage(page, queryDto);
+        Page<AuditDataElementVo> resultPage = dataElementStandardMapper.queryAuditDataElementListPage(page, queryDto, userOrgCode);
         
         // 补充状态描述
         for (AuditDataElementVo vo : resultPage.getRecords()) {
@@ -1246,7 +1252,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         queryDto.setPageSize(null);
 
         // 查询所有符合条件的数据元记录
-        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto, userOrgCode);
 
         if (exportList == null) {
             exportList = new ArrayList<>();
@@ -1286,7 +1296,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         queryDto.setPageSize(null);
 
         // 查询所有符合条件的数据元记录
-        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto, userOrgCode);
 
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
@@ -1327,7 +1341,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         queryDto.setPageSize(null);
 
         // 查询所有符合条件的数据元记录
-        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto, userOrgCode);
 
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
@@ -1367,7 +1385,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         queryDto.setPageSize(null);
 
         // 查询所有符合条件的数据元记录
-        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto, userOrgCode);
 
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
@@ -1407,7 +1429,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         queryDto.setPageSize(null);
 
         // 查询所有符合条件的数据元记录
-        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto, userOrgCode);
 
         if (exportList.isEmpty()) {
             throw new IllegalArgumentException("无数据可导出");
@@ -1912,7 +1938,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         revisionComment.setRevisionInitiatorAccount(userInfo.getAccount());
         revisionComment.setRevisionInitiatorName(userInfo.getName());
         revisionComment.setRevisionCreatedate(now);
-        revisionComment.setRevisionInitiatorTel(userInfo.getPhone());
+        revisionComment.setRevisionInitiatorTel(userInfo.getMobile());
         revisionComment.setCreateDate(now);
         revisionComment.setCreateAccount(userInfo.getAccount());
         revisionComment.setLastModifyDate(now);
@@ -2204,6 +2230,7 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         dataElement.setStatus(nextStatus);
         dataElement.setLastApproveDate(new Date());
         dataElement.setLastModifyDate(new Date());
+        dataElement.setPublishDate(new Date());
         dataElement.setLastModifyAccount(userInfo.getAccount());
         baseDataElementMapper.updateById(dataElement);
 
@@ -2279,7 +2306,11 @@ public class DataElementStandardServiceImpl implements DataElementStandardServic
         queryDto.setPageSize(null);
 
         // 查询所有符合条件的数据元记录
-        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto);
+        // 获取当前登录用户信息
+        UserLoginInfo userInfo = BspLoginUserInfoUtils.getUserInfo();
+        String userOrgCode = userInfo.getOrgCode();
+        
+        List<AuditDataElementVo> exportList = dataElementStandardMapper.queryAuditDataElementList(queryDto, userOrgCode);
 
         if (exportList == null) {
             exportList = new ArrayList<>();

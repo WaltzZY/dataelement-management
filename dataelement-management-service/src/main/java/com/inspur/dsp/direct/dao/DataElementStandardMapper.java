@@ -38,18 +38,20 @@ public interface DataElementStandardMapper extends BaseMapper<BaseDataElement> {
      * 审核标准模块数据元查询
      * 
      * @param queryDto 查询条件
+     * @param userOrgCode 用户组织机构编码（用于过滤数据源单位）
      * @return 数据元列表查询结果
      */
-    List<AuditDataElementVo> queryAuditDataElementList(@Param("queryDto") AuditDataElementQueryDto queryDto);
+    List<AuditDataElementVo> queryAuditDataElementList(@Param("queryDto") AuditDataElementQueryDto queryDto, @Param("userOrgCode") String userOrgCode);
 
     /**
      * 审核标准模块数据元分页查询
      * 
      * @param page 分页对象
      * @param queryDto 查询条件
+     * @param userOrgCode 用户组织机构编码（用于过滤数据源单位）
      * @return 分页数据元列表查询结果
      */
-    Page<AuditDataElementVo> queryAuditDataElementListPage(@Param("page") Page<AuditDataElementVo> page, @Param("queryDto") AuditDataElementQueryDto queryDto);
+    Page<AuditDataElementVo> queryAuditDataElementListPage(@Param("page") Page<AuditDataElementVo> page, @Param("queryDto") AuditDataElementQueryDto queryDto, @Param("userOrgCode") String userOrgCode);
     
     /**
      * 根据数据元ID列表查询数据元基本信息
