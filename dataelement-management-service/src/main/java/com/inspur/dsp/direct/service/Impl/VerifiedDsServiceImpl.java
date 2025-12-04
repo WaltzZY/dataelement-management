@@ -20,6 +20,7 @@ import com.inspur.dsp.direct.enums.PaPageSortFieldEnums;
 import com.inspur.dsp.direct.enums.RecordSourceTypeEnums;
 import com.inspur.dsp.direct.enums.StatusEnums;
 import com.inspur.dsp.direct.enums.TaskTypeEnums;
+import com.inspur.dsp.direct.service.BaseDataElementService;
 import com.inspur.dsp.direct.service.CommonService;
 import com.inspur.dsp.direct.service.VerifiedDsService;
 import com.inspur.dsp.direct.util.BspLoginUserInfoUtils;
@@ -47,6 +48,7 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
     private final DomainDataElementMapper domainDataElementMapper;
     private final SourceEventRecordMapper sourceEventRecordMapper;
     private final CommonService commonService;
+    private final BaseDataElementService baseDataElementService;
 
     @Override
     public Page<GetPendingApprovalPageVo> getPaPage(GetPendingApprovalPageDto dto) {
@@ -216,5 +218,10 @@ public class VerifiedDsServiceImpl implements VerifiedDsService {
 
         // 批量插入定源记录
         sourceEventRecordMapper.insert(addEventRecord);
+
+        // 初始化联系人信息
+        for (BaseDataElement updateBaseDatum : updateBaseData) {
+            baseDataElementService.insertDataElementContact(updateBaseDatum.getDataid());
+        }
     }
 }

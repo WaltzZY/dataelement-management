@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.inspur.dsp.direct.constant.HttpStatus;
 import com.inspur.dsp.direct.domain.Resp;
 import com.inspur.dsp.direct.enums.RespCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Component
+@Slf4j
 public class UserInfoFilter implements Filter {
 
     @Override
@@ -36,6 +38,7 @@ public class UserInfoFilter implements Filter {
         // 提前校验,用户是否过期
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         String requestURI = request.getRequestURI();
+        log.info("-----------请求地址-------------: {}", requestURI);
         if (requestURI.contains("loginStatus") || requestURI.contains("login") || requestURI.contains("logout") || requestURI.contains("captcha")
                 // 这个接口前端本地测试加不上cookie
                 || requestURI.contains("/dataItem/join")
